@@ -1,9 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Karena kita di file terpisah, kita tidak bisa memakai {{ asset() }} Blade.
-    // Kita simpan URL gambar di atribut data- HTML, atau definisikan path relatif jika Vite sudah diatur.
-    // Untuk amannya, kita akan melempar data gambar dari Blade ke window object.
-    
-    // Ambil data slide dari variabel global yang didefinisikan di Blade
     if (typeof window.loginSlides === 'undefined') return;
     
     const originalSlides = window.loginSlides;
