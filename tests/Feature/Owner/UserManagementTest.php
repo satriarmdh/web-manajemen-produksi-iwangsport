@@ -118,7 +118,7 @@ class UserManagementTest extends TestCase
         $response->assertRedirect('/owner/users');
 
         // Pastikan datanya sudah hilang dari database
-        $this->assertDatabaseMissing('users', [
+        $this->assertSoftDeleted('users', [
             'id' => $karyawan->id,
         ]);
     }

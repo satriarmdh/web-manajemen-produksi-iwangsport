@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -25,7 +25,8 @@ class UserSeeder extends Seeder
             'alamat' => 'Jl. Jendral Sudirman No. 123, Jakarta',
             'no_hp' => '081234567890',
             'role' => 'owner',
-            'password' => Hash::make('password123'), // Password untuk login
+            'jenis_kelamin' => 'laki-laki',
+            'password' => Hash::make('password123'),
         ]);
     }
 }

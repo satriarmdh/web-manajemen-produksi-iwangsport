@@ -12,9 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('alamat')->nullable();
             $table->string('no_hp')->nullable();
             $table->enum('role', ['owner', 'admin', 'potong', 'jahit', 'finishing']);
+            $table->string('alamat')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('online_status')->default(false);

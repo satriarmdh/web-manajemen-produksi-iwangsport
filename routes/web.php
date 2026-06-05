@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 
-use App\Http\Controllers\Owner\UserController;
+use App\Http\Controllers\Owner\UserManagementController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,7 +18,11 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
         return view('owner.dashboard'); 
     })->name('dashboard');
 
-    Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
+    Route::get('/persetujuan-workorder', function () { 
+        return view('owner.persetujuan-workorder'); 
+    })->name('persetujuan-workorder');
+
+    Route::resource('users', UserManagementController::class)->except(['show']);
 });
 
 Route::middleware(['auth'])->group(function () {
