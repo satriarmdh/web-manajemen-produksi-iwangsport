@@ -50,4 +50,25 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Accessor untuk mengecek status online secara otomatis.
+     * Ditambahkan type-hint (mixed $value) dan return type (: bool) agar editor tidak warning.
+     */
+    public function getOnlineStatusAttribute(mixed $value): bool
+    {
+        // 1. Jika di DB memang sudah 0 (karena klik logout), langsung kembalikan false
+        if ((bool) $value === false) {
+            return false;
+        }
+
+        // 2. Jika di DB nilainya 1, tapi tidak ada aktivitas lebih dari 5 menit,
+        // paksa jadi false otomatis (mengatasi user yang asal close browser)
+        if ($this->last_seen && $this->last_seen->diffInMinutes(now()) > 5) {
+            return false;
+        }
+
+        // 3. Jika baru aktif kurang dari 5 menit, berarti benar-benar Online
+        return true;
+    }
 }

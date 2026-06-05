@@ -26,7 +26,7 @@ class BahanBakuManagementTest extends TestCase
     }
 
     /** @test */
-    public function admin_dapat_melihat_halaman_katalog_bahan_baku()
+    public function test_admin_dapat_melihat_halaman_katalog_bahan_baku()
     {
         $response = $this->actingAs($this->admin)->get('/admin/bahan-baku');
 
@@ -35,7 +35,7 @@ class BahanBakuManagementTest extends TestCase
     }
 
     /** @test */
-    public function karyawan_non_admin_tidak_dapat_mengakses_halaman_katalog()
+    public function test_karyawan_non_admin_tidak_dapat_mengakses_halaman_katalog()
     {
         $response = $this->actingAs($this->karyawanJahit)->get('/admin/bahan-baku');
 
@@ -44,11 +44,12 @@ class BahanBakuManagementTest extends TestCase
     }
 
     /** @test */
-    public function admin_dapat_menambahkan_bahan_baku_baru()
+    public function test_admin_dapat_menambahkan_bahan_baku_baru()
     {
         $dataBahan = [
             'kode_bahan' => 'KAIN-001',
-            'nama_bahan' => 'Kain Cotton Combed 30s Hitam',
+            'nama_bahan' => 'Kain Cotton Combed 30s',
+            'warna' => 'hitam',
             'kategori' => 'kain',
             'satuan' => 'roll',
             'stok' => 0, // Default awal katalog
@@ -58,11 +59,11 @@ class BahanBakuManagementTest extends TestCase
 
         $response->assertRedirect('/admin/bahan-baku');
         $response->assertSessionHas('success');
-        $this->assertDatabaseHas('bahan_bakus', ['kode_bahan' => 'KAIN-001']);
+        $this->assertDatabaseHas('bahan_baku', ['kode_bahan' => 'KAIN-001']);
     }
 
     /** @test */
-    public function sistem_menolak_duplikasi_kode_bahan_baku()
+    public function test_sistem_menolak_duplikasi_kode_bahan_baku()
     {
         // Buat bahan baku awal
         BahanBaku::factory()->create(['kode_bahan' => 'KAIN-001']);
@@ -71,6 +72,7 @@ class BahanBakuManagementTest extends TestCase
         $dataDuplikat = [
             'kode_bahan' => 'KAIN-001',
             'nama_bahan' => 'Kain Berbeda',
+            'warna' => 'navy',
             'kategori' => 'kain',
             'satuan' => 'roll',
         ];
@@ -79,11 +81,11 @@ class BahanBakuManagementTest extends TestCase
 
         // Harus ada error pada field 'kode_bahan'
         $response->assertSessionHasErrors('kode_bahan');
-        $this->assertDatabaseCount('bahan_bakus', 1); // Data tidak boleh bertambah
+        $this->assertDatabaseCount('bahan_baku', 1); // Data tidak boleh bertambah
     }
 
     /** @test */
-    public function admin_dapat_memperbarui_data_bahan_baku()
+    public function test_admin_dapat_memperbarui_data_bahan_baku()
     {
         $bahan = BahanBaku::factory()->create([
             'nama_bahan' => 'Benang Merah Lama'
@@ -92,6 +94,7 @@ class BahanBakuManagementTest extends TestCase
         $dataUpdate = [
             'kode_bahan' => $bahan->kode_bahan,
             'nama_bahan' => 'Benang Jahit Merah Super',
+            'warna' => 'abu',
             'kategori' => 'benang',
             'satuan' => 'pcs',
         ];
@@ -99,14 +102,14 @@ class BahanBakuManagementTest extends TestCase
         $response = $this->actingAs($this->admin)->put('/admin/bahan-baku/' . $bahan->id, $dataUpdate);
 
         $response->assertRedirect('/admin/bahan-baku');
-        $this->assertDatabaseHas('bahan_bakus', [
+        $this->assertDatabaseHas('bahan_baku', [
             'id' => $bahan->id,
             'nama_bahan' => 'Benang Jahit Merah Super'
         ]);
     }
 
     /** @test */
-    public function admin_dapat_menghapus_bahan_baku_secara_soft_delete()
+    public function test_admin_dapat_menghapus_bahan_baku_secara_soft_delete()
     {
         $bahan = BahanBaku::factory()->create();
 
@@ -115,7 +118,7 @@ class BahanBakuManagementTest extends TestCase
         $response->assertRedirect('/admin/bahan-baku');
         
         // Memastikan tidak terhapus permanen dari DB, hanya ditandai deleted_at
-        $this->assertSoftDeleted('bahan_bakus', [
+        $this->assertSoftDeleted('bahan_baku', [
             'id' => $bahan->id,
         ]);
     }

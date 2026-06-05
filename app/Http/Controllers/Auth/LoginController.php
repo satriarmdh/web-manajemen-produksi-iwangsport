@@ -50,6 +50,15 @@ class LoginController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        if (Auth::check()) {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            
+            $user->last_seen = now();
+            $user->online_status = 0; 
+            $user->saveQuietly(); // Pakai saveQuietly() juga di sini biar rapi
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();

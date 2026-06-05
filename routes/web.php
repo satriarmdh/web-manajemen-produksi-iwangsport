@@ -25,8 +25,17 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     Route::resource('users', UserManagementController::class)->except(['show']);
 });
 
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () { 
+        return view('admin.dashboard'); 
+    })->name('dashboard');    
+
+    // Rute pengelolaan Bahan Baku
+    Route::resource('bahan-baku', \App\Http\Controllers\Admin\BahanBakuController::class)->except(['create', 'show', 'edit']);
+});
+
 Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/dashboard', function () { return 'Admin Dashboard'; })->name('admin.dashboard');
+    // Route::get('/admin/dashboard', function () { return 'Admin Dashboard'; })->name('admin.dashboard');
 
 
     Route::get('/produksi/potong', function () { return 'Produksi Potong'; })->name('produksi.potong');

@@ -28,5 +28,16 @@ class UserSeeder extends Seeder
             'jenis_kelamin' => 'laki-laki',
             'password' => Hash::make('password123'),
         ]);
+
+        // 2. admin
+        User::create([
+            'name' => 'admin',
+            'email' => 'admin@gmail.com',
+            'alamat' => 'Jl. Rungkut',
+            'no_hp' => '081234567890',
+            'role' => 'admin',
+            'jenis_kelamin' => 'laki-laki',
+            'password' => Hash::make('password123'),
+        ]);
     }
 }

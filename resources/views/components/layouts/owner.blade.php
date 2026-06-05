@@ -232,8 +232,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @vite([
-        'resources/js/owner/layout/toggle-navbar-menu.js',
-        'resources/js/owner/layout/toast.js'
+        'resources/js/layout/toggle-navbar-menu.js',
+        'resources/js/layout/toast.js'
     ])
 </body>
 </html>
