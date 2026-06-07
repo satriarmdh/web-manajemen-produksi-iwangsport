@@ -3,58 +3,51 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\BahanBaku;
-use Illuminate\Validation\Rule;
-// use SebastianBergmann\CodeUnit\FunctionUnit;
+use App\Http\Requests\Admin\StoreBahanBakuRequest;
+use App\Http\Requests\Admin\UpdateBahanBakuRequest;
+use App\Services\BahanBakuService;
 
 class BahanBakuController extends Controller
 {
-    public function index()
+    public function __construct(
+        protected BahanBakuService $bahanBakuService
+    ) {}
+
+    public function index(\Illuminate\Http\Request $request)
     {
-        $bahanBaku = BahanBaku::latest()->get();
-        return view('admin.bahan-baku.index', compact('bahanBaku'));
+        // Tangkap parameter filter dari URL
+        $filters = $request->only(['search', 'kategori', 'stok', 'sort']);
+
+        // Panggil service dengan parameter filters
+        $bahanBaku = $this->bahanBakuService->getAllPaginated($filters);
+        $nextNumbers = $this->bahanBakuService->getNextNumbers();
+
+        return view('admin.bahan-baku.index', compact('bahanBaku', 'nextNumbers'));
     }
 
-    public function store(Request $request)
+    public function store(StoreBahanBakuRequest $request)
     {
-        $validated = $request->validate([
-            'kode_bahan' => 'required|string|unique:bahan_baku,kode_bahan',
-            'nama_bahan' => 'required|string|max:255',
-            'warna' => 'required|string|max:100',
-            'kategori' => 'required|string|max:100',
-            'satuan' => 'required|string|max:50',
-            'stok' => 'nullable|integer|min:0',
-        ]);
+        // Langsung kirim data yang sudah tervalidasi ke Service
+        $bahanBaku = $this->bahanBakuService->store($request->validated());
 
-        BahanBaku::create($validated);
-
-        return redirect()->route('admin.bahan-baku.index')->with('success', 'Bahan baku berhasil ditambahkan.');
+        return redirect()->route('admin.bahan-baku.index')
+            ->with('success', 'Bahan baku berhasil ditambahkan dengan kode ' . $bahanBaku->kode_bahan);
     }
 
-    public function update(Request $request, BahanBaku $bahanBaku)
+    public function update(UpdateBahanBakuRequest $request, BahanBaku $bahanBaku)
     {
-        $validated = $request->validate([
-            'kode_bahan' => [
-                'required',
-                'string',
-                Rule::unique('bahan_baku')->ignore($bahanBaku->id),
-            ],
-            'nama_bahan' => 'required|string|max:255',
-            'warna' => 'required|string|max:100',
-            'kategori' => 'required|string|max:100',
-            'satuan' => 'required|string|max:50',
-        ]);
+        $this->bahanBakuService->update($bahanBaku, $request->validated());
 
-        $bahanBaku->update($validated);
-
-        return redirect()->route('admin.bahan-baku.index')->with('success', 'Bahan baku berhasil diperbarui.');
+        return redirect()->route('admin.bahan-baku.index')
+            ->with('success', 'Bahan baku berhasil diperbarui.');
     }
 
     public function destroy(BahanBaku $bahanBaku)
     {
-        $bahanBaku->delete(); // Soft delete bekerja otomatis
-
-        return redirect()->route('admin.bahan-baku.index')->with('success', 'Bahan baku berhasil dihapus.');
+        $this->bahanBakuService->delete($bahanBaku);
+        
+        return redirect()->route('admin.bahan-baku.index')
+            ->with('success', 'Bahan baku berhasil dihapus.');
     }
 }

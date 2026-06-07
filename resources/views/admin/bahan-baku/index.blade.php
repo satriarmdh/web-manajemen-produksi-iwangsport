@@ -13,20 +13,184 @@
         Bahan Baku
     </x-slot:header>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        
-        <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100"> 
+        <!-- Header -->
+        <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-xl">
             <div>
                 <h3 class="text-lg font-bold text-[#0F034D]">Daftar Inventori Dasar</h3>
                 <p class="text-sm text-gray-500 mt-1">Kelola data master bahan baku yang digunakan untuk proses produksi.</p>
             </div>
-            <button onclick="toggleModal('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
+            <button onclick="window.toggleModal('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Tambah Bahan Baku
             </button>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Baris Pencarian, Filter & Sorting -->
+        <!-- Posisi ditukar: div filter di atas (kiri), form search di bawah (kanan) -->
+        <div class="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center gap-4 relative z-20">
+            
+            <!-- KIRI: Grup Tombol Aksi (Filter & Sort) -->
+            <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 relative">
+            
+                <!-- TOMBOL & MENU FILTER -->
+                <div class="relative w-1/2 sm:w-auto">
+                    <button type="button" onclick="toggleFilterMenu('filterDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request()->hasAny(['kategori', 'stok']) ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        Filter
+                        @if(request()->hasAny(['kategori', 'stok']))
+                            <span class="flex h-2 w-2 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0F034D] opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#0F034D]"></span>
+                            </span>
+                        @endif
+                    </button>
+
+                    <!-- Dropdown ditambat ke kiri (left-0 origin-top-left) -->
+                    <div id="filterDropdown" class="absolute left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2">
+                        
+                        <!-- Nested Kategori -->
+                        <div class="relative group">
+                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                    Kategori Bahan
+                                </span>
+                                <!-- Panah Kanan -->
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            
+                            <!-- Submenu terbuka ke kanan (left-full pl-1) -->
+                            <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                                <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
+                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request('kategori') ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'kain']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'kain' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Kain</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'benang']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'benang' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Benang</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'kancing']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'kancing' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Kancing</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'resleting']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'resleting' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Resleting</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'aksesoris']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'aksesoris' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Aksesoris</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-100"></div>
+
+                        <!-- Nested Status Stok -->
+                        <div class="relative group">
+                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                    Status Stok
+                                </span>
+                                <!-- Panah Kanan -->
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            
+                            <!-- Submenu terbuka ke kanan (left-full pl-1) -->
+                            <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                                <div class="w-44 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
+                                    <a href="{{ request()->fullUrlWithQuery(['stok' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request('stok') ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Status</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['stok' => 'tersedia']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('stok') == 'tersedia' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Tersedia (> 0)</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['stok' => 'habis']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('stok') == 'habis' ? 'bg-red-50 text-red-600 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Stockout (Habis)</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if(request()->hasAny(['kategori', 'stok']))
+                            <div class="px-4 pt-2 mt-2 border-t border-gray-100">
+                                <a href="{{ request()->fullUrlWithQuery(['kategori' => null, 'stok' => null]) }}" class="block w-full text-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">Reset Filter</a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- TOMBOL & MENU SORTING -->
+                <div class="relative w-1/2 sm:w-auto">
+                    <button type="button" onclick="toggleFilterMenu('sortDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                        Urutkan
+                    </button>
+
+                    <!-- Dropdown ditambat ke kiri (left-0 origin-top-left) -->
+                    <div id="sortDropdown" class="absolute left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2">
+                        
+                        <!-- Waktu -->
+                        <div class="relative group">
+                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Waktu Ditambahkan
+                                </span>
+                                <!-- Panah Kanan -->
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                                <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request('sort') || request('sort') == 'terbaru' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Terbaru</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'terlama']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'terlama' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Terlama</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Abjad -->
+                        <div class="relative group">
+                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+                                    Abjad Nama
+                                </span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                                <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'nama_asc']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'nama_asc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">A - Z</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'nama_desc']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'nama_desc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Z - A</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stok -->
+                        <div class="relative group">
+                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                                    Jumlah Stok
+                                </span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                                <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'stok_desc']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'stok_desc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Paling Banyak</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'stok_asc']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'stok_asc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Paling Sedikit</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KANAN: Search Bar -->
+            <form method="GET" action="{{ route('admin.bahan-baku.index') }}" class="relative flex-1">
+                @if(request('kategori')) <input type="hidden" name="kategori" value="{{ request('kategori') }}"> @endif
+                @if(request('stok')) <input type="hidden" name="stok" value="{{ request('stok') }}"> @endif
+                @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
+
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik lalu tekan enter untuk mencari..." class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] outline-none transition-colors bg-white shadow-sm">
+            </form>
+
+            <!-- Tombol Hapus Filter/Pencarian -->
+            @if(request()->hasAny(['search', 'kategori', 'stok', 'sort']))
+                <a href="{{ route('admin.bahan-baku.index') }}" title="Hapus Semua Filter & Pencarian" class="hidden sm:flex items-center justify-center w-10 h-10 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-xl transition-colors shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </a>
+            @endif
+        </div>
+
+        <!-- Tabel Data -->
+        <div class="overflow-x-auto rounded-b-xl relative z-10">
             <table class="w-full text-left text-sm text-gray-500 whitespace-nowrap">
                 <thead class="text-xs text-gray-400 uppercase bg-gray-50/50 border-b border-gray-100">
                     <tr>
@@ -43,9 +207,6 @@
                         <tr class="hover:bg-gray-50/50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    {{-- <div class="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 shrink-0">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                    </div> --}}
                                     <div>
                                         <div class="font-bold text-gray-900">{{ $bahan->nama_bahan }}</div>
                                         <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $bahan->kode_bahan }}</div>
@@ -83,10 +244,11 @@
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button type="button" 
-                                            onclick="openEditModal(this)"
+                                            onclick="window.openEditModal(this)"
                                             data-id="{{ $bahan->id }}"
                                             data-kode="{{ $bahan->kode_bahan }}"
                                             data-nama="{{ $bahan->nama_bahan }}"
+                                            data-warna="{{ $bahan->warna }}"
                                             data-kategori="{{ $bahan->kategori }}"
                                             data-satuan="{{ $bahan->satuan }}"
                                             class="p-2 text-gray-400 hover:text-[#0F034D] hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" title="Edit Bahan Baku">
@@ -105,11 +267,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                    <p class="text-gray-500 font-medium">Belum ada bahan baku terdaftar.</p>
-                                    <p class="text-sm text-gray-400 mt-1">Silakan klik Tambah Bahan Baku untuk mengisi katalog.</p>
+                                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    <p class="text-gray-500 font-medium">Data tidak ditemukan.</p>
+                                    <p class="text-sm text-gray-400 mt-1">Coba sesuaikan kata kunci pencarian atau filter Anda.</p>
                                 </div>
                             </td>
                         </tr>
@@ -117,6 +279,12 @@
                 </tbody>
             </table>
         </div>
+
+        @if($bahanBaku->hasPages())
+            <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
+                {{ $bahanBaku->links() }}
+            </div>
+        @endif
     </div>
 
     {{-- ========================================= --}}
@@ -139,8 +307,14 @@
                         @csrf
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Bahan <span class="text-red-500">*</span></label>
-                                <input type="text" name="kode_bahan" required placeholder="Contoh: KAIN-001" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm uppercase">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Bahan</label>
+                                <div class="relative">
+                                    <input type="text" id="add_kode_bahan" disabled placeholder="Dibuat otomatis oleh sistem" class="w-full px-4 py-2.5 border border-gray-300 bg-gray-50 text-gray-500 rounded-xl text-sm italic cursor-not-allowed transition-colors duration-300">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Kode menyesuaikan kategori yang dipilih (Misal: KAIN-001).</p>
                             </div>
                             
                             <div>
@@ -148,10 +322,28 @@
                                 <input type="text" name="nama_bahan" required placeholder="Contoh: Kain Cotton Combed 30s Hitam" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
                             </div>
 
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Warna Dasar <span class="text-red-500">*</span></label>
+                                <select name="warna" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm bg-white cursor-pointer">
+                                    <option value="" disabled selected>Pilih Warna...</option>
+                                    <option value="hitam">Hitam</option>
+                                    <option value="putih">Putih</option>
+                                    <option value="abu-abu">Abu-abu</option>
+                                    <option value="navy">Navy / Biru Dongker</option>
+                                    <option value="merah">Merah</option>
+                                    <option value="maroon">Maroon</option>
+                                    <option value="kuning">Kuning</option>
+                                    <option value="hijau">Hijau</option>
+                                    <option value="biru">Biru</option>
+                                    <option value="coklat">Coklat</option>
+                                    <option value="lainnya">Lainnya (Bebas / Multi-warna)</option>
+                                </select>
+                            </div>
+
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
-                                    <select name="kategori" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm bg-white cursor-pointer">
+                                    <select name="kategori" id="add_kategori" data-prefixes="{{ json_encode($nextNumbers) }}" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm bg-white cursor-pointer">
                                         <option value="" disabled selected>Pilih...</option>
                                         <option value="kain">Kain</option>
                                         <option value="benang">Benang</option>
@@ -212,13 +404,30 @@
                         @method('PUT')
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Bahan <span class="text-red-500">*</span></label>
-                                <input type="text" name="kode_bahan" id="edit_kode" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm uppercase">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Bahan</label>
+                                <input type="text" id="edit_kode" readonly class="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 text-gray-600 font-bold rounded-xl text-sm focus:outline-none cursor-not-allowed">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Bahan <span class="text-red-500">*</span></label>
                                 <input type="text" name="nama_bahan" id="edit_nama" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Warna Dasar <span class="text-red-500">*</span></label>
+                                <select name="warna" id="edit_warna" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm bg-white cursor-pointer">
+                                    <option value="hitam">Hitam</option>
+                                    <option value="putih">Putih</option>
+                                    <option value="abu-abu">Abu-abu</option>
+                                    <option value="navy">Navy / Biru Dongker</option>
+                                    <option value="merah">Merah</option>
+                                    <option value="maroon">Maroon</option>
+                                    <option value="kuning">Kuning</option>
+                                    <option value="hijau">Hijau</option>
+                                    <option value="biru">Biru</option>
+                                    <option value="coklat">Coklat</option>
+                                    <option value="lainnya">Lainnya (Bebas / Multi-warna)</option>
+                                </select>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
@@ -256,46 +465,8 @@
         </div>
     </div>
 
-    <script>
-        function toggleModal(modalID) {
-            const modal = document.getElementById(modalID);
-            const isHidden = modal.classList.contains('hidden');
-            const innerContent = modal.querySelector('div.transform');
-            
-            if (isHidden) {
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    innerContent.classList.remove('scale-95');
-                }, 10);
-            } else {
-                modal.classList.add('opacity-0');
-                innerContent.classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
-            }
-        }
-
-        // Logic Auto-fill Data untuk Modal Edit
-        function openEditModal(button) {
-            const id = button.getAttribute('data-id');
-            const kode = button.getAttribute('data-kode');
-            const nama = button.getAttribute('data-nama');
-            const kategori = button.getAttribute('data-kategori');
-            const satuan = button.getAttribute('data-satuan');
-
-            // Set Form Action URL (Ganti sesuai nama rute Anda)
-            const form = document.getElementById('editForm');
-            form.action = `/admin/bahan-baku/${id}`; 
-
-            // Isi input fields
-            document.getElementById('edit_kode').value = kode;
-            document.getElementById('edit_nama').value = nama;
-            document.getElementById('edit_kategori').value = kategori;
-            document.getElementById('edit_satuan').value = satuan;
-
-            toggleModal('edit-modal');
-        }
-    </script>
+    @vite([
+        'resources/js/admin/bahan-baku/toggle-modal.js',
+        'resources/js/admin/bahan-baku/generate-kode.js'
+    ])
 </x-layouts.admin>

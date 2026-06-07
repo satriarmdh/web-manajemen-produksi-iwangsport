@@ -12,12 +12,16 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    protected AuthService $authService;
+    // protected AuthService $authService;
 
-    public function __construct(AuthService $authService)
-    {
-        $this->authService = $authService;
-    }
+    // public function __construct(AuthService $authService)
+    // {
+    //     $this->authService = $authService;
+    // }
+
+    public function __construct(
+        protected AuthService $authService
+    ) {}
 
     public function showLoginForm(): View
     {
