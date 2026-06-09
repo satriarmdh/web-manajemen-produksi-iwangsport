@@ -25,7 +25,6 @@ class BahanBakuManagementTest extends TestCase
         $this->karyawanJahit = User::factory()->create(['role' => 'jahit']);
     }
 
-    /** @test */
     public function test_admin_dapat_melihat_halaman_katalog_bahan_baku()
     {
         $response = $this->actingAs($this->admin)->get('/admin/bahan-baku');
@@ -34,7 +33,6 @@ class BahanBakuManagementTest extends TestCase
         $response->assertViewIs('admin.bahan-baku.index');
     }
 
-    /** @test */
     public function test_karyawan_non_admin_tidak_dapat_mengakses_halaman_katalog()
     {
         $response = $this->actingAs($this->karyawanJahit)->get('/admin/bahan-baku');
@@ -43,7 +41,6 @@ class BahanBakuManagementTest extends TestCase
         $response->assertStatus(403); 
     }
 
-    /** @test */
     public function test_admin_dapat_menambahkan_bahan_baku_baru()
     {
         $dataBahan = [
@@ -62,7 +59,6 @@ class BahanBakuManagementTest extends TestCase
         $this->assertDatabaseHas('bahan_baku', ['kode_bahan' => 'KAIN-001']);
     }
 
-    /** @test */
     public function test_sistem_menolak_duplikasi_kode_bahan_baku()
     {
         // Buat bahan baku awal
@@ -84,7 +80,6 @@ class BahanBakuManagementTest extends TestCase
         $this->assertDatabaseCount('bahan_baku', 1); // Data tidak boleh bertambah
     }
 
-    /** @test */
     public function test_admin_dapat_memperbarui_data_bahan_baku()
     {
         $bahan = BahanBaku::factory()->create([
@@ -108,7 +103,6 @@ class BahanBakuManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
     public function test_admin_dapat_menghapus_bahan_baku_secara_soft_delete()
     {
         $bahan = BahanBaku::factory()->create();

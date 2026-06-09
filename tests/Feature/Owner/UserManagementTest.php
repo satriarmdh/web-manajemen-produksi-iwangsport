@@ -25,7 +25,6 @@ class UserManagementTest extends TestCase
         $this->admin = User::factory()->create(['role' => 'admin']);
     }
 
-    /** @test */
     public function test_halaman_manajemen_pengguna_tidak_dapat_diakses_oleh_peran_selain_owner()
     {
         // Simulasi login sebagai admin
@@ -35,7 +34,6 @@ class UserManagementTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
     public function test_owner_dapat_mengakses_halaman_manajemen_pengguna()
     {
         // Simulasi login sebagai owner
@@ -46,7 +44,6 @@ class UserManagementTest extends TestCase
         $response->assertSee('Manajemen Pengguna');
     }
 
-    /** @test */
     public function test_owner_dapat_menambahkan_pengguna_baru()
     {
         $userData = [
@@ -71,7 +68,6 @@ class UserManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
     public function test_data_pengguna_baru_yang_ditambahkan_harus_valid()
     {
         // Sengaja mengirim data kosong
@@ -81,7 +77,6 @@ class UserManagementTest extends TestCase
         $response->assertSessionHasErrors(['name', 'email', 'password', 'role']);
     }
 
-    /** @test */
     public function test_owner_dapat_mengubah_peran_pengguna_yang_ada()
     {
         // Bikin user dummy sebagai penjahit
@@ -108,7 +103,6 @@ class UserManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
     public function test_owner_dapat_menghapus_data_pengguna()
     {
         $karyawan = User::factory()->create();

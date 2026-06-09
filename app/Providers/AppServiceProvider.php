@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use App\Models\Produk;
+use App\Models\BahanBaku;
+use App\Observers\ProdukObserver;
+use App\Observers\BahanBakuObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useTailwind();
+        
+        // Daftarkan observer untuk mencatat perubahan stok
+        Produk::observe(ProdukObserver::class);
+        BahanBaku::observe(BahanBakuObserver::class);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\BahanBaku;
 use App\Http\Requests\Admin\StoreBahanBakuRequest;
 use App\Http\Requests\Admin\UpdateBahanBakuRequest;
 use App\Services\BahanBakuService;
+use Illuminate\Http\Request;
 
 class BahanBakuController extends Controller
 {
@@ -14,7 +15,7 @@ class BahanBakuController extends Controller
         protected BahanBakuService $bahanBakuService
     ) {}
 
-    public function index(\Illuminate\Http\Request $request)
+    public function index(Request $request)
     {
         // Tangkap parameter filter dari URL
         $filters = $request->only(['search', 'kategori', 'stok', 'sort']);
@@ -32,7 +33,7 @@ class BahanBakuController extends Controller
         $bahanBaku = $this->bahanBakuService->store($request->validated());
 
         return redirect()->route('admin.bahan-baku.index')
-            ->with('success', 'Bahan baku berhasil ditambahkan dengan kode ' . $bahanBaku->kode_bahan);
+            ->with('success', 'Bahan baku "'. $bahanBaku->nama_bahan . '" berhasil ditambahkan');
     }
 
     public function update(UpdateBahanBakuRequest $request, BahanBaku $bahanBaku)

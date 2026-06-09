@@ -60,17 +60,17 @@
                                 $isPantau = request()->routeIs('owner.pantau-progress'); 
                             @endphp
                             <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isWorkOrder ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Persetujuan Work Order
                             </a>
                         </li>
                         
                         <li>
                             <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPantau ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 Pantau Progres Produksi
                             </a>
                         </li>
@@ -97,18 +97,18 @@
                             @endphp
                             <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isMutasi ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                                 
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isMutasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isMutasi ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isMutasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isMutasi ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 
                                 Log Mutasi Bahan Baku
                             </a>
                         </li>
                         <li>
                             <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isRiwayatJual ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 Riwayat Penjualan
                             </a>
                         </li>
@@ -130,8 +130,8 @@
                         <li>
                             @php $isManajemenUser = request()->routeIs('owner.users.*'); @endphp
                             <a href="{{ route('owner.users.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isManajemenUser ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isManajemenUser ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isManajemenUser ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isManajemenUser ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isManajemenUser ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 Manajemen Pengguna
                             </a>
                         </li>

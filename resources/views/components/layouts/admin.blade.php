@@ -44,8 +44,8 @@
                 $isBahanBaku = request()->routeIs('admin.bahan-baku.*'); 
                 $isProduk = request()->routeIs('admin.produk.*'); 
                 $isSupplier = request()->routeIs('admin.supplier.*');
-                $isPelanggan = request()->routeIs('admin.pelanggan.*');
-                $isManajemenGroup = $isBahanBaku || $isProduk || $isSupplier || $isPelanggan;
+                $isEstimasi = request()->routeIs('admin.estimasi-produksi.*');
+                $isManajemenGroup = $isBahanBaku || $isProduk || $isSupplier || $isEstimasi;
             @endphp
             <div>
                 <button onclick="toggleMenu('menu-manajemen', 'icon-manajemen')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isManajemenGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
@@ -60,36 +60,36 @@
                         
                         <li>
                             <a href="{{ route('admin.bahan-baku.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isBahanBaku ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ ($isProduk || $isSupplier || $isPelanggan) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isProduk || $isSupplier || $isEstimasi) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Bahan Baku
                             </a>
                         </li>
                         
                         <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isProduk ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ ($isSupplier || $isPelanggan) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
+                            <a href="{{ route('admin.produk.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isProduk ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isSupplier || $isEstimasi) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Produk
                             </a>
                         </li>
                         
                         <li>
                             <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isSupplier ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isPelanggan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isEstimasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Supplier
                             </a>
                         </li>
                         
                         <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPelanggan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPelanggan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isPelanggan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                Pelanggan
+                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isEstimasi ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isEstimasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isEstimasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                Estimasi Produksi
                             </a>
                         </li>
 

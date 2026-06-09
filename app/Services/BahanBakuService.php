@@ -6,14 +6,6 @@ use App\Models\BahanBaku;
 
 class BahanBakuService
 {
-    /**
-     * Mengambil semua data bahan baku
-     */
-    // public function getAll()
-    // {
-    //     return BahanBaku::latest()->get();
-    // }
-
     public function getAllPaginated(array $filters = [], int $perPage = 10)
     {
         $query = BahanBaku::query();

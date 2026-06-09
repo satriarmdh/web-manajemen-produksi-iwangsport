@@ -26,6 +26,7 @@ window.openEditModal = function (button) {
     const warna = button.getAttribute("data-warna");
     const kategori = button.getAttribute("data-kategori");
     const satuan = button.getAttribute("data-satuan");
+    const stok = button.getAttribute("data-stok");
 
     // Set Form Action URL
     const form = document.getElementById("editForm");
@@ -37,6 +38,7 @@ window.openEditModal = function (button) {
     document.getElementById("edit_warna").value = warna;
     document.getElementById("edit_kategori").value = kategori;
     document.getElementById("edit_satuan").value = satuan;
+    document.getElementById("edit_stok").value = stok;
 
     window.toggleModal("edit-modal");
 };

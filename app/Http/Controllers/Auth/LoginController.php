@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Support\Carbon;
 
 class LoginController extends Controller
 {
@@ -57,9 +58,9 @@ class LoginController extends Controller
         if (Auth::check()) {
             /** @var \App\Models\User $user */
             $user = Auth::user();
-            
+
             $user->last_seen = now();
-            $user->online_status = 0; 
+            $user->online_status = 0;
             $user->saveQuietly(); // Pakai saveQuietly() juga di sini biar rapi
         }
 

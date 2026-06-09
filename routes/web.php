@@ -32,6 +32,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Rute pengelolaan Bahan Baku
     Route::resource('bahan-baku', \App\Http\Controllers\Admin\BahanBakuController::class)->except(['create', 'show', 'edit']);
+
+    // Rute pengelolaan Produk
+    Route::resource('produk', \App\Http\Controllers\Admin\ProdukController::class)->except(['create', 'show', 'edit']);
 });
 
 Route::middleware(['auth'])->group(function () {
