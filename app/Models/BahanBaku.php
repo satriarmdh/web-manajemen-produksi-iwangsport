@@ -20,4 +20,12 @@ class BahanBaku extends Model
         'satuan',
         'stok',
     ];
+
+    /**
+     * Relasi ke estimasi produksi
+     */
+    public function estimasiProduksi()
+    {
+        return $this->hasMany(EstimasiProduksi::class, 'bahan_baku_id');
+    }
 }

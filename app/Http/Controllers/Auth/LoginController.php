@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,12 +14,7 @@ use Illuminate\Support\Carbon;
 
 class LoginController extends Controller
 {
-    // protected AuthService $authService;
-
-    // public function __construct(AuthService $authService)
-    // {
-    //     $this->authService = $authService;
-    // }
+    
 
     public function __construct(
         protected AuthService $authService
@@ -56,7 +52,7 @@ class LoginController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         if (Auth::check()) {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             $user->last_seen = now();

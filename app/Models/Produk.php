@@ -26,4 +26,12 @@ class Produk extends Model
         'harga_satuan' => 'integer',
         'stok' => 'integer',
     ];
+
+    /**
+     * Relasi ke estimasi produksi
+     */
+    public function estimasiProduksi()
+    {
+        return $this->hasMany(EstimasiProduksi::class, 'produk_id');
+    }
 }
