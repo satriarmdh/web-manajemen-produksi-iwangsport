@@ -58,11 +58,15 @@ function openEditModal(button) {
     // Isi field
     document.getElementById('edit_kode').value       = kode;
     document.getElementById('edit_nama').value       = nama;
-    document.getElementById('edit_ukuran').value     = ukuran;
-    document.getElementById('edit_warna').value      = warna;
     document.getElementById('edit_harga').value      = harga;
     document.getElementById('edit_satuan').value     = satuan;
     document.getElementById('edit_stok').value       = stok;
+
+    // Set custom dropdown values
+    if (typeof setCustomDropdownValue === 'function') {
+        setCustomDropdownValue('edit_ukuran', ukuran);
+        setCustomDropdownValue('edit_warna', warna);
+    }
 
     toggleModal('edit-modal');
 }
@@ -108,3 +112,15 @@ document.addEventListener('click', (e) => {
 window.toggleModal = toggleModal;
 window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;
+
+// Initialize custom dropdowns on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initCustomDropdown === 'function') {
+        // Modal Tambah
+        initCustomDropdown('add_ukuran');
+        initCustomDropdown('add_warna');
+        // Modal Edit
+        initCustomDropdown('edit_ukuran');
+        initCustomDropdown('edit_warna');
+    }
+});

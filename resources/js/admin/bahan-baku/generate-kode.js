@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const kategoriSelect = document.getElementById('add_kategori');
+    const kategoriSelect = document.getElementById('add_kategori_value');
     const kodeInput = document.getElementById('add_kode_bahan');
 
     if(kategoriSelect && kodeInput) {

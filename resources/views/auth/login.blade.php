@@ -89,8 +89,15 @@
                     
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex items-center gap-2">
-                            <input type="checkbox" name="remember" id="remember" class="w-4 h-4 text-[#0F034D] rounded border-gray-300 focus:ring-[#0F034D] accent-[#0F034D]">
-                            <label for="remember" class="text-gray-600 select-none cursor-pointer">Ingat Saya</label>
+                            <input type="checkbox" name="remember" id="remember" class="hidden" onchange="updateCheckbox(this, 'remember')">
+                            <label for="remember" class="flex items-center gap-2 cursor-pointer select-none">
+                                <span id="remember_box" class="flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-colors">
+                                    <svg id="remember_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                <span id="remember_text" class="text-gray-600">Ingat Saya</span>
+                            </label>
                         </div>
                     </div>
                     
@@ -119,7 +126,11 @@
         ];
     </script>
 
-    @vite(['resources/js/auth/login-slider.js', 'resources/js/auth/password-toggle.js'])
+    @vite([
+        'resources/js/admin/custom-forms.js',
+        'resources/js/auth/login-slider.js',
+        'resources/js/auth/password-toggle.js'
+    ])
 
 </body>
 </html>

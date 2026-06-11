@@ -34,6 +34,21 @@ function toggleModal(modalId) {
             // Reset form setelah modal ditutup
             const form = modal.querySelector('form');
             if (form) form.reset();
+            // Reset custom checkboxes
+            if (typeof updateCheckbox === 'function') {
+                const checkboxes = modal.querySelectorAll('.edit_kategori, input[id^="add_kategori_"]');
+                checkboxes.forEach(cb => {
+                    if (cb.type === 'checkbox') {
+                        cb.checked = false;
+                        const prefix = cb.id;
+                        updateCheckbox(cb, prefix);
+                    }
+                });
+            }
+            // Reset custom status dropdown
+            if (typeof resetCustomDropdown === 'function') {
+                resetCustomDropdown('edit_status');
+            }
         }, 300);
     }
 }
@@ -153,16 +168,20 @@ function openEditModal(button) {
     const editForm = document.getElementById('editForm');
     editForm.action = `/admin/supplier/${id}`;
 
-    // Isi field text/select
+    // Isi field text
     document.getElementById('edit_kode').value    = kode;
     document.getElementById('edit_nama').value    = nama;
     document.getElementById('edit_kontak').value  = kontak;
     document.getElementById('edit_email').value   = email;
     document.getElementById('edit_alamat').value  = alamat;
     document.getElementById('edit_catatan').value = catatan;
-    document.getElementById('edit_status').value  = status;
 
-    // Isi checkbox kategori (multi-select)
+    // Set custom status dropdown value
+    if (typeof setCustomDropdownValue === 'function') {
+        setCustomDropdownValue('edit_status', status);
+    }
+
+    // Isi checkbox kategori (multi-select) dengan custom styling
     let kategoriArray = [];
     try {
         kategoriArray = JSON.parse(kategori);
@@ -173,12 +192,18 @@ function openEditModal(button) {
     // Uncheck semua checkbox edit_kategori terlebih dahulu
     document.querySelectorAll('.edit_kategori').forEach(cb => {
         cb.checked = false;
+        if (typeof updateCheckbox === 'function') {
+            updateCheckbox(cb, cb.id);
+        }
     });
 
     // Check yang sesuai dengan data kategori
     document.querySelectorAll('.edit_kategori').forEach(cb => {
         if (kategoriArray.includes(cb.value)) {
             cb.checked = true;
+            if (typeof updateCheckbox === 'function') {
+                updateCheckbox(cb, cb.id);
+            }
         }
     });
 
@@ -262,3 +287,10 @@ window.openDetailModal = openDetailModal;
 window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;
 window.toggleActionDropdown = toggleActionDropdown;
+
+// Initialize custom dropdown on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initCustomDropdown === 'function') {
+        initCustomDropdown('edit_status');
+    }
+});

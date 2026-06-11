@@ -1,4 +1,28 @@
 /**
+ * Update checkbox styling saat status berubah
+ */
+function updateCheckbox(checkbox, prefix) {
+    const wrapper = document.getElementById(`${prefix}_wrapper`);
+    const box = document.getElementById(`${prefix}_box`);
+    const icon = document.getElementById(`${prefix}_icon`);
+    const text = document.getElementById(`${prefix}_text`);
+
+    if (checkbox.checked) {
+        wrapper.className = 'flex items-center gap-3 p-4 border border-[#0F034D] bg-[#0F034D]/5 ring-1 ring-[#0F034D] rounded-xl cursor-pointer hover:bg-gray-50 transition-all';
+        box.className = 'relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-[#0F034D] transition-all';
+        icon.style.display = 'block';
+        text.className = 'text-sm font-semibold text-[#0F034D]';
+    } else {
+        wrapper.className = 'flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all';
+        box.className = 'relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all';
+        icon.style.display = 'none';
+        text.className = 'text-sm font-semibold text-gray-700';
+    }
+}
+
+window.updateCheckbox = updateCheckbox;
+
+/**
  * Toggle Modal - Standard Baseline Produksi
  * Mengatur buka/tutup modal dengan animasi smooth.
  */
@@ -34,8 +58,111 @@ function toggleModal(modalId) {
             // Reset form setelah modal ditutup
             const form = modal.querySelector('form');
             if (form) form.reset();
+            // Reset searchable dropdowns
+            resetSearchableDropdowns(modalId);
         }, 300);
     }
+}
+
+/**
+ * Reset searchable dropdowns setelah modal ditutup
+ */
+function resetSearchableDropdowns(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    // Reset semua search input
+    const searchInputs = modal.querySelectorAll('input[type="text"][id$="_search"]');
+    searchInputs.forEach(input => {
+        input.value = '';
+    });
+
+    // Reset semua hidden input
+    const hiddenInputs = modal.querySelectorAll('input[type="hidden"][id$="_id"]');
+    hiddenInputs.forEach(input => {
+        input.value = '';
+    });
+
+    // Hide semua dropdown
+    const dropdowns = modal.querySelectorAll('[id$="_dropdown"]');
+    dropdowns.forEach(dropdown => {
+        dropdown.classList.add('hidden');
+    });
+}
+
+/**
+ * Initialize searchable dropdown
+ */
+function initSearchableDropdown(prefix) {
+    const searchInput = document.getElementById(`${prefix}_search`);
+    const hiddenInput = document.getElementById(`${prefix}_id`);
+    const dropdown = document.getElementById(`${prefix}_dropdown`);
+    const noResults = document.getElementById(`${prefix}_no_results`);
+    const options = dropdown.querySelectorAll('.dropdown-option');
+
+    if (!searchInput || !hiddenInput || !dropdown) return;
+
+    // Show dropdown on focus
+    searchInput.addEventListener('focus', () => {
+        dropdown.classList.remove('hidden');
+        filterOptions();
+    });
+
+    // Filter options on input
+    searchInput.addEventListener('input', filterOptions);
+
+    function filterOptions() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleCount = 0;
+
+        options.forEach(option => {
+            const text = option.getAttribute('data-text').toLowerCase();
+            if (text.includes(searchTerm)) {
+                option.style.display = 'block';
+                visibleCount++;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Show/hide no results message
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    // Select option
+    options.forEach(option => {
+        option.addEventListener('click', () => {
+            const value = option.getAttribute('data-value');
+            const text = option.getAttribute('data-text');
+            
+            hiddenInput.value = value;
+            searchInput.value = text;
+            dropdown.classList.add('hidden');
+
+            // Update checkmark - hide all, show selected
+            options.forEach(opt => {
+                const checkIcon = opt.querySelector('.check-icon');
+                if (checkIcon) {
+                    checkIcon.classList.add('hidden');
+                }
+            });
+            const selectedCheckIcon = option.querySelector('.check-icon');
+            if (selectedCheckIcon) {
+                selectedCheckIcon.classList.remove('hidden');
+            }
+        });
+    });
+
+    // Hide dropdown on click outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
 }
 
 /**
@@ -143,6 +270,18 @@ function openEditModal(button) {
     // Isi field
     document.getElementById('edit_produk_id').value = produkId;
     document.getElementById('edit_bahan_baku_id').value = bahanId;
+    
+    // Set search input text
+    const produkOption = document.querySelector(`#edit_produk_dropdown .dropdown-option[data-value="${produkId}"]`);
+    const bahanOption = document.querySelector(`#edit_bahan_baku_dropdown .dropdown-option[data-value="${bahanId}"]`);
+    
+    if (produkOption) {
+        document.getElementById('edit_produk_search').value = produkOption.getAttribute('data-text');
+    }
+    if (bahanOption) {
+        document.getElementById('edit_bahan_baku_search').value = bahanOption.getAttribute('data-text');
+    }
+    
     document.getElementById('edit_pcs_per_roll').value = pcs;
     document.getElementById('edit_toleransi_minus').value = toleransi;
     document.getElementById('edit_keterangan').value = keterangan;
@@ -225,9 +364,21 @@ window.addEventListener('resize', () => {
     });
 });
 
+// Initialize searchable dropdowns on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Modal Tambah
+    initSearchableDropdown('add_produk');
+    initSearchableDropdown('add_bahan_baku');
+    
+    // Modal Edit
+    initSearchableDropdown('edit_produk');
+    initSearchableDropdown('edit_bahan_baku');
+});
+
 // Expose ke global scope
 window.toggleModal = toggleModal;
 window.openDetailModal = openDetailModal;
 window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;
 window.toggleActionDropdown = toggleActionDropdown;
+window.initSearchableDropdown = initSearchableDropdown;

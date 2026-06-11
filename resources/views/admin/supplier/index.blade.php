@@ -325,26 +325,56 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Bahan <span class="text-red-500">*</span></label>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="kain" class="w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Kain</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="benang" class="w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Benang</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="kancing" class="w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Kancing</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="resleting" class="w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Resleting</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="aksesoris" class="w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Aksesoris</span>
-                                    </label>
+                                    <!-- Kain -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="kain" id="add_kategori_kain" class="hidden" onchange="updateCheckbox(this, 'add_kategori_kain')">
+                                        <div id="add_kategori_kain_wrapper" onclick="document.getElementById('add_kategori_kain').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="add_kategori_kain_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="add_kategori_kain_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="add_kategori_kain_text" class="text-sm font-medium text-gray-700">Kain</span>
+                                        </div>
+                                    </div>
+                                    <!-- Benang -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="benang" id="add_kategori_benang" class="hidden" onchange="updateCheckbox(this, 'add_kategori_benang')">
+                                        <div id="add_kategori_benang_wrapper" onclick="document.getElementById('add_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="add_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="add_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="add_kategori_benang_text" class="text-sm font-medium text-gray-700">Benang</span>
+                                        </div>
+                                    </div>
+                                    <!-- Kancing -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="kancing" id="add_kategori_kancing" class="hidden" onchange="updateCheckbox(this, 'add_kategori_kancing')">
+                                        <div id="add_kategori_kancing_wrapper" onclick="document.getElementById('add_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="add_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="add_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="add_kategori_kancing_text" class="text-sm font-medium text-gray-700">Kancing</span>
+                                        </div>
+                                    </div>
+                                    <!-- Resleting -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="resleting" id="add_kategori_resleting" class="hidden" onchange="updateCheckbox(this, 'add_kategori_resleting')">
+                                        <div id="add_kategori_resleting_wrapper" onclick="document.getElementById('add_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="add_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="add_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="add_kategori_resleting_text" class="text-sm font-medium text-gray-700">Resleting</span>
+                                        </div>
+                                    </div>
+                                    <!-- Aksesoris -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="aksesoris" id="add_kategori_aksesoris" class="hidden" onchange="updateCheckbox(this, 'add_kategori_aksesoris')">
+                                        <div id="add_kategori_aksesoris_wrapper" onclick="document.getElementById('add_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="add_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="add_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="add_kategori_aksesoris_text" class="text-sm font-medium text-gray-700">Aksesoris</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">Pilih satu atau lebih kategori bahan yang disuplai.</p>
                             </div>
@@ -415,26 +445,56 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Bahan <span class="text-red-500">*</span></label>
                                 <div class="grid grid-cols-2 gap-2" id="edit_kategori_container">
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="kain" class="edit_kategori w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Kain</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="benang" class="edit_kategori w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Benang</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="kancing" class="edit_kategori w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Kancing</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="resleting" class="edit_kategori w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Resleting</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                        <input type="checkbox" name="kategori[]" value="aksesoris" class="edit_kategori w-4 h-4 text-[#0F034D] rounded focus:ring-[#0F034D]">
-                                        <span class="text-sm text-gray-700">Aksesoris</span>
-                                    </label>
+                                    <!-- Kain -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="kain" id="edit_kategori_kain" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kain')">
+                                        <div id="edit_kategori_kain_wrapper" onclick="document.getElementById('edit_kategori_kain').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="edit_kategori_kain_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="edit_kategori_kain_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="edit_kategori_kain_text" class="text-sm font-medium text-gray-700">Kain</span>
+                                        </div>
+                                    </div>
+                                    <!-- Benang -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="benang" id="edit_kategori_benang" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_benang')">
+                                        <div id="edit_kategori_benang_wrapper" onclick="document.getElementById('edit_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="edit_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="edit_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="edit_kategori_benang_text" class="text-sm font-medium text-gray-700">Benang</span>
+                                        </div>
+                                    </div>
+                                    <!-- Kancing -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="kancing" id="edit_kategori_kancing" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kancing')">
+                                        <div id="edit_kategori_kancing_wrapper" onclick="document.getElementById('edit_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="edit_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="edit_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="edit_kategori_kancing_text" class="text-sm font-medium text-gray-700">Kancing</span>
+                                        </div>
+                                    </div>
+                                    <!-- Resleting -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="resleting" id="edit_kategori_resleting" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_resleting')">
+                                        <div id="edit_kategori_resleting_wrapper" onclick="document.getElementById('edit_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="edit_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="edit_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="edit_kategori_resleting_text" class="text-sm font-medium text-gray-700">Resleting</span>
+                                        </div>
+                                    </div>
+                                    <!-- Aksesoris -->
+                                    <div>
+                                        <input type="checkbox" name="kategori[]" value="aksesoris" id="edit_kategori_aksesoris" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_aksesoris')">
+                                        <div id="edit_kategori_aksesoris_wrapper" onclick="document.getElementById('edit_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <div id="edit_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                                <svg id="edit_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <span id="edit_kategori_aksesoris_text" class="text-sm font-medium text-gray-700">Aksesoris</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -462,10 +522,27 @@
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-                                <select name="status" id="edit_status" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm bg-white cursor-pointer">
-                                    <option value="aktif">Aktif</option>
-                                    <option value="nonaktif">Nonaktif</option>
-                                </select>
+                                <!-- Dropdown Status -->
+                                <div class="relative">
+                                    <input type="hidden" name="status" id="edit_status" required>
+                                    <input type="text" id="edit_status_input" placeholder="Pilih status..." autocomplete="off" class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                    <div id="edit_status_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
+                                        <div class="p-2">
+                                            <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="aktif" data-text="Aktif">
+                                                <span class="text-sm font-medium text-gray-700">Aktif</span>
+                                                <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                            <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="nonaktif" data-text="Nonaktif">
+                                                <span class="text-sm font-medium text-gray-700">Nonaktif</span>
+                                                <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                        </div>
+                                        <div id="edit_status_no_results" class="hidden p-4 text-center text-sm text-gray-500">Status tidak ditemukan</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -562,6 +639,7 @@
     </div>
 
     @vite([
+        'resources/js/admin/custom-forms.js',
         'resources/js/admin/supplier/toggle-modal.js',
         'resources/js/admin/supplier/generate-kode.js'
     ])
