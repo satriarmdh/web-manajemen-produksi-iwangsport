@@ -1,27 +1,76 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const kategoriSelect = document.getElementById('add_kategori_value');
-    const kodeInput = document.getElementById('add_kode_bahan');
+    // Modal Tambah - Preview kode bahan saat kategori dipilih
+    const addKategoriSelect = document.getElementById('add_kategori_value');
+    const addKodeInput = document.getElementById('add_kode_bahan');
 
-    if(kategoriSelect && kodeInput) {
+    if(addKategoriSelect && addKodeInput) {
         // Ambil string JSON dari atribut 'data-prefixes', lalu ubah jadi Objek JS
-        const rawData = kategoriSelect.getAttribute('data-prefixes');
+        const rawData = addKategoriSelect.getAttribute('data-prefixes');
         const prefixMap = rawData ? JSON.parse(rawData) : {};
 
-        kategoriSelect.addEventListener('change', function() {
+        addKategoriSelect.addEventListener('change', function() {
             const kategoriTerpilih = this.value;
             const kodeAsli = prefixMap[kategoriTerpilih];
 
             if(kodeAsli) {
-                // Berikan efek visual kalau kode sudah terisi otomatis
-                kodeInput.value = kodeAsli;
-                kodeInput.classList.remove('text-gray-500', 'italic');
-                kodeInput.classList.add('text-[#0F034D]', 'font-bold', 'bg-blue-50/50', 'border-blue-200');
+                addKodeInput.value = kodeAsli;
             } else {
-                // Kembalikan ke mode awal jika tidak memilih apapun
-                kodeInput.value = '';
-                kodeInput.classList.add('text-gray-500', 'italic');
-                kodeInput.classList.remove('text-[#0F034D]', 'font-bold', 'bg-blue-50/50', 'border-blue-200');
+                addKodeInput.value = '';
             }
         });
+    }
+
+    // Modal Edit - Preview kode bahan saat kategori berubah
+    const editKategoriSelect = document.getElementById('edit_kategori_value');
+    const editKodeInput = document.getElementById('edit_kode');
+
+    if(editKategoriSelect && editKodeInput) {
+        // Simpan kode dan kategori asli
+        let originalKode = '';
+        let originalKategori = '';
+        let isFirstChange = true;
+
+        // Listen to change event dari custom dropdown
+        editKategoriSelect.addEventListener('change', function() {
+            const kategoriBaru = this.value;
+            
+            // Simpan kode asli saat pertama kali modal dibuka
+            if (isFirstChange) {
+                originalKode = editKodeInput.value;
+                originalKategori = kategoriBaru;
+                isFirstChange = false;
+                return; // Skip first change (saat modal baru dibuka)
+            }
+
+            // Jika kategori berubah, fetch kode baru
+            if (kategoriBaru && kategoriBaru !== originalKategori) {
+                // Fetch kode baru via AJAX
+                fetch(`/admin/bahan-baku/generate-kode/${kategoriBaru}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.kode) {
+                            editKodeInput.value = data.kode;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching kode:', error);
+                    });
+            } else {
+                // Kembalikan ke kode asli jika kategori tidak berubah
+                editKodeInput.value = originalKode;
+            }
+        });
+
+        // Reset saat modal ditutup
+        const editModal = document.getElementById('edit-modal');
+        if (editModal) {
+            editModal.addEventListener('transitionend', function() {
+                if (editModal.classList.contains('hidden')) {
+                    originalKode = '';
+                    originalKategori = '';
+                    isFirstChange = true;
+                }
+            });
+        }
     }
 });

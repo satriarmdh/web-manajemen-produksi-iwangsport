@@ -28,39 +28,12 @@ class BahanBakuObserver
 
     /**
      * Handle the BahanBaku "updated" event.
-     * Catat perubahan stok jika ada
+     * Perubahan stok saat edit data master ditangani di BahanBakuService (movement_type: adjustment).
+     * Observer tidak mencatat ulang untuk menghindari duplikasi.
      */
     public function updated(BahanBaku $bahanBaku): void
     {
-        if ($bahanBaku->isDirty('stok')) {
-            $previousStock = $bahanBaku->getOriginal('stok');
-            $newStock = $bahanBaku->stok;
-            $quantity = $newStock - $previousStock;
-
-            if ($quantity > 0) {
-                // Stok bertambah
-                StockMovement::record(
-                    'bahan_baku',
-                    $bahanBaku->id,
-                    'in',
-                    $quantity,
-                    $previousStock,
-                    $newStock,
-                    'Penambahan stok bahan baku ' . $bahanBaku->nama_bahan
-                );
-            } elseif ($quantity < 0) {
-                // Stok berkurang
-                StockMovement::record(
-                    'bahan_baku',
-                    $bahanBaku->id,
-                    'out',
-                    abs($quantity),
-                    $previousStock,
-                    $newStock,
-                    'Pengurangan stok bahan baku ' . $bahanBaku->nama_bahan
-                );
-            }
-        }
+        // Stock movement saat edit data master ditangani oleh BahanBakuService
     }
 
     /**

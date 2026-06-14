@@ -19,6 +19,7 @@ class UpdateBahanBakuRequest extends FormRequest
             'warna'      => 'required|string|max:100',
             'kategori'   => 'required|string|max:100',
             'satuan'     => 'required|string|max:50',
+            'stok'       => 'required|integer|min:0',
         ];
     }
 }

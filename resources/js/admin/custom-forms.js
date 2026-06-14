@@ -16,7 +16,22 @@ function initCustomDropdown(prefix) {
 
     const options = dropdown.querySelectorAll('.dropdown-option');
     const placeholder = searchInput.placeholder;
-    let selectedOption = null;
+
+    // Simpan teks asli item yang selected (untuk restore saat blur tanpa pilih baru)
+    let originalSelectedText = '';
+
+    function updateOriginalText() {
+        const currentValue = hiddenInput.value;
+        if (currentValue) {
+            const selectedOpt = dropdown.querySelector(`.dropdown-option[data-value="${currentValue}"]`);
+            originalSelectedText = selectedOpt ? selectedOpt.getAttribute('data-text') : '';
+        } else {
+            originalSelectedText = '';
+        }
+    }
+
+    // Initialize original text on load
+    updateOriginalText();
 
     function filterOptions() {
         const term = searchInput.value.toLowerCase();
@@ -33,14 +48,13 @@ function initCustomDropdown(prefix) {
     }
 
     function selectOption(opt) {
-        // Remove selected from previous
-        if (selectedOption) {
-            selectedOption.classList.remove('bg-gray-100');
-            const pi = selectedOption.querySelector('.check-icon');
-            if (pi) pi.classList.add('hidden');
-        }
+        // Remove selected from previous (termasuk yang di-set oleh setCustomDropdownValue)
+        options.forEach(o => {
+            o.classList.remove('bg-gray-100');
+            const ci = o.querySelector('.check-icon');
+            if (ci) ci.classList.add('hidden');
+        });
         // Set new selected
-        selectedOption = opt;
         opt.classList.add('bg-gray-100');
         const ci = opt.querySelector('.check-icon');
         if (ci) ci.classList.remove('hidden');
@@ -51,11 +65,16 @@ function initCustomDropdown(prefix) {
         searchInput.classList.remove('text-gray-500');
         searchInput.classList.add('text-gray-900', 'font-medium');
         dropdown.classList.add('hidden');
+
+        // Update original text agar saat blur, teks yang benar yang dikembalikan
+        originalSelectedText = opt.dataset.text;
     }
 
-    // Show dropdown on focus
+    // Show dropdown on focus — kosongkan search agar semua opsi muncul
     searchInput.addEventListener('focus', () => {
+        updateOriginalText();
         dropdown.classList.remove('hidden');
+        searchInput.value = '';
         filterOptions();
     });
 
@@ -65,6 +84,18 @@ function initCustomDropdown(prefix) {
     // Select option on click
     options.forEach(opt => {
         opt.addEventListener('click', () => selectOption(opt));
+    });
+
+    // Restore original text on blur (jika user tidak pilih item baru)
+    searchInput.addEventListener('blur', () => {
+        // Beri delay kecil agar click event pada option sempat diproses
+        setTimeout(() => {
+            if (!dropdown.classList.contains('hidden')) return;
+            // Jika search input kosong dan ada item yang selected, kembalikan teks asli
+            if (searchInput.value === '' && originalSelectedText) {
+                searchInput.value = originalSelectedText;
+            }
+        }, 150);
     });
 
     // Close on outside click

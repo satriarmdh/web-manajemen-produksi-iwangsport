@@ -22,6 +22,7 @@ class UpdateProdukRequest extends FormRequest
             'warna'        => 'required|string|max:100',
             'harga_satuan' => 'required|integer|min:0',
             'satuan'       => 'required|string|max:50',
+            'stok'         => 'required|integer|min:0',
         ];
     }
     public function messages(): array
@@ -39,6 +40,9 @@ class UpdateProdukRequest extends FormRequest
             'harga_satuan.min'      => 'Harga satuan tidak boleh kurang dari 0.',
             'satuan.required'       => 'Satuan wajib diisi.',
             'satuan.max'            => 'Satuan maksimal 50 karakter.',
+            'stok.required'         => 'Stok wajib diisi.',
+            'stok.integer'          => 'Stok harus berupa angka.',
+            'stok.min'              => 'Stok tidak boleh kurang dari 0.',
         ];
     }
 }

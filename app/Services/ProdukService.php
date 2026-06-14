@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Produk;
+use App\Models\StockMovement;
 
 class ProdukService
 {
@@ -84,9 +85,27 @@ class ProdukService
 
     /**
      * Update produk
+     * Catat perubahan stok sebagai 'adjustment' ke stock_movements
      */
     public function update(Produk $produk, array $data): bool
     {
+        // Cek apakah stok berubah
+        if (isset($data['stok']) && $data['stok'] != $produk->stok) {
+            $previousStock = (int) $produk->stok;
+            $newStock = (int) $data['stok'];
+            $quantity = $newStock - $previousStock;
+
+            StockMovement::record(
+                'produk',
+                $produk->id,
+                'adjustment',
+                $quantity,
+                $previousStock,
+                $newStock,
+                'Koreksi stok saat edit data produk'
+            );
+        }
+
         return $produk->update($data);
     }
 

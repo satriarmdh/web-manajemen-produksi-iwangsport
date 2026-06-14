@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Produk;
+use App\Models\BahanBaku;
 
 class StoreEstimasiProduksiRequest extends FormRequest
 {
@@ -38,5 +40,19 @@ class StoreEstimasiProduksiRequest extends FormRequest
             'toleransi_minus.min' => 'Toleransi minus tidak boleh negatif.',
             'keterangan.max' => 'Keterangan maksimal 500 karakter.',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if ($this->produk_id && $this->bahan_baku_id) {
+                $produk = Produk::find($this->produk_id);
+                $bahanBaku = BahanBaku::find($this->bahan_baku_id);
+
+                if ($produk && $bahanBaku && $produk->warna !== $bahanBaku->warna) {
+                    $validator->errors()->add('bahan_baku_id', 'Warna bahan baku (' . $bahanBaku->warna . ') tidak cocok dengan warna produk (' . $produk->warna . ').');
+                }
+            }
+        });
     }
 }

@@ -23,6 +23,54 @@ function updateCheckbox(checkbox, prefix) {
 window.updateCheckbox = updateCheckbox;
 
 /**
+ * Validasi kompatibilitas warna antara produk dan bahan baku
+ * @param {string} prefix - Prefix modal ('add' atau 'edit')
+ * @returns {boolean} - true jika valid, false jika tidak valid
+ */
+function validateWarnaCompatibility(prefix) {
+    const produkId = document.getElementById(`${prefix}_produk_id`).value;
+    const bahanId = document.getElementById(`${prefix}_bahan_baku_id`).value;
+    
+    if (!produkId || !bahanId) {
+        return true; // Belum pilih keduanya, biarkan validasi required field yang handle
+    }
+    
+    // Cari option produk yang dipilih
+    const produkOption = document.querySelector(`#${prefix}_produk_dropdown .dropdown-option[data-value="${produkId}"]`);
+    const bahanOption = document.querySelector(`#${prefix}_bahan_baku_dropdown .dropdown-option[data-value="${bahanId}"]`);
+    
+    if (!produkOption || !bahanOption) {
+        return true; // Option tidak ditemukan, biarkan backend yang handle
+    }
+    
+    const produkWarna = produkOption.getAttribute('data-warna');
+    const bahanWarna = bahanOption.getAttribute('data-warna');
+    
+    if (produkWarna !== bahanWarna) {
+        const produkNama = produkOption.getAttribute('data-text').split('(')[0].trim();
+        const bahanNama = bahanOption.getAttribute('data-text').split('(')[0].trim();
+        
+        const errorElement = document.getElementById(`${prefix}_warna_error`);
+        if (errorElement) {
+            const errorText = errorElement.querySelector('p');
+            errorText.textContent = `Warna produk (${produkWarna}) dan bahan baku (${bahanWarna}) tidak cocok. Silakan pilih dengan warna yang sama.`;
+            errorElement.classList.remove('hidden');
+        }
+        return false;
+    }
+    
+    // Jika valid, sembunyikan error
+    const errorElement = document.getElementById(`${prefix}_warna_error`);
+    if (errorElement) {
+        errorElement.classList.add('hidden');
+    }
+    
+    return true;
+}
+
+window.validateWarnaCompatibility = validateWarnaCompatibility;
+
+/**
  * Toggle Modal - Standard Baseline Produksi
  * Mengatur buka/tutup modal dengan animasi smooth.
  */
@@ -88,12 +136,22 @@ function resetSearchableDropdowns(modalId) {
     dropdowns.forEach(dropdown => {
         dropdown.classList.add('hidden');
     });
+
+    // Reset tampilan option bahan baku ke semua kategori kain (agar saat modal dibuka lagi tidak ter-filter)
+    const bahanDropdowns = modal.querySelectorAll('[id*="bahan_baku"][id$="_dropdown"]');
+    bahanDropdowns.forEach(dd => {
+        const noResultsId = dd.id.replace('_dropdown', '_no_results');
+        const noResults = document.getElementById(noResultsId);
+        showAllKainOptions(dd, noResults);
+    });
 }
 
 /**
  * Initialize searchable dropdown
+ * @param {string} prefix - Prefix ID
+ * @param {Function} onSelectCallback - Optional callback when option is selected (value, selectedOption)
  */
-function initSearchableDropdown(prefix) {
+function initSearchableDropdown(prefix, onSelectCallback) {
     const searchInput = document.getElementById(`${prefix}_search`);
     const hiddenInput = document.getElementById(`${prefix}_id`);
     const dropdown = document.getElementById(`${prefix}_dropdown`);
@@ -102,8 +160,26 @@ function initSearchableDropdown(prefix) {
 
     if (!searchInput || !hiddenInput || !dropdown) return;
 
-    // Show dropdown on focus
+    // Simpan teks asli item yang selected (untuk restore saat blur tanpa pilih baru)
+    let originalSelectedText = '';
+
+    function updateOriginalText() {
+        const currentId = hiddenInput.value;
+        if (currentId) {
+            const selectedOpt = dropdown.querySelector(`.dropdown-option[data-value="${currentId}"]`);
+            originalSelectedText = selectedOpt ? selectedOpt.getAttribute('data-text') : '';
+        } else {
+            originalSelectedText = '';
+        }
+    }
+
+    // Initialize original text on load
+    updateOriginalText();
+
+    // Show dropdown on focus — kosongkan search agar semua opsi muncul
     searchInput.addEventListener('focus', () => {
+        updateOriginalText();
+        searchInput.value = '';
         dropdown.classList.remove('hidden');
         filterOptions();
     });
@@ -117,8 +193,9 @@ function initSearchableDropdown(prefix) {
 
         options.forEach(option => {
             const text = option.getAttribute('data-text').toLowerCase();
-            if (text.includes(searchTerm)) {
-                option.style.display = 'block';
+            const isWarnaFiltered = option.classList.contains('warna-filtered-out');
+            if (text.includes(searchTerm) && !isWarnaFiltered) {
+                option.style.display = 'flex';
                 visibleCount++;
             } else {
                 option.style.display = 'none';
@@ -149,12 +226,34 @@ function initSearchableDropdown(prefix) {
                 if (checkIcon) {
                     checkIcon.classList.add('hidden');
                 }
+                opt.classList.remove('bg-gray-100');
             });
             const selectedCheckIcon = option.querySelector('.check-icon');
             if (selectedCheckIcon) {
                 selectedCheckIcon.classList.remove('hidden');
             }
+            option.classList.add('bg-gray-100');
+
+            // Update original text agar saat blur, teks yang benar yang dikembalikan
+            originalSelectedText = text;
+
+            // Call onSelect callback if provided
+            if (onSelectCallback) {
+                onSelectCallback(value, option);
+            }
         });
+    });
+
+    // Restore original text on blur (jika user tidak pilih item baru)
+    searchInput.addEventListener('blur', () => {
+        // Beri delay kecil agar click event pada option sempat diproses
+        setTimeout(() => {
+            if (!dropdown.classList.contains('hidden')) return;
+            // Jika search input kosong dan ada item yang selected, kembalikan teks asli
+            if (searchInput.value === '' && originalSelectedText) {
+                searchInput.value = originalSelectedText;
+            }
+        }, 150);
     });
 
     // Hide dropdown on click outside
@@ -163,6 +262,87 @@ function initSearchableDropdown(prefix) {
             dropdown.classList.add('hidden');
         }
     });
+}
+
+/**
+ * Filter dropdown bahan baku berdasarkan warna produk yang dipilih.
+ * Hanya menampilkan bahan baku dengan warna yang sama dan kategori kain.
+ * @param {string} produkPrefix - Prefix ID dropdown produk (e.g., 'add_produk')
+ * @param {string} bahanPrefix - Prefix ID dropdown bahan baku (e.g., 'add_bahan_baku')
+ */
+function filterBahanBakuByWarna(produkPrefix, bahanPrefix) {
+    const produkSearchInput = document.getElementById(`${produkPrefix}_search`);
+    const bahanDropdown = document.getElementById(`${bahanPrefix}_dropdown`);
+    const bahanNoResults = document.getElementById(`${bahanPrefix}_no_results`);
+
+    if (!produkSearchInput || !bahanDropdown) return;
+
+    // Get selected produk option to extract warna
+    const selectedProdukOption = document.querySelector(`#${produkPrefix}_dropdown .dropdown-option[data-value="${document.getElementById(`${produkPrefix}_id`).value}"]`);
+
+    if (!selectedProdukOption) {
+        // Jika tidak ada produk yang dipilih, tampilkan semua bahan baku kategori kain
+        showAllKainOptions(bahanDropdown, bahanNoResults);
+        return;
+    }
+
+    const produkWarna = selectedProdukOption.getAttribute('data-warna');
+    const bahanOptions = bahanDropdown.querySelectorAll('.dropdown-option');
+    let visibleCount = 0;
+
+    bahanOptions.forEach(option => {
+        const bahanWarna = option.getAttribute('data-warna');
+        const bahanKategori = option.getAttribute('data-kategori');
+
+        // Tampilkan hanya jika kategori kain DAN warna cocok dengan produk
+        if (bahanKategori === 'kain' && bahanWarna === produkWarna) {
+            option.classList.remove('warna-filtered-out');
+            option.style.display = 'flex';
+            visibleCount++;
+        } else {
+            option.classList.add('warna-filtered-out');
+            option.style.display = 'none';
+        }
+    });
+
+    // Show/hide no results message
+    if (bahanNoResults) {
+        if (visibleCount === 0) {
+            bahanNoResults.classList.remove('hidden');
+            bahanNoResults.textContent = `Tidak ada bahan baku kain warna ${produkWarna}`;
+        } else {
+            bahanNoResults.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Tampilkan semua option bahan baku kategori kain (saat produk belum dipilih)
+ */
+function showAllKainOptions(dropdown, noResults) {
+    const options = dropdown.querySelectorAll('.dropdown-option');
+    let visibleCount = 0;
+
+    options.forEach(option => {
+        const kategori = option.getAttribute('data-kategori');
+        // Hapus class warna-filtered-out agar bisa tampil kembali
+        option.classList.remove('warna-filtered-out');
+        if (kategori === 'kain') {
+            option.style.display = 'flex';
+            visibleCount++;
+        } else {
+            option.style.display = 'none';
+        }
+    });
+
+    if (noResults) {
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+            noResults.textContent = 'Tidak ada bahan baku kategori kain';
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
 }
 
 /**
@@ -187,16 +367,16 @@ function openDetailModal(button) {
     // Isi field detail
     document.getElementById('detail_produk').textContent = produkNama;
     document.getElementById('detail_produk_sub').textContent = `${produkKode} · ${produkUkuran.charAt(0).toUpperCase() + produkUkuran.slice(1)} · ${produkWarna}`;
-    
+
     document.getElementById('detail_bahan').textContent = bahanNama;
     document.getElementById('detail_bahan_sub').textContent = `${bahanKode} · ${bahanWarna} · ${bahanKategori.charAt(0).toUpperCase() + bahanKategori.slice(1)}`;
-    
+
     document.getElementById('detail_pcs').textContent = pcs;
     document.getElementById('detail_toleransi').textContent = toleransi > 0 ? `−${toleransi}` : '0';
     document.getElementById('detail_range').textContent = `${rangeBawah} - ${pcs}`;
-    
+
     document.getElementById('detail_keterangan').textContent = keterangan || '—';
-    
+
     // Render status badge
     const statusContainer = document.getElementById('detail_status');
     if (status === 'aktif') {
@@ -270,25 +450,53 @@ function openEditModal(button) {
     // Isi field
     document.getElementById('edit_produk_id').value = produkId;
     document.getElementById('edit_bahan_baku_id').value = bahanId;
-    
-    // Set search input text
+
+    // Set search input text dan highlight visual untuk produk
     const produkOption = document.querySelector(`#edit_produk_dropdown .dropdown-option[data-value="${produkId}"]`);
-    const bahanOption = document.querySelector(`#edit_bahan_baku_dropdown .dropdown-option[data-value="${bahanId}"]`);
-    
     if (produkOption) {
         document.getElementById('edit_produk_search').value = produkOption.getAttribute('data-text');
+        
+        // Clear semua highlight di dropdown produk
+        document.querySelectorAll('#edit_produk_dropdown .dropdown-option').forEach(opt => {
+            opt.classList.remove('bg-gray-100');
+            const checkIcon = opt.querySelector('.check-icon');
+            if (checkIcon) checkIcon.classList.add('hidden');
+        });
+        
+        // Highlight item yang selected
+        produkOption.classList.add('bg-gray-100');
+        const produkCheckIcon = produkOption.querySelector('.check-icon');
+        if (produkCheckIcon) produkCheckIcon.classList.remove('hidden');
     }
+
+    // Set search input text dan highlight visual untuk bahan baku
+    const bahanOption = document.querySelector(`#edit_bahan_baku_dropdown .dropdown-option[data-value="${bahanId}"]`);
     if (bahanOption) {
         document.getElementById('edit_bahan_baku_search').value = bahanOption.getAttribute('data-text');
+        
+        // Clear semua highlight di dropdown bahan baku
+        document.querySelectorAll('#edit_bahan_baku_dropdown .dropdown-option').forEach(opt => {
+            opt.classList.remove('bg-gray-100');
+            const checkIcon = opt.querySelector('.check-icon');
+            if (checkIcon) checkIcon.classList.add('hidden');
+        });
+        
+        // Highlight item yang selected
+        bahanOption.classList.add('bg-gray-100');
+        const bahanCheckIcon = bahanOption.querySelector('.check-icon');
+        if (bahanCheckIcon) bahanCheckIcon.classList.remove('hidden');
     }
-    
+
     document.getElementById('edit_pcs_per_roll').value = pcs;
     document.getElementById('edit_toleransi_minus').value = toleransi;
     document.getElementById('edit_keterangan').value = keterangan;
-    
+
     // Set checkbox aktif
     const checkboxAktif = document.getElementById('edit_is_aktif');
     checkboxAktif.checked = status === '1';
+
+    // Filter dropdown bahan baku berdasarkan warna produk yang sudah tersimpan
+    filterBahanBakuByWarna('edit_produk', 'edit_bahan_baku');
 
     toggleModal('edit-modal');
 }
@@ -329,7 +537,7 @@ document.addEventListener('click', (e) => {
             dd.classList.add('hidden', 'opacity-0', 'scale-95', 'pointer-events-none');
         });
     }
-    
+
     // Tutup action dropdown
     if (!e.target.closest('.action-dropdown') && !e.target.closest('[onclick*="toggleActionDropdown"]')) {
         document.querySelectorAll('.action-dropdown').forEach(dd => {
@@ -366,13 +574,39 @@ window.addEventListener('resize', () => {
 
 // Initialize searchable dropdowns on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Modal Tambah
-    initSearchableDropdown('add_produk');
+    // Modal Tambah - dengan callback filter bahan baku saat produk dipilih
+    initSearchableDropdown('add_produk', (value, option) => {
+        // Saat produk dipilih, filter dropdown bahan baku berdasarkan warna
+        filterBahanBakuByWarna('add_produk', 'add_bahan_baku');
+    });
     initSearchableDropdown('add_bahan_baku');
-    
-    // Modal Edit
-    initSearchableDropdown('edit_produk');
+
+    // Modal Edit - dengan callback filter bahan baku saat produk dipilih
+    initSearchableDropdown('edit_produk', (value, option) => {
+        // Saat produk dipilih, filter dropdown bahan baku berdasarkan warna
+        filterBahanBakuByWarna('edit_produk', 'edit_bahan_baku');
+    });
     initSearchableDropdown('edit_bahan_baku');
+
+    // Add form validation for color compatibility
+    const addForm = document.getElementById('addForm');
+    if (addForm) {
+        addForm.addEventListener('submit', (e) => {
+            if (!validateWarnaCompatibility('add')) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // Edit form validation for color compatibility
+    const editForm = document.getElementById('editForm');
+    if (editForm) {
+        editForm.addEventListener('submit', (e) => {
+            if (!validateWarnaCompatibility('edit')) {
+                e.preventDefault();
+            }
+        });
+    }
 });
 
 // Expose ke global scope
@@ -382,3 +616,5 @@ window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;
 window.toggleActionDropdown = toggleActionDropdown;
 window.initSearchableDropdown = initSearchableDropdown;
+window.filterBahanBakuByWarna = filterBahanBakuByWarna;
+window.showAllKainOptions = showAllKainOptions;

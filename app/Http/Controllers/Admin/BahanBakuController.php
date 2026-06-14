@@ -51,4 +51,16 @@ class BahanBakuController extends Controller
         return redirect()->route('admin.bahan-baku.index')
             ->with('success', 'Bahan baku berhasil dihapus.');
     }
+
+    /**
+     * Generate kode bahan baku berdasarkan kategori (AJAX endpoint)
+     */
+    public function generateKode(string $kategori)
+    {
+        $kode = $this->bahanBakuService->generateKodeBahan($kategori);
+        
+        return response()->json([
+            'kode' => $kode
+        ]);
+    }
 }

@@ -37,6 +37,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Rute pengelolaan Bahan Baku
     Route::resource('bahan-baku', BahanBakuController::class)->except(['create', 'show', 'edit']);
 
+    // AJAX route untuk generate kode bahan baku
+    Route::get('/bahan-baku/generate-kode/{kategori}', [BahanBakuController::class, 'generateKode'])
+        ->name('bahan-baku.generate-kode');
+
     // Rute pengelolaan Produk
     Route::resource('produk', ProdukController::class)->except(['create', 'show', 'edit']);
 

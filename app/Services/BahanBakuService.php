@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BahanBaku;
+use App\Models\StockMovement;
 
 class BahanBakuService
 {
@@ -105,9 +106,35 @@ class BahanBakuService
 
     /**
      * Proses update data
+     * Regenerate kode jika kategori berubah
+     * Catat perubahan stok ke stock_movements
      */
     public function update(BahanBaku $bahanBaku, array $data): bool
     {
+        // Cek apakah kategori berubah
+        if (isset($data['kategori']) && $data['kategori'] !== $bahanBaku->kategori) {
+            // Generate kode baru untuk kategori yang baru
+            $data['kode_bahan'] = $this->generateKodeBahan($data['kategori']);
+        }
+        
+        // Cek apakah stok berubah
+        if (isset($data['stok']) && $data['stok'] != $bahanBaku->stok) {
+            $previousStock = (int) $bahanBaku->stok;
+            $newStock = (int) $data['stok'];
+            $quantity = $newStock - $previousStock;
+            
+            // Catat perubahan stok ke stock_movements
+            StockMovement::record(
+                'bahan_baku',
+                $bahanBaku->id,
+                'adjustment',
+                $quantity,
+                $previousStock,
+                $newStock,
+                'Koreksi stok saat edit data bahan baku'
+            );
+        }
+        
         return $bahanBaku->update($data);
     }
 

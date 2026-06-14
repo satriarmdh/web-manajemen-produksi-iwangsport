@@ -126,14 +126,14 @@
                                 <div class="flex items-center gap-3">
                                     <div>
                                         <div class="font-bold text-gray-900">{{ $item->produk->nama_produk }}</div>
-                                        <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $item->produk->kode_produk }} · {{ ucfirst($item->produk->ukuran) }} · {{ $item->produk->warna }}</div>
+                                        <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $item->produk->kode_produk }} · {{ ucfirst($item->produk->ukuran) }} · {{ ucfirst($item->produk->warna) }}</div>
                                     </div>
                                 </div>
                             </td>
 
                             <td class="px-6 py-4">
                                 <div class="font-medium text-gray-900">{{ $item->bahanBaku->nama_bahan }}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">{{ $item->bahanBaku->kode_bahan }} · {{ $item->bahanBaku->warna }} · {{ ucfirst($item->bahanBaku->kategori) }}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">{{ $item->bahanBaku->kode_bahan }} · {{ ucfirst($item->bahanBaku->warna) }} · {{ ucfirst($item->bahanBaku->kategori) }}</div>
                             </td>
 
                             <td class="px-6 py-4 text-center">
@@ -184,12 +184,12 @@
                                             data-produk-nama="{{ $item->produk->nama_produk }}"
                                             data-produk-kode="{{ $item->produk->kode_produk }}"
                                             data-produk-ukuran="{{ $item->produk->ukuran }}"
-                                            data-produk-warna="{{ $item->produk->warna }}"
+                                            data-produk-warna="{{ ucfirst($item->produk->warna) }}"
                                             data-bahan-id="{{ $item->bahan_baku_id }}"
                                             data-bahan-nama="{{ $item->bahanBaku->nama_bahan }}"
                                             data-bahan-kode="{{ $item->bahanBaku->kode_bahan }}"
-                                            data-bahan-warna="{{ $item->bahanBaku->warna }}"
-                                            data-bahan-kategori="{{ $item->bahanBaku->kategori }}"
+                                            data-bahan-warna="{{ ucfirst($item->bahanBaku->warna) }}"
+                                            data-bahan-kategori="{{ ucfirst($item->bahanBaku->kategori) }}"
                                             data-pcs="{{ $item->pcs_per_roll }}"
                                             data-toleransi="{{ $item->toleransi_minus }}"
                                             data-range-bawah="{{ $item->range_bawah }}"
@@ -288,12 +288,12 @@
                                     <div id="add_produk_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($produks as $produk)
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) — {{ ucfirst($produk->ukuran) }}, {{ $produk->warna }}">
-                                                    <div class="flex-1">
-                                                        <div class="font-medium text-gray-900">{{ $produk->nama_produk }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $produk->kode_produk }} • {{ ucfirst($produk->ukuran) }}, {{ $produk->warna }}</div>
+                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) — {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
+                                                    <div style="flex:1; min-width:0; overflow:hidden;">
+                                                        <div class="font-medium text-gray-900 truncate">{{ $produk->nama_produk }}</div>
+                                                        <div class="text-xs text-gray-500 truncate">{{ $produk->kode_produk }} • {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
                                                     </div>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="check-icon hidden" style="width:16px; height:16px; color:#0F034D; flex-shrink:0; margin-left:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </div>
@@ -318,12 +318,12 @@
                                     <div id="add_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($bahanBaku as $bahan)
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) — {{ $bahan->warna }}, {{ ucfirst($bahan->kategori) }}">
-                                                    <div class="flex-1">
-                                                        <div class="font-medium text-gray-900">{{ $bahan->nama_bahan }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $bahan->kode_bahan }} • {{ $bahan->warna }}, {{ ucfirst($bahan->kategori) }}</div>
+                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) — {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
+                                                    <div style="flex:1; min-width:0; overflow:hidden;">
+                                                        <div class="font-medium text-gray-900 truncate">{{ $bahan->nama_bahan }}</div>
+                                                        <div class="text-xs text-gray-500 truncate">{{ $bahan->kode_bahan }} • {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
                                                     </div>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="check-icon hidden" style="width:16px; height:16px; color:#0F034D; flex-shrink:0; margin-left:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </div>
@@ -334,6 +334,11 @@
                                 </div>
                             </div>
 
+                            <!-- Error Message Warna -->
+                            <div id="add_warna_error" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-sm text-red-600"></p>
+                            </div>
+                            
                             <!-- Grid: Pcs per Roll & Toleransi -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -371,6 +376,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </form>
                 </div>
 
@@ -402,6 +408,7 @@
                         @csrf
                         @method('PUT')
                         <div class="space-y-4">
+
                             <!-- Pilih Produk -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Produk <span class="text-red-500">*</span></label>
@@ -416,12 +423,12 @@
                                     <div id="edit_produk_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($produks as $produk)
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) — {{ ucfirst($produk->ukuran) }}, {{ $produk->warna }}">
-                                                    <div class="flex-1">
+                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) — {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
+                                                    <div class="flex-1 min-w-0">
                                                         <div class="font-medium text-gray-900">{{ $produk->nama_produk }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $produk->kode_produk }} • {{ ucfirst($produk->ukuran) }}, {{ $produk->warna }}</div>
+                                                        <div class="text-xs text-gray-500">{{ $produk->kode_produk }} • {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
                                                     </div>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </div>
@@ -446,12 +453,12 @@
                                     <div id="edit_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($bahanBaku as $bahan)
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) — {{ $bahan->warna }}, {{ ucfirst($bahan->kategori) }}">
-                                                    <div class="flex-1">
+                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) — {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
+                                                    <div class="flex-1 min-w-0">
                                                         <div class="font-medium text-gray-900">{{ $bahan->nama_bahan }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $bahan->kode_bahan }} • {{ $bahan->warna }}, {{ ucfirst($bahan->kategori) }}</div>
+                                                        <div class="text-xs text-gray-500">{{ $bahan->kode_bahan }} • {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
                                                     </div>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </div>
@@ -462,6 +469,11 @@
                                 </div>
                             </div>
 
+                            <!-- Error Message Warna -->
+                            <div id="edit_warna_error" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-sm text-red-600"></p>
+                            </div>
+                            
                             <!-- Grid: Pcs per Roll & Toleransi -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -497,6 +509,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </form>
                 </div>
 

@@ -306,16 +306,8 @@
                     <form action="{{ route('admin.supplier.store') }}" method="POST" id="addForm">
                         @csrf
                         <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Supplier</label>
-                                <div class="relative">
-                                    <input type="text" id="add_kode_supplier" data-next-number="{{ $nextNumber }}" disabled placeholder="Dibuat otomatis oleh sistem" class="w-full px-4 py-2.5 border border-gray-300 bg-gray-50 text-gray-500 rounded-xl text-sm italic cursor-not-allowed transition-colors duration-300">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Kode akan dibuat otomatis (Format: SUP-001, SUP-002, dst).</p>
-                            </div>
+                            <!-- Hidden input untuk kode supplier (digenerate otomatis oleh backend) -->
+                            <input type="hidden" id="add_kode_supplier" data-next-number="{{ $nextNumber }}">
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Supplier <span class="text-red-500">*</span></label>
@@ -432,10 +424,8 @@
                         @csrf
                         @method('PUT')
                         <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Supplier</label>
-                                <input type="text" id="edit_kode" readonly class="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 text-gray-600 font-bold rounded-xl text-sm focus:outline-none cursor-not-allowed">
-                            </div>
+                            <!-- Hidden input untuk kode supplier (digenerate otomatis oleh backend) -->
+                            <input type="hidden" id="edit_kode">
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Supplier <span class="text-red-500">*</span></label>
