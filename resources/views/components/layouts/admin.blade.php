@@ -141,10 +141,9 @@
             </div>
 
             @php 
-                $isInBahan = request()->routeIs('admin.pemasukan-bahan.*'); 
-                $isOutBahan = request()->routeIs('admin.pengeluaran-bahan.*'); 
+                $isPergerakanBahan = request()->routeIs('admin.pemasukan-bahan.*') || request()->routeIs('admin.pengeluaran-bahan.*'); 
                 $isStokProduk = request()->routeIs('admin.stok-produk.*'); 
-                $isStokGroup = $isInBahan || $isOutBahan || $isStokProduk;
+                $isStokGroup = $isPergerakanBahan || $isStokProduk;
             @endphp
             <div>
                 <button onclick="toggleMenu('menu-stok', 'icon-stok')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isStokGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
@@ -157,19 +156,11 @@
                 <div id="menu-stok" class="overflow-hidden transition-all duration-300 {{ $isStokGroup ? 'max-h-96' : 'max-h-0' }}">
                     <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
                         <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isInBahan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ ($isOutBahan || $isStokProduk) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isInBahan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isInBahan ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
-                                Pemasukan Bahan
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isOutBahan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPergerakanBahan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                                 <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isStokProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isOutBahan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isOutBahan ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
-                                Pengeluaran Bahan
+                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isPergerakanBahan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPergerakanBahan ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
+                                Pergerakan Stok Bahan Baku
                             </a>
                         </li>
                         <li>

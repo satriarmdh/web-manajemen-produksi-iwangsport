@@ -14,14 +14,13 @@ class BahanBakuSeeder extends Seeder
      */
     public function run(): void
     {
-        // bahan baku 1
-        // BahanBaku::create([
-        //     'kode_bahan' => 'KAIN-001',
-        //     'nama_bahan' => 'Kain Combed 30s',
-        //     'warna' => 'hitam',
-        //     'kategori' => 'kain',
-        //     'satuan' => 'roll',
-        //     'stok' => '1',
-        // ]);
+        BahanBaku::create([
+            'kode_bahan' => 'KAIN-001',
+            'nama_bahan' => 'Kain Combed 30s',
+            'warna' => 'hitam',
+            'kategori' => 'kain',
+            'satuan' => 'roll',
+            'stok' => '1',
+        ]);
     }
 }
