@@ -118,13 +118,22 @@ window.togglePanel = (id) => window.slidePanel.toggle(id);
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Close other open nested-submenus
+                // Close other open nested-submenus & reset their arrows
                 document.querySelectorAll('.nested-submenu:not(.hidden)').forEach(el => {
-                    if (el !== nestedSubmenu) el.classList.add('hidden');
+                    if (el !== nestedSubmenu) {
+                        el.classList.add('hidden');
+                        const otherArrow = el.closest('.relative.group')?.querySelector('.nested-arrow');
+                        if (otherArrow) otherArrow.classList.remove('rotate-180');
+                    }
                 });
 
-                // Toggle
+                // Toggle submenu
                 nestedSubmenu.classList.toggle('hidden');
+
+                // Toggle arrow rotation
+                const arrow = groupDiv.querySelector('.nested-arrow');
+                if (arrow) arrow.classList.toggle('rotate-180');
+
                 return;
             }
 
@@ -157,9 +166,11 @@ window.togglePanel = (id) => window.slidePanel.toggle(id);
             return;
         }
 
-        // Click outside: close ALL open submenus (both patterns)
+        // Click outside: close ALL open submenus (both patterns) & reset arrows
         document.querySelectorAll('.nested-submenu:not(.hidden)').forEach(el => {
             el.classList.add('hidden');
+            const arrow = el.closest('.relative.group')?.querySelector('.nested-arrow');
+            if (arrow) arrow.classList.remove('rotate-180');
         });
         document.querySelectorAll('.relative.group div.absolute.visible').forEach(el => {
             el.classList.remove('visible', 'opacity-100');

@@ -47,6 +47,9 @@ function initCustomDropdown(prefix) {
         }
     }
 
+    // Arrow rotation
+    const arrow = searchInput.parentElement.querySelector('.dropdown-arrow');
+
     function selectOption(opt) {
         // Remove selected from previous (termasuk yang di-set oleh setCustomDropdownValue)
         options.forEach(o => {
@@ -65,6 +68,7 @@ function initCustomDropdown(prefix) {
         searchInput.classList.remove('text-gray-500');
         searchInput.classList.add('text-gray-900', 'font-medium');
         dropdown.classList.add('hidden');
+        if (arrow) arrow.classList.remove('rotate-180');
 
         // Update original text agar saat blur, teks yang benar yang dikembalikan
         originalSelectedText = opt.dataset.text;
@@ -74,6 +78,7 @@ function initCustomDropdown(prefix) {
     searchInput.addEventListener('focus', () => {
         updateOriginalText();
         dropdown.classList.remove('hidden');
+        if (arrow) arrow.classList.add('rotate-180');
         searchInput.value = '';
         filterOptions();
     });
@@ -102,6 +107,7 @@ function initCustomDropdown(prefix) {
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.add('hidden');
+            if (arrow) arrow.classList.remove('rotate-180');
         }
     });
 }
@@ -167,6 +173,10 @@ function resetCustomDropdown(prefix) {
     searchInput.classList.remove('text-gray-900', 'font-medium');
     searchInput.classList.add('text-gray-500');
     dropdown.classList.add('hidden');
+
+    // Reset arrow rotation
+    const arrow = searchInput.parentElement.querySelector('.dropdown-arrow');
+    if (arrow) arrow.classList.remove('rotate-180');
 }
 
 /**

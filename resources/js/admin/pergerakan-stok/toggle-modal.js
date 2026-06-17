@@ -41,13 +41,23 @@ function toggleDropdown(name) {
     allDropdowns.forEach(d => {
         if (d.id !== 'dropdown-' + name) {
             d.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
+            // Reset arrow for closed dropdowns
+            const dropdownName = d.id.replace('dropdown-', '');
+            const arrow = document.querySelector(`[data-dropdown="${dropdownName}"] .dropdown-arrow`);
+            if (arrow) arrow.classList.remove('rotate-180');
         }
     });
 
     if (dropdown.classList.contains('hidden')) {
         dropdown.classList.remove('hidden', 'opacity-0', 'scale-95', 'pointer-events-none');
+        // Rotate arrow
+        const arrow = document.querySelector(`[data-dropdown="${name}"] .dropdown-arrow`);
+        if (arrow) arrow.classList.add('rotate-180');
     } else {
         dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
+        // Reset arrow
+        const arrow = document.querySelector(`[data-dropdown="${name}"] .dropdown-arrow`);
+        if (arrow) arrow.classList.remove('rotate-180');
     }
 }
 
@@ -57,6 +67,10 @@ document.addEventListener('click', function(e) {
     if (!e.target.closest('[data-dropdown]') && !e.target.closest('[id^="dropdown-"]')) {
         document.querySelectorAll('[id^="dropdown-"]').forEach(d => {
             d.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
+            // Reset arrow
+            const dropdownName = d.id.replace('dropdown-', '');
+            const arrow = document.querySelector(`[data-dropdown="${dropdownName}"] .dropdown-arrow`);
+            if (arrow) arrow.classList.remove('rotate-180');
         });
     }
 
@@ -66,32 +80,6 @@ document.addEventListener('click', function(e) {
         if (mobileDd && !mobileDd.classList.contains('hidden')) {
             mobileDd.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
         }
-    }
-});
-
-// ============================================
-// NESTED SUBMENU TOGGLE (Mobile - Kategori & Supplier)
-// ============================================
-document.addEventListener('click', function(e) {
-    const groupDiv = e.target.closest('#filterDropdownMobile .relative.group');
-    if (groupDiv) {
-        const button = groupDiv.querySelector('button');
-        if (!button || !button.contains(e.target)) return;
-
-        const nestedSubmenu = groupDiv.querySelector('.nested-submenu');
-        if (nestedSubmenu) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Tutup nested-submenu lain yang sedang terbuka
-            document.querySelectorAll('#filterDropdownMobile .nested-submenu:not(.hidden)').forEach(el => {
-                if (el !== nestedSubmenu) el.classList.add('hidden');
-            });
-
-            // Toggle submenu yang diklik
-            nestedSubmenu.classList.toggle('hidden');
-        }
-        return;
     }
 });
 
