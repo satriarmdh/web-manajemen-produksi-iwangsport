@@ -49,9 +49,13 @@ class SupplierService
             $query->whereJsonContains('kategori', $filters['kategori']);
         }
 
-        // Filter berdasarkan status
+        // Filter berdasarkan status (is_aktif)
         if (!empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+            if ($filters['status'] === 'aktif') {
+                $query->where('is_aktif', true);
+            } elseif ($filters['status'] === 'nonaktif') {
+                $query->where('is_aktif', false);
+            }
         }
 
         // Sorting
@@ -85,8 +89,8 @@ class SupplierService
             $data['kategori'] = [$data['kategori']];
         }
 
-        // Set default status
-        $data['status'] = $data['status'] ?? 'aktif';
+        // Set default is_aktif
+        $data['is_aktif'] = $data['is_aktif'] ?? true;
 
         return Supplier::create($data);
     }

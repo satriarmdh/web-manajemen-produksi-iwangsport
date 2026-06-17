@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Produk;
-use App\Models\StockMovement;
+use App\Models\RiwayatStok;
 
 class ProdukObserver
 {
@@ -14,26 +14,40 @@ class ProdukObserver
     public function created(Produk $produk): void
     {
         if ($produk->stok > 0) {
-            StockMovement::record(
-                'produk',
-                $produk->id,
-                'in',
-                $produk->stok,
-                0,
-                $produk->stok,
-                'Stok awal produk ' . $produk->nama_produk
-            );
+            RiwayatStok::create([
+                'jenis_item'       => 'produk',
+                'id_item'          => $produk->id,
+                'jenis_pergerakan' => 'inisiasi data',
+                'jumlah'           => $produk->stok,
+                'stok_sebelum'     => 0,
+                'stok_sesudah'     => $produk->stok,
+                'user_id'          => auth()->id(),
+                'keterangan'       => 'Stok awal produk ' . $produk->nama_produk,
+            ]);
         }
     }
 
     /**
      * Handle the Produk "updated" event.
-     * Perubahan stok saat edit data master ditangani di ProdukService (movement_type: adjustment).
-     * Observer tidak mencatat ulang untuk menghindari duplikasi.
+     * Catat perubahan stok sebagai 'penyesuaian' jika stok berubah saat edit data master.
      */
     public function updated(Produk $produk): void
     {
-        // Stock movement saat edit data master ditangani oleh ProdukService
+        if ($produk->isDirty('stok')) {
+            $stokSebelum = (int) $produk->getOriginal('stok');
+            $stokSesudah = (int) $produk->stok;
+
+            RiwayatStok::create([
+                'jenis_item'       => 'produk',
+                'id_item'          => $produk->id,
+                'jenis_pergerakan' => 'penyesuaian',
+                'jumlah'           => $stokSesudah - $stokSebelum,
+                'stok_sebelum'     => $stokSebelum,
+                'stok_sesudah'     => $stokSesudah,
+                'user_id'          => auth()->id(),
+                'keterangan'       => 'Koreksi stok saat edit data produk',
+            ]);
+        }
     }
 
     /**

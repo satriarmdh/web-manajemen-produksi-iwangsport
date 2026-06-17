@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\BahanBaku;
-use App\Models\StockMovement;
+use App\Models\RiwayatStok;
 
 class BahanBakuObserver
 {
@@ -14,26 +14,40 @@ class BahanBakuObserver
     public function created(BahanBaku $bahanBaku): void
     {
         if ($bahanBaku->stok > 0) {
-            StockMovement::record(
-                'bahan_baku',
-                $bahanBaku->id,
-                'in',
-                $bahanBaku->stok,
-                0,
-                $bahanBaku->stok,
-                'Stok awal bahan baku ' . $bahanBaku->nama_bahan
-            );
+            RiwayatStok::create([
+                'jenis_item'       => 'bahan_baku',
+                'id_item'          => $bahanBaku->id,
+                'jenis_pergerakan' => 'inisiasi data',
+                'jumlah'           => $bahanBaku->stok,
+                'stok_sebelum'     => 0,
+                'stok_sesudah'     => $bahanBaku->stok,
+                'user_id'          => auth()->id(),
+                'keterangan'       => 'Stok awal bahan baku ' . $bahanBaku->nama_bahan,
+            ]);
         }
     }
 
     /**
      * Handle the BahanBaku "updated" event.
-     * Perubahan stok saat edit data master ditangani di BahanBakuService (movement_type: adjustment).
-     * Observer tidak mencatat ulang untuk menghindari duplikasi.
+     * Catat perubahan stok sebagai 'penyesuaian' jika stok berubah saat edit data master.
      */
     public function updated(BahanBaku $bahanBaku): void
     {
-        // Stock movement saat edit data master ditangani oleh BahanBakuService
+        if ($bahanBaku->isDirty('stok')) {
+            $stokSebelum = (int) $bahanBaku->getOriginal('stok');
+            $stokSesudah = (int) $bahanBaku->stok;
+
+            RiwayatStok::create([
+                'jenis_item'       => 'bahan_baku',
+                'id_item'          => $bahanBaku->id,
+                'jenis_pergerakan' => 'penyesuaian',
+                'jumlah'           => $stokSesudah - $stokSebelum,
+                'stok_sebelum'     => $stokSebelum,
+                'stok_sesudah'     => $stokSesudah,
+                'user_id'          => auth()->id(),
+                'keterangan'       => 'Koreksi stok saat edit data bahan baku',
+            ]);
+        }
     }
 
     /**

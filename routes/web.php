@@ -7,7 +7,10 @@ use App\Http\Controllers\Owner\UserManagementController;
 use App\Http\Controllers\Admin\BahanBakuController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\SupplierController;
-use App\Http\Controllers\Admin\EstimasiProduksiController;
+use App\Http\Controllers\Admin\StandardBaselineProduksiController;
+use App\Http\Controllers\Admin\PergerakanStokController;
+use App\Http\Controllers\Admin\PemasukanBahanController;
+use App\Http\Controllers\Admin\PengeluaranBahanController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -47,8 +50,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Rute pengelolaan Supplier
     Route::resource('supplier', SupplierController::class)->except(['create', 'show', 'edit']);
 
-    // Rute pengelolaan Estimasi Produksi (Standard Baseline)
-    Route::resource('estimasi-produksi', EstimasiProduksiController::class)->except(['create', 'show', 'edit']);
+    // Rute pengelolaan Standard Baseline Produksi
+    Route::resource('standard-baseline-produksi', StandardBaselineProduksiController::class)->except(['create', 'show', 'edit']);
+
+    // Rute Pergerakan Stok Bahan Baku
+    Route::get('pergerakan-stok', [PergerakanStokController::class, 'index'])->name('pergerakan-stok.index');
+
+    // Rute Pemasukan Bahan Baku (Stok Masuk)
+    Route::resource('pemasukan-bahan', PemasukanBahanController::class)->except(['create', 'show', 'edit']);
+
+    // Rute Pengeluaran Bahan Baku (Stok Keluar)
+    Route::resource('pengeluaran-bahan', PengeluaranBahanController::class)->except(['create', 'show', 'edit']);
 });
 
 Route::middleware(['auth'])->group(function () {

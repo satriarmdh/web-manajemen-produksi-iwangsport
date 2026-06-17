@@ -20,7 +20,7 @@
                 <h3 class="text-lg font-bold text-[#0F034D]">Daftar Supplier</h3>
                 <p class="text-sm text-gray-500 mt-1">Kelola data supplier bahan baku untuk memastikan rantai pasokan selalu aman.</p>
             </div>
-            <button onclick="window.toggleModal('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
+            <button onclick="window.togglePanel('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Tambah Supplier
             </button>
@@ -198,7 +198,7 @@
                             </td>
 
                             <td class="px-6 py-4 text-center">
-                                @if($supplier->status == 'aktif')
+                                @if($supplier->is_aktif)
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">
                                         <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                                         Aktif
@@ -224,7 +224,7 @@
                                             data-email="{{ $supplier->email }}"
                                             data-alamat="{{ $supplier->alamat }}"
                                             data-catatan="{{ $supplier->catatan }}"
-                                            data-status="{{ $supplier->status }}"
+                                            data-status="{{ $supplier->is_aktif ? 'aktif' : 'nonaktif' }}"
                                             data-created="{{ $supplier->created_at->format('d M Y, H:i') }}"
                                             class="p-2 text-gray-400 hover:text-[#0F034D] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -246,7 +246,7 @@
                                                     data-email="{{ $supplier->email }}"
                                                     data-alamat="{{ $supplier->alamat }}"
                                                     data-catatan="{{ $supplier->catatan }}"
-                                                    data-status="{{ $supplier->status }}"
+                                                    data-is-aktif="{{ $supplier->is_aktif ? '1' : '0' }}"
                                                     class="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 hover:text-[#0F034D] hover:bg-gray-50 transition-colors cursor-pointer">
                                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                                 Edit Supplier
@@ -290,116 +290,103 @@
     {{-- ========================================= --}}
     {{-- MODAL TAMBAH SUPPLIER --}}
     {{-- ========================================= --}}
-    <div id="add-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('add-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
-
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Tambah Supplier</h3>
-                    <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+    <div id="add-modal" class="slide-panel">
+        <div class="slide-panel-backdrop" data-panel-close></div>
+        <div class="slide-panel-body">
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 </div>
+                <h2 class="slide-panel-header-title">Tambah Supplier</h2>
+                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <form action="{{ route('admin.supplier.store') }}" method="POST" id="addForm" class="slide-panel-content">
+                @csrf
+                <div class="space-y-4">
+                    <input type="hidden" id="add_kode_supplier" data-next-number="{{ $nextNumber }}">
 
-                <div class="p-6 overflow-y-auto">
-                    <form action="{{ route('admin.supplier.store') }}" method="POST" id="addForm">
-                        @csrf
-                        <div class="space-y-4">
-                            <!-- Hidden input untuk kode supplier (digenerate otomatis oleh backend) -->
-                            <input type="hidden" id="add_kode_supplier" data-next-number="{{ $nextNumber }}">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Supplier <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_supplier" required placeholder="Contoh: PT Tekstil Jaya Abadi" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                    </div>
 
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Bahan <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Supplier <span class="text-red-500">*</span></label>
-                                <input type="text" name="nama_supplier" required placeholder="Contoh: PT Tekstil Jaya Abadi" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Bahan <span class="text-red-500">*</span></label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <!-- Kain -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="kain" id="add_kategori_kain" class="hidden" onchange="updateCheckbox(this, 'add_kategori_kain')">
-                                        <div id="add_kategori_kain_wrapper" onclick="document.getElementById('add_kategori_kain').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="add_kategori_kain_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="add_kategori_kain_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="add_kategori_kain_text" class="text-sm font-medium text-gray-700">Kain</span>
-                                        </div>
+                                <input type="checkbox" name="kategori[]" value="kain" id="add_kategori_kain" class="hidden" onchange="updateCheckbox(this, 'add_kategori_kain')">
+                                <div id="add_kategori_kain_wrapper" onclick="document.getElementById('add_kategori_kain').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="add_kategori_kain_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="add_kategori_kain_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
-                                    <!-- Benang -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="benang" id="add_kategori_benang" class="hidden" onchange="updateCheckbox(this, 'add_kategori_benang')">
-                                        <div id="add_kategori_benang_wrapper" onclick="document.getElementById('add_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="add_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="add_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="add_kategori_benang_text" class="text-sm font-medium text-gray-700">Benang</span>
-                                        </div>
-                                    </div>
-                                    <!-- Kancing -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="kancing" id="add_kategori_kancing" class="hidden" onchange="updateCheckbox(this, 'add_kategori_kancing')">
-                                        <div id="add_kategori_kancing_wrapper" onclick="document.getElementById('add_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="add_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="add_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="add_kategori_kancing_text" class="text-sm font-medium text-gray-700">Kancing</span>
-                                        </div>
-                                    </div>
-                                    <!-- Resleting -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="resleting" id="add_kategori_resleting" class="hidden" onchange="updateCheckbox(this, 'add_kategori_resleting')">
-                                        <div id="add_kategori_resleting_wrapper" onclick="document.getElementById('add_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="add_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="add_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="add_kategori_resleting_text" class="text-sm font-medium text-gray-700">Resleting</span>
-                                        </div>
-                                    </div>
-                                    <!-- Aksesoris -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="aksesoris" id="add_kategori_aksesoris" class="hidden" onchange="updateCheckbox(this, 'add_kategori_aksesoris')">
-                                        <div id="add_kategori_aksesoris_wrapper" onclick="document.getElementById('add_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="add_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="add_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="add_kategori_aksesoris_text" class="text-sm font-medium text-gray-700">Aksesoris</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Pilih satu atau lebih kategori bahan yang disuplai.</p>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Kontak <span class="text-red-500">*</span></label>
-                                    <input type="text" name="kontak" required placeholder="08xxxxxxxxxx" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" required placeholder="supplier@email.com" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                                    <span id="add_kategori_kain_text" class="text-sm font-medium text-gray-700">Kain</span>
                                 </div>
                             </div>
-
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat <span class="text-red-500">*</span></label>
-                                <textarea name="alamat" required rows="3" placeholder="Alamat lengkap supplier" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
+                                <input type="checkbox" name="kategori[]" value="benang" id="add_kategori_benang" class="hidden" onchange="updateCheckbox(this, 'add_kategori_benang')">
+                                <div id="add_kategori_benang_wrapper" onclick="document.getElementById('add_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="add_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="add_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span id="add_kategori_benang_text" class="text-sm font-medium text-gray-700">Benang</span>
+                                </div>
                             </div>
-
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
-                                <textarea name="catatan" rows="2" placeholder="Catatan tambahan (opsional)" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
+                                <input type="checkbox" name="kategori[]" value="kancing" id="add_kategori_kancing" class="hidden" onchange="updateCheckbox(this, 'add_kategori_kancing')">
+                                <div id="add_kategori_kancing_wrapper" onclick="document.getElementById('add_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="add_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="add_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span id="add_kategori_kancing_text" class="text-sm font-medium text-gray-700">Kancing</span>
+                                </div>
+                            </div>
+                            <div>
+                                <input type="checkbox" name="kategori[]" value="resleting" id="add_kategori_resleting" class="hidden" onchange="updateCheckbox(this, 'add_kategori_resleting')">
+                                <div id="add_kategori_resleting_wrapper" onclick="document.getElementById('add_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="add_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="add_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span id="add_kategori_resleting_text" class="text-sm font-medium text-gray-700">Resleting</span>
+                                </div>
+                            </div>
+                            <div>
+                                <input type="checkbox" name="kategori[]" value="aksesoris" id="add_kategori_aksesoris" class="hidden" onchange="updateCheckbox(this, 'add_kategori_aksesoris')">
+                                <div id="add_kategori_aksesoris_wrapper" onclick="document.getElementById('add_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="add_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="add_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span id="add_kategori_aksesoris_text" class="text-sm font-medium text-gray-700">Aksesoris</span>
+                                </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                        <p class="text-xs text-gray-500 mt-1">Pilih satu atau lebih kategori bahan yang disuplai.</p>
+                    </div>
 
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end gap-3 shrink-0">
-                    <button type="button" onclick="toggleModal('add-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Batal</button>
-                    <button type="submit" form="addForm" class="px-5 py-2.5 text-sm font-medium text-white bg-[#0F034D] hover:bg-[#0a0235] shadow-md rounded-xl transition-all cursor-pointer">Simpan Data</button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Kontak <span class="text-red-500">*</span></label>
+                            <input type="text" name="kontak" required placeholder="08xxxxxxxxxx" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" required placeholder="supplier@email.com" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat <span class="text-red-500">*</span></label>
+                        <textarea name="alamat" required rows="3" placeholder="Alamat lengkap supplier" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
+                        <textarea name="catatan" rows="2" placeholder="Catatan tambahan (opsional)" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
+                    </div>
                 </div>
+            </form>
+            <div class="slide-panel-footer">
+                <button type="button" class="btn-panel-cancel" data-panel-close>Batal</button>
+                <button type="submit" form="addForm" class="btn-panel-submit">Simpan Data</button>
             </div>
         </div>
     </div>
@@ -407,141 +394,118 @@
     {{-- ========================================= --}}
     {{-- MODAL EDIT SUPPLIER --}}
     {{-- ========================================= --}}
-    <div id="edit-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('edit-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
-
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Edit Supplier</h3>
-                    <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+    <div id="edit-modal" class="slide-panel">
+        <div class="slide-panel-backdrop" data-panel-close></div>
+        <div class="slide-panel-body">
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 </div>
+                <h2 class="slide-panel-header-title">Edit Supplier</h2>
+                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <form action="" method="POST" id="editForm" class="slide-panel-content">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <input type="hidden" id="edit_kode">
 
-                <div class="p-6 overflow-y-auto">
-                    <form action="" method="POST" id="editForm">
-                        @csrf
-                        @method('PUT')
-                        <div class="space-y-4">
-                            <!-- Hidden input untuk kode supplier (digenerate otomatis oleh backend) -->
-                            <input type="hidden" id="edit_kode">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Supplier <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_supplier" id="edit_nama" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                    </div>
 
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Bahan <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-2" id="edit_kategori_container">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Supplier <span class="text-red-500">*</span></label>
-                                <input type="text" name="nama_supplier" id="edit_nama" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Bahan <span class="text-red-500">*</span></label>
-                                <div class="grid grid-cols-2 gap-2" id="edit_kategori_container">
-                                    <!-- Kain -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="kain" id="edit_kategori_kain" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kain')">
-                                        <div id="edit_kategori_kain_wrapper" onclick="document.getElementById('edit_kategori_kain').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="edit_kategori_kain_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="edit_kategori_kain_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="edit_kategori_kain_text" class="text-sm font-medium text-gray-700">Kain</span>
-                                        </div>
+                                <input type="checkbox" name="kategori[]" value="kain" id="edit_kategori_kain" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kain')">
+                                <div id="edit_kategori_kain_wrapper" onclick="document.getElementById('edit_kategori_kain').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="edit_kategori_kain_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="edit_kategori_kain_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
-                                    <!-- Benang -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="benang" id="edit_kategori_benang" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_benang')">
-                                        <div id="edit_kategori_benang_wrapper" onclick="document.getElementById('edit_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="edit_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="edit_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="edit_kategori_benang_text" class="text-sm font-medium text-gray-700">Benang</span>
-                                        </div>
-                                    </div>
-                                    <!-- Kancing -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="kancing" id="edit_kategori_kancing" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kancing')">
-                                        <div id="edit_kategori_kancing_wrapper" onclick="document.getElementById('edit_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="edit_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="edit_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="edit_kategori_kancing_text" class="text-sm font-medium text-gray-700">Kancing</span>
-                                        </div>
-                                    </div>
-                                    <!-- Resleting -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="resleting" id="edit_kategori_resleting" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_resleting')">
-                                        <div id="edit_kategori_resleting_wrapper" onclick="document.getElementById('edit_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="edit_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="edit_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="edit_kategori_resleting_text" class="text-sm font-medium text-gray-700">Resleting</span>
-                                        </div>
-                                    </div>
-                                    <!-- Aksesoris -->
-                                    <div>
-                                        <input type="checkbox" name="kategori[]" value="aksesoris" id="edit_kategori_aksesoris" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_aksesoris')">
-                                        <div id="edit_kategori_aksesoris_wrapper" onclick="document.getElementById('edit_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                            <div id="edit_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                                <svg id="edit_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <span id="edit_kategori_aksesoris_text" class="text-sm font-medium text-gray-700">Aksesoris</span>
-                                        </div>
-                                    </div>
+                                    <span id="edit_kategori_kain_text" class="text-sm font-medium text-gray-700">Kain</span>
                                 </div>
                             </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Kontak <span class="text-red-500">*</span></label>
-                                    <input type="text" name="kontak" id="edit_kontak" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" id="edit_email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                            <div>
+                                <input type="checkbox" name="kategori[]" value="benang" id="edit_kategori_benang" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_benang')">
+                                <div id="edit_kategori_benang_wrapper" onclick="document.getElementById('edit_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="edit_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="edit_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span id="edit_kategori_benang_text" class="text-sm font-medium text-gray-700">Benang</span>
                                 </div>
                             </div>
-
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat <span class="text-red-500">*</span></label>
-                                <textarea name="alamat" id="edit_alamat" required rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
-                                <textarea name="catatan" id="edit_catatan" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-                                <!-- Dropdown Status -->
-                                <div class="relative">
-                                    <input type="hidden" name="status" id="edit_status" required>
-                                    <input type="text" id="edit_status_input" placeholder="Pilih status..." autocomplete="off" class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                <input type="checkbox" name="kategori[]" value="kancing" id="edit_kategori_kancing" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kancing')">
+                                <div id="edit_kategori_kancing_wrapper" onclick="document.getElementById('edit_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="edit_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="edit_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
-                                    <div id="edit_status_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
-                                        <div class="p-2">
-                                            <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="aktif" data-text="Aktif">
-                                                <span class="text-sm font-medium text-gray-700">Aktif</span>
-                                                <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                            <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="nonaktif" data-text="Nonaktif">
-                                                <span class="text-sm font-medium text-gray-700">Nonaktif</span>
-                                                <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            </div>
-                                        </div>
-                                        <div id="edit_status_no_results" class="hidden p-4 text-center text-sm text-gray-500">Status tidak ditemukan</div>
+                                    <span id="edit_kategori_kancing_text" class="text-sm font-medium text-gray-700">Kancing</span>
+                                </div>
+                            </div>
+                            <div>
+                                <input type="checkbox" name="kategori[]" value="resleting" id="edit_kategori_resleting" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_resleting')">
+                                <div id="edit_kategori_resleting_wrapper" onclick="document.getElementById('edit_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="edit_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="edit_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
+                                    <span id="edit_kategori_resleting_text" class="text-sm font-medium text-gray-700">Resleting</span>
+                                </div>
+                            </div>
+                            <div>
+                                <input type="checkbox" name="kategori[]" value="aksesoris" id="edit_kategori_aksesoris" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_aksesoris')">
+                                <div id="edit_kategori_aksesoris_wrapper" onclick="document.getElementById('edit_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="edit_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="edit_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span id="edit_kategori_aksesoris_text" class="text-sm font-medium text-gray-700">Aksesoris</span>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
 
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end gap-3 shrink-0">
-                    <button type="button" onclick="toggleModal('edit-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Batal</button>
-                    <button type="submit" form="editForm" class="px-5 py-2.5 text-sm font-medium text-white bg-[#0F034D] hover:bg-[#0a0235] shadow-md rounded-xl transition-all cursor-pointer">Simpan Perubahan</button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Kontak <span class="text-red-500">*</span></label>
+                            <input type="text" name="kontak" id="edit_kontak" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" id="edit_email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat <span class="text-red-500">*</span></label>
+                        <textarea name="alamat" id="edit_alamat" required rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
+                        <textarea name="catatan" id="edit_catatan" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
+                    </div>
+
+                    <!-- Checkbox is_aktif -->
+                    <div>
+                        <input type="hidden" name="is_aktif" value="0">
+                        <input type="checkbox" name="is_aktif" id="edit_is_aktif" value="1" class="hidden" onchange="updateCheckbox(this, 'edit_cb')">
+                        <div id="edit_cb_wrapper" onclick="document.getElementById('edit_is_aktif').click()" class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                            <div id="edit_cb_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                <svg id="edit_cb_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div>
+                                <span id="edit_cb_text" class="text-sm font-semibold text-gray-700">Aktif</span>
+                                <p class="text-xs text-gray-500">Supplier ini dapat digunakan dalam proses produksi.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </form>
+            <div class="slide-panel-footer">
+                <button type="button" class="btn-panel-cancel" data-panel-close>Batal</button>
+                <button type="submit" form="editForm" class="btn-panel-submit">Simpan Perubahan</button>
             </div>
         </div>
     </div>
@@ -549,86 +513,64 @@
     {{-- ========================================= --}}
     {{-- MODAL DETAIL SUPPLIER --}}
     {{-- ========================================= --}}
-    <div id="detail-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('detail-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
-
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Detail Supplier</h3>
-                    <button onclick="toggleModal('detail-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+    <div id="detail-modal" class="slide-panel">
+        <div class="slide-panel-backdrop" data-panel-close></div>
+        <div class="slide-panel-body">
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 </div>
-
-                <div class="p-6 overflow-y-auto">
-                    <div class="space-y-5">
-                        {{-- Kode Supplier --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Kode Supplier</label>
-                            <p id="detail_kode" class="text-sm font-bold text-[#0F034D]">-</p>
-                        </div>
-
-                        {{-- Nama Supplier --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Nama Supplier</label>
-                            <p id="detail_nama" class="text-sm font-medium text-gray-900">-</p>
-                        </div>
-
-                        {{-- Kategori Bahan --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Kategori Bahan</label>
-                            <div id="detail_kategori" class="flex flex-wrap gap-1.5">
-                                {{-- Populated by JS --}}
-                            </div>
-                        </div>
-
-                        {{-- Kontak & Email --}}
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Kontak</label>
-                                <p id="detail_kontak" class="text-sm font-medium text-gray-900">-</p>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Email</label>
-                                <p id="detail_email" class="text-sm font-medium text-gray-900 break-all">-</p>
-                            </div>
-                        </div>
-
-                        {{-- Alamat --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Alamat</label>
-                            <p id="detail_alamat" class="text-sm text-gray-700 leading-relaxed whitespace-normal">-</p>
-                        </div>
-
-                        {{-- Catatan --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Catatan</label>
-                            <p id="detail_catatan" class="text-sm text-gray-700 leading-relaxed whitespace-normal">-</p>
-                        </div>
-
-                        {{-- Status & Tanggal --}}
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Status</label>
-                                <div id="detail_status"></div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Ditambahkan</label>
-                                <p id="detail_created" class="text-sm font-medium text-gray-900">-</p>
-                            </div>
-                        </div>
+                <h2 class="slide-panel-header-title">Detail Supplier</h2>
+                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <div class="slide-panel-content">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Kode Supplier</label>
+                        <p id="detail_kode" class="text-sm text-gray-900 font-bold">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Nama Supplier</label>
+                        <p id="detail_nama" class="text-sm text-gray-900 font-bold">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Kategori Bahan</label>
+                        <div id="detail_kategori" class="flex flex-wrap gap-1"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Kontak</label>
+                        <p id="detail_kontak" class="text-sm text-gray-900 font-bold">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Email</label>
+                        <p id="detail_email" class="text-sm text-gray-900 font-bold">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Alamat</label>
+                        <p id="detail_alamat" class="text-sm text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Catatan</label>
+                        <p id="detail_catatan" class="text-sm text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Status</label>
+                        <div id="detail_status"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Dibuat</label>
+                        <p id="detail_created" class="text-sm text-gray-900">-</p>
                     </div>
                 </div>
-
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end shrink-0">
-                    <button type="button" onclick="toggleModal('detail-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Tutup</button>
-                </div>
             </div>
+            <!-- <div class="slide-panel-footer">
+                <button type="button" class="btn-panel-cancel" data-panel-close>Tutup</button>
+            </div> -->
         </div>
     </div>
 
     @vite([
+        'resources/css/global-modal.css',
         'resources/js/admin/custom-forms.js',
         'resources/js/admin/supplier/toggle-modal.js',
         'resources/js/admin/supplier/generate-kode.js'

@@ -1,51 +1,7 @@
 /**
  * Toggle Modal - Manajemen Bahan Baku
- * Mengatur buka/tutup modal dengan animasi smooth.
+ * Menggunakan Slide Panel API dari global-modal.js
  */
-
-function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    const content = modal.querySelector('.relative.w-full');
-    const isHidden = modal.classList.contains('hidden');
-
-    if (isHidden) {
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            modal.classList.remove('opacity-0');
-            modal.classList.add('opacity-100');
-            if (content) {
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }
-        });
-    } else {
-        modal.classList.remove('opacity-100');
-        modal.classList.add('opacity-0');
-        if (content) {
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-        }
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            const form = modal.querySelector('form');
-            if (form) form.reset();
-            // Reset custom dropdowns
-            if (typeof resetCustomDropdown === 'function') {
-                if (modalId === 'add-modal') {
-                    resetCustomDropdown('add_warna');
-                    resetCustomDropdown('add_kategori');
-                    resetCustomDropdown('add_satuan');
-                } else if (modalId === 'edit-modal') {
-                    resetCustomDropdown('edit_warna');
-                    resetCustomDropdown('edit_kategori');
-                    resetCustomDropdown('edit_satuan');
-                }
-            }
-        }, 300);
-    }
-}
 
 /**
  * Buka modal edit dan isi data dari atribut data-* pada tombol yang diklik.
@@ -58,6 +14,7 @@ function openEditModal(button) {
     const kategori = button.dataset.kategori;
     const satuan = button.dataset.satuan;
     const stok = button.dataset.stok;
+    const isAktif = button.dataset.isAktif;
 
     const form = document.getElementById('editForm');
     form.action = `/admin/bahan-baku/${id}`;
@@ -73,7 +30,16 @@ function openEditModal(button) {
         setCustomDropdownValue('edit_satuan', satuan);
     }
 
-    toggleModal('edit-modal');
+    // Set checkbox is_aktif
+    const checkboxAktif = document.getElementById('edit_is_aktif');
+    if (checkboxAktif) {
+        checkboxAktif.checked = isAktif === '1';
+        if (typeof updateCheckbox === 'function') {
+            updateCheckbox(checkboxAktif, 'edit_cb');
+        }
+    }
+
+    window.openPanel('edit-modal');
 }
 
 /**
@@ -114,7 +80,6 @@ document.addEventListener('click', (e) => {
 });
 
 // Expose ke global scope
-window.toggleModal = toggleModal;
 window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;
 

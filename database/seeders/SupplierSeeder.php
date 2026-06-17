@@ -21,7 +21,7 @@ class SupplierSeeder extends Seeder
                 'email' => 'info@majujayatextile.com',
                 'alamat' => 'Jl. Industri Tekstil No. 45, Bandung, Jawa Barat',
                 'catatan' => 'Supplier utama kain baby terry, fleece, dan diadora. Pengiriman setiap hari Senin dan Kamis.',
-                'status' => 'aktif',
+                'is_aktif' => '1',
             ],
             [
                 'kode_supplier' => 'SUP-002',
@@ -31,7 +31,7 @@ class SupplierSeeder extends Seeder
                 'email' => 'sales@sumberbenang.com',
                 'alamat' => 'Jl. Raya Tekstil No. 12, Solo, Jawa Tengah',
                 'catatan' => 'Supplier benang jahit dan benang obras berbagai warna.',
-                'status' => 'aktif',
+                'is_aktif' => '1',
             ],
             [
                 'kode_supplier' => 'SUP-003',
@@ -41,7 +41,7 @@ class SupplierSeeder extends Seeder
                 'email' => 'order@aksesorisgarmen.co.id',
                 'alamat' => 'Jl. Garmen Raya No. 78, Semarang, Jawa Tengah',
                 'catatan' => 'Supplier kancing, resleting, dan aksesoris garmen lainnya. Minimum order 1000 pcs.',
-                'status' => 'aktif',
+                'is_aktif' => '1',
             ],
         ];
 

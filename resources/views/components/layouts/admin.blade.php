@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Admin Panel | Iwangsport' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/global-modal.css', 'resources/js/app.js'])
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -44,8 +44,8 @@
                 $isBahanBaku = request()->routeIs('admin.bahan-baku.*'); 
                 $isProduk = request()->routeIs('admin.produk.*'); 
                 $isSupplier = request()->routeIs('admin.supplier.*');
-                $isEstimasi = request()->routeIs('admin.estimasi-produksi.*');
-                $isManajemenGroup = $isBahanBaku || $isProduk || $isSupplier || $isEstimasi;
+                $isStandardBaseline = request()->routeIs('admin.standard-baseline-produksi.*');
+                $isManajemenGroup = $isBahanBaku || $isProduk || $isSupplier || $isStandardBaseline;
             @endphp
             <div>
                 <button onclick="toggleMenu('menu-manajemen', 'icon-manajemen')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isManajemenGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
@@ -60,7 +60,7 @@
                         
                         <li>
                             <a href="{{ route('admin.bahan-baku.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isBahanBaku ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isProduk || $isSupplier || $isEstimasi) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isProduk || $isSupplier || $isStandardBaseline) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Bahan Baku
@@ -69,7 +69,7 @@
                         
                         <li>
                             <a href="{{ route('admin.produk.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isProduk ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isSupplier || $isEstimasi) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isSupplier || $isStandardBaseline) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Produk
@@ -78,7 +78,7 @@
                         
                         <li>
                             <a href="{{ route('admin.supplier.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isSupplier ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isEstimasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Supplier
@@ -86,9 +86,9 @@
                         </li>
                         
                         <li>
-                            <a href="{{ route('admin.estimasi-produksi.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isEstimasi ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isEstimasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isEstimasi ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                            <a href="{{ route('admin.standard-baseline-produksi.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isStandardBaseline ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 Standard Baseline Produksi
                             </a>
                         </li>
@@ -141,7 +141,7 @@
             </div>
 
             @php 
-                $isPergerakanBahan = request()->routeIs('admin.pemasukan-bahan.*') || request()->routeIs('admin.pengeluaran-bahan.*'); 
+                $isPergerakanBahan = request()->routeIs('admin.pergerakan-stok.*'); 
                 $isStokProduk = request()->routeIs('admin.stok-produk.*'); 
                 $isStokGroup = $isPergerakanBahan || $isStokProduk;
             @endphp
@@ -156,7 +156,7 @@
                 <div id="menu-stok" class="overflow-hidden transition-all duration-300 {{ $isStokGroup ? 'max-h-96' : 'max-h-0' }}">
                     <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
                         <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPergerakanBahan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                            <a href="{{ route('admin.pergerakan-stok.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPergerakanBahan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                                 <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isStokProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isPergerakanBahan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPergerakanBahan ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
@@ -300,6 +300,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @vite([
+        'resources/js/global-modal.js',
         'resources/js/layout/toggle-navbar-menu.js',
         'resources/js/layout/toast.js'
     ])

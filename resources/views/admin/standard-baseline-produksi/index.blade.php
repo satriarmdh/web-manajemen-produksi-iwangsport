@@ -20,7 +20,7 @@
                 <h3 class="text-lg font-bold text-[#0F034D]">Daftar Baseline Produksi</h3>
                 <p class="text-sm text-gray-500 mt-1">Kelola standar estimasi hasil produksi per roll bahan baku untuk setiap produk.</p>
             </div>
-            <button onclick="window.toggleModal('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
+            <button onclick="window.togglePanel('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Tambah Baseline
             </button>
@@ -76,11 +76,38 @@
                         Urutkan
                     </button>
                     <div id="sortDropdown" class="absolute left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2">
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => null]) }}" class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ !request('sort') || request('sort') == 'newest' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Terbaru</a>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'oldest']) }}" class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request('sort') == 'oldest' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Terlama</a>
-                        <div class="border-t border-gray-100 my-1"></div>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'nama_produk_asc']) }}" class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request('sort') == 'nama_produk_asc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Produk A - Z</a>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'nama_produk_desc']) }}" class="block px-4 py-2.5 text-sm rounded-lg transition-colors {{ request('sort') == 'nama_produk_desc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Produk Z - A</a>
+                        <!-- Waktu -->
+                        <div class="relative group">
+                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Waktu Ditambahkan
+                                </span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                                <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request('sort') || request('sort') == 'newest' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Terbaru</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'oldest']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'oldest' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Terlama</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Abjad -->
+                        <div class="relative group">
+                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+                                    Abjad Nama Produk
+                                </span>
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                                <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'nama_produk_asc']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'nama_produk_asc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">A - Z</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'nama_produk_desc']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('sort') == 'nama_produk_desc' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Z - A</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +141,6 @@
                         <th scope="col" class="px-6 py-4 font-semibold">Bahan Baku</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Pcs per Roll</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Toleransi (−)</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Range Hasil</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Status</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Aksi</th>
                     </tr>
@@ -149,15 +175,6 @@
                                 @else
                                     <span class="text-xs text-gray-400">—</span>
                                 @endif
-                            </td>
-
-                            <td class="px-6 py-4 text-center">
-                                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100">
-                                    <span class="text-xs font-bold text-blue-700">{{ $item->range_bawah }}</span>
-                                    <span class="text-xs text-blue-400">s.d.</span>
-                                    <span class="text-xs font-bold text-blue-700">{{ number_format($item->pcs_per_roll) }}</span>
-                                    <span class="text-xs text-blue-500">pcs</span>
-                                </div>
                             </td>
 
                             <td class="px-6 py-4 text-center">
@@ -258,22 +275,31 @@
     {{-- ========================================= --}}
     {{-- MODAL TAMBAH BASELINE --}}
     {{-- ========================================= --}}
-    <div id="add-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('add-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+    <div id="add-modal" class="slide-panel">
+        <!-- Backdrop -->
+        <div class="slide-panel-backdrop" data-panel-close="add-modal"></div>
 
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Tambah Baseline Produksi</h3>
-                    <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+        <!-- Panel Body -->
+        <div class="slide-panel-body">
+            <!-- Header -->
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
                 </div>
+                <h3 class="slide-panel-header-title">Tambah Baseline Produksi</h3>
+                <button class="slide-panel-close" data-panel-close="add-modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
-                <div class="p-6 overflow-y-auto">
-                    <form action="{{ route('admin.standard-baseline-produksi.store') }}" method="POST" id="addForm">
-                        @csrf
-                        <div class="space-y-4">
+            <!-- Content -->
+            <form action="{{ route('admin.standard-baseline-produksi.store') }}" method="POST" id="addForm" class="slide-panel-content">
+                @csrf
+                <div class="space-y-4">
                             <!-- Pilih Produk -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Produk <span class="text-red-500">*</span></label>
@@ -359,31 +385,14 @@
                                 <textarea name="keterangan" rows="2" placeholder="Catatan tambahan (opsional)" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
                             </div>
 
-                            <!-- Toggle Aktif -->
-                            <div>
-                                <input type="hidden" name="is_aktif" value="0">
-                                <input type="checkbox" name="is_aktif" id="add_is_aktif" value="1" checked class="hidden" onchange="updateCheckbox(this, 'add_cb')">
-                                <div id="add_cb_wrapper" onclick="document.getElementById('add_is_aktif').click()" class="flex items-center gap-3 p-4 border border-[#0F034D] bg-[#0F034D]/5 ring-1 ring-[#0F034D] rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
-                                    <div id="add_cb_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-[#0F034D] transition-all">
-                                        <svg id="add_cb_icon" class="w-3 h-3 text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <span id="add_cb_text" class="text-sm font-semibold text-[#0F034D]">Aktif</span>
-                                        <p class="text-xs text-gray-500">Baseline ini akan digunakan dalam perhitungan produksi.</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
-                    </form>
-                </div>
+                </form>
 
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end gap-3 shrink-0">
-                    <button type="button" onclick="toggleModal('add-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Batal</button>
-                    <button type="submit" form="addForm" class="px-5 py-2.5 text-sm font-medium text-white bg-[#0F034D] hover:bg-[#0a0235] shadow-md rounded-xl transition-all cursor-pointer">Simpan Baseline</button>
-                </div>
+            <!-- Footer -->
+            <div class="slide-panel-footer">
+                <button type="button" onclick="closePanel('add-modal')" class="btn-panel-cancel">Batal</button>
+                <button type="submit" form="addForm" class="btn-panel-submit">Simpan Baseline</button>
             </div>
         </div>
     </div>
@@ -391,23 +400,32 @@
     {{-- ========================================= --}}
     {{-- MODAL EDIT BASELINE --}}
     {{-- ========================================= --}}
-    <div id="edit-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('edit-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+    <div id="edit-modal" class="slide-panel">
+        <!-- Backdrop -->
+        <div class="slide-panel-backdrop" data-panel-close="edit-modal"></div>
 
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Edit Baseline Produksi</h3>
-                    <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+        <!-- Panel Body -->
+        <div class="slide-panel-body">
+            <!-- Header -->
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
                 </div>
+                <h3 class="slide-panel-header-title">Edit Baseline Produksi</h3>
+                <button class="slide-panel-close" data-panel-close="edit-modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
-                <div class="p-6 overflow-y-auto">
-                    <form action="" method="POST" id="editForm">
-                        @csrf
-                        @method('PUT')
-                        <div class="space-y-4">
+            <!-- Content -->
+            <form action="" method="POST" id="editForm" class="slide-panel-content">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
 
                             <!-- Pilih Produk -->
                             <div>
@@ -510,13 +528,12 @@
                             </div>
                         </div>
 
-                    </form>
-                </div>
+                </form>
 
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end gap-3 shrink-0">
-                    <button type="button" onclick="toggleModal('edit-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Batal</button>
-                    <button type="submit" form="editForm" class="px-5 py-2.5 text-sm font-medium text-white bg-[#0F034D] hover:bg-[#0a0235] shadow-md rounded-xl transition-all cursor-pointer">Simpan Perubahan</button>
-                </div>
+            <!-- Footer -->
+            <div class="slide-panel-footer">
+                <button type="button" onclick="closePanel('edit-modal')" class="btn-panel-cancel">Batal</button>
+                <button type="submit" form="editForm" class="btn-panel-submit">Simpan Perubahan</button>
             </div>
         </div>
     </div>
@@ -524,20 +541,30 @@
     {{-- ========================================= --}}
     {{-- MODAL DETAIL BASELINE --}}
     {{-- ========================================= --}}
-    <div id="detail-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('detail-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+    <div id="detail-modal" class="slide-panel">
+        <!-- Backdrop -->
+        <div class="slide-panel-backdrop" data-panel-close="detail-modal"></div>
 
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Detail Baseline Produksi</h3>
-                    <button onclick="toggleModal('detail-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+        <!-- Panel Body -->
+        <div class="slide-panel-body">
+            <!-- Header -->
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
                 </div>
+                <h3 class="slide-panel-header-title">Detail Baseline Produksi</h3>
+                <button class="slide-panel-close" data-panel-close="detail-modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
-                <div class="p-6 overflow-y-auto">
-                    <div class="space-y-5">
+            <!-- Content -->
+            <div class="slide-panel-content">
+                <div class="space-y-5">
                         {{-- Produk --}}
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Produk</label>
@@ -585,15 +612,18 @@
                             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Dibuat</label>
                             <p id="detail_created" class="text-sm text-gray-700">-</p>
                         </div>
-                    </div>
-                </div>
-
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end shrink-0">
-                    <button type="button" onclick="toggleModal('detail-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Tutup</button>
                 </div>
             </div>
+
+            <!-- Footer -->
+            <!-- <div class="slide-panel-footer">
+                <button type="button" onclick="closePanel('detail-modal')" class="btn-panel-cancel">Tutup</button>
+            </div> -->
         </div>
     </div>
 
-    @vite(['resources/js/admin/standard-baseline-produksi/toggle-modal.js'])
+    @vite([
+        'resources/css/global-modal.css',
+        'resources/js/admin/standard-baseline-produksi/toggle-modal.js'
+    ])
 </x-layouts.admin>

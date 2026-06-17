@@ -18,10 +18,11 @@ class Supplier extends Model
         'email',
         'alamat',
         'catatan',
-        'status',
+        'is_aktif',
     ];
 
     protected $casts = [
         'kategori' => 'array',
+        'is_aktif' => 'boolean',
     ];
 }

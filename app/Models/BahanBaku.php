@@ -19,13 +19,18 @@ class BahanBaku extends Model
         'kategori',
         'satuan',
         'stok',
+        'is_aktif',
+    ];
+
+    protected $casts = [
+        'is_aktif' => 'boolean',
     ];
 
     /**
-     * Relasi ke estimasi produksi
+     * Relasi ke standard baseline produksi
      */
-    public function estimasiProduksi()
+    public function standardBaselineProduksi()
     {
-        return $this->hasMany(EstimasiProduksi::class, 'bahan_baku_id');
+        return $this->hasMany(StandardBaselineProduksi::class, 'bahan_baku_id');
     }
 }

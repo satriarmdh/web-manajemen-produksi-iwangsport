@@ -1,57 +1,7 @@
 /**
  * Toggle Modal - Manajemen Supplier
- * Mengatur buka/tutup modal dengan animasi smooth.
+ * Menggunakan Slide Panel API dari global-modal.js
  */
-
-function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    const content = modal.querySelector('.relative.w-full');
-    const isHidden = modal.classList.contains('hidden');
-
-    if (isHidden) {
-        // BUKA
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            modal.classList.remove('opacity-0');
-            modal.classList.add('opacity-100');
-            if (content) {
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }
-        });
-    } else {
-        // TUTUP
-        modal.classList.remove('opacity-100');
-        modal.classList.add('opacity-0');
-        if (content) {
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-        }
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            // Reset form setelah modal ditutup
-            const form = modal.querySelector('form');
-            if (form) form.reset();
-            // Reset custom checkboxes
-            if (typeof updateCheckbox === 'function') {
-                const checkboxes = modal.querySelectorAll('.edit_kategori, input[id^="add_kategori_"]');
-                checkboxes.forEach(cb => {
-                    if (cb.type === 'checkbox') {
-                        cb.checked = false;
-                        const prefix = cb.id;
-                        updateCheckbox(cb, prefix);
-                    }
-                });
-            }
-            // Reset custom status dropdown
-            if (typeof resetCustomDropdown === 'function') {
-                resetCustomDropdown('edit_status');
-            }
-        }, 300);
-    }
-}
 
 /**
  * Buka modal detail dan tampilkan data lengkap supplier
@@ -105,7 +55,7 @@ function openDetailModal(button) {
         statusContainer.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100"><div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>Nonaktif</span>';
     }
 
-    toggleModal('detail-modal');
+    window.openPanel('detail-modal');
 }
 
 /**
@@ -162,7 +112,7 @@ function openEditModal(button) {
     const email    = button.dataset.email;
     const alamat   = button.dataset.alamat;
     const catatan  = button.dataset.catatan;
-    const status   = button.dataset.status;
+    const isAktif  = button.dataset.isAktif;
 
     // Set action URL form edit
     const editForm = document.getElementById('editForm');
@@ -176,9 +126,13 @@ function openEditModal(button) {
     document.getElementById('edit_alamat').value  = alamat;
     document.getElementById('edit_catatan').value = catatan;
 
-    // Set custom status dropdown value
-    if (typeof setCustomDropdownValue === 'function') {
-        setCustomDropdownValue('edit_status', status);
+    // Set checkbox is_aktif
+    const checkboxAktif = document.getElementById('edit_is_aktif');
+    if (checkboxAktif) {
+        checkboxAktif.checked = isAktif === '1';
+        if (typeof updateCheckbox === 'function') {
+            updateCheckbox(checkboxAktif, 'edit_cb');
+        }
     }
 
     // Isi checkbox kategori (multi-select) dengan custom styling
@@ -207,7 +161,7 @@ function openEditModal(button) {
         }
     });
 
-    toggleModal('edit-modal');
+    window.openPanel('edit-modal');
 }
 
 /**
@@ -282,15 +236,7 @@ window.addEventListener('resize', () => {
 });
 
 // Expose ke global scope
-window.toggleModal = toggleModal;
 window.openDetailModal = openDetailModal;
 window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;
 window.toggleActionDropdown = toggleActionDropdown;
-
-// Initialize custom dropdown on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof initCustomDropdown === 'function') {
-        initCustomDropdown('edit_status');
-    }
-});

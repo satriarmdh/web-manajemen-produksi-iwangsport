@@ -20,18 +20,20 @@ class Produk extends Model
         'harga_satuan',
         'satuan',
         'stok',
+        'is_aktif',
     ];
 
     protected $casts = [
         'harga_satuan' => 'integer',
         'stok' => 'integer',
+        'is_aktif' => 'boolean',
     ];
 
     /**
-     * Relasi ke estimasi produksi
+     * Relasi ke standard baseline produksi
      */
-    public function estimasiProduksi()
+    public function standardBaselineProduksi()
     {
-        return $this->hasMany(EstimasiProduksi::class, 'produk_id');
+        return $this->hasMany(StandardBaselineProduksi::class, 'produk_id');
     }
 }

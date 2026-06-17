@@ -30,26 +30,26 @@ window.updateCheckbox = updateCheckbox;
 function validateWarnaCompatibility(prefix) {
     const produkId = document.getElementById(`${prefix}_produk_id`).value;
     const bahanId = document.getElementById(`${prefix}_bahan_baku_id`).value;
-    
+
     if (!produkId || !bahanId) {
         return true; // Belum pilih keduanya, biarkan validasi required field yang handle
     }
-    
+
     // Cari option produk yang dipilih
     const produkOption = document.querySelector(`#${prefix}_produk_dropdown .dropdown-option[data-value="${produkId}"]`);
     const bahanOption = document.querySelector(`#${prefix}_bahan_baku_dropdown .dropdown-option[data-value="${bahanId}"]`);
-    
+
     if (!produkOption || !bahanOption) {
         return true; // Option tidak ditemukan, biarkan backend yang handle
     }
-    
+
     const produkWarna = produkOption.getAttribute('data-warna');
     const bahanWarna = bahanOption.getAttribute('data-warna');
-    
+
     if (produkWarna !== bahanWarna) {
         const produkNama = produkOption.getAttribute('data-text').split('(')[0].trim();
         const bahanNama = bahanOption.getAttribute('data-text').split('(')[0].trim();
-        
+
         const errorElement = document.getElementById(`${prefix}_warna_error`);
         if (errorElement) {
             const errorText = errorElement.querySelector('p');
@@ -58,13 +58,13 @@ function validateWarnaCompatibility(prefix) {
         }
         return false;
     }
-    
+
     // Jika valid, sembunyikan error
     const errorElement = document.getElementById(`${prefix}_warna_error`);
     if (errorElement) {
         errorElement.classList.add('hidden');
     }
-    
+
     return true;
 }
 
@@ -72,45 +72,8 @@ window.validateWarnaCompatibility = validateWarnaCompatibility;
 
 /**
  * Toggle Modal - Standard Baseline Produksi
- * Mengatur buka/tutup modal dengan animasi smooth.
+ * Menggunakan Slide Panel API dari global-modal.js
  */
-
-function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    const content = modal.querySelector('.relative.w-full');
-    const isHidden = modal.classList.contains('hidden');
-
-    if (isHidden) {
-        // BUKA
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            modal.classList.remove('opacity-0');
-            modal.classList.add('opacity-100');
-            if (content) {
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }
-        });
-    } else {
-        // TUTUP
-        modal.classList.remove('opacity-100');
-        modal.classList.add('opacity-0');
-        if (content) {
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-        }
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            // Reset form setelah modal ditutup
-            const form = modal.querySelector('form');
-            if (form) form.reset();
-            // Reset searchable dropdowns
-            resetSearchableDropdowns(modalId);
-        }, 300);
-    }
-}
 
 /**
  * Reset searchable dropdowns setelah modal ditutup
@@ -215,7 +178,7 @@ function initSearchableDropdown(prefix, onSelectCallback) {
         option.addEventListener('click', () => {
             const value = option.getAttribute('data-value');
             const text = option.getAttribute('data-text');
-            
+
             hiddenInput.value = value;
             searchInput.value = text;
             dropdown.classList.add('hidden');
@@ -387,7 +350,7 @@ function openDetailModal(button) {
 
     document.getElementById('detail_created').textContent = created;
 
-    toggleModal('detail-modal');
+    window.openPanel('detail-modal');
 }
 
 /**
@@ -455,14 +418,14 @@ function openEditModal(button) {
     const produkOption = document.querySelector(`#edit_produk_dropdown .dropdown-option[data-value="${produkId}"]`);
     if (produkOption) {
         document.getElementById('edit_produk_search').value = produkOption.getAttribute('data-text');
-        
+
         // Clear semua highlight di dropdown produk
         document.querySelectorAll('#edit_produk_dropdown .dropdown-option').forEach(opt => {
             opt.classList.remove('bg-gray-100');
             const checkIcon = opt.querySelector('.check-icon');
             if (checkIcon) checkIcon.classList.add('hidden');
         });
-        
+
         // Highlight item yang selected
         produkOption.classList.add('bg-gray-100');
         const produkCheckIcon = produkOption.querySelector('.check-icon');
@@ -473,14 +436,14 @@ function openEditModal(button) {
     const bahanOption = document.querySelector(`#edit_bahan_baku_dropdown .dropdown-option[data-value="${bahanId}"]`);
     if (bahanOption) {
         document.getElementById('edit_bahan_baku_search').value = bahanOption.getAttribute('data-text');
-        
+
         // Clear semua highlight di dropdown bahan baku
         document.querySelectorAll('#edit_bahan_baku_dropdown .dropdown-option').forEach(opt => {
             opt.classList.remove('bg-gray-100');
             const checkIcon = opt.querySelector('.check-icon');
             if (checkIcon) checkIcon.classList.add('hidden');
         });
-        
+
         // Highlight item yang selected
         bahanOption.classList.add('bg-gray-100');
         const bahanCheckIcon = bahanOption.querySelector('.check-icon');
@@ -491,14 +454,19 @@ function openEditModal(button) {
     document.getElementById('edit_toleransi_minus').value = toleransi;
     document.getElementById('edit_keterangan').value = keterangan;
 
-    // Set checkbox aktif
+    // Set checkbox is_aktif
     const checkboxAktif = document.getElementById('edit_is_aktif');
-    checkboxAktif.checked = status === '1';
+    if (checkboxAktif) {
+        checkboxAktif.checked = status === '1';
+        if (typeof updateCheckbox === 'function') {
+            updateCheckbox(checkboxAktif, 'edit_cb');
+        }
+    }
 
     // Filter dropdown bahan baku berdasarkan warna produk yang sudah tersimpan
     filterBahanBakuByWarna('edit_produk', 'edit_bahan_baku');
 
-    toggleModal('edit-modal');
+    window.openPanel('edit-modal');
 }
 
 /**
@@ -610,7 +578,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Expose ke global scope
-window.toggleModal = toggleModal;
 window.openDetailModal = openDetailModal;
 window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;

@@ -1,66 +1,32 @@
 /**
  * Toggle Modal - Manajemen Produk
- * Mengatur buka/tutup modal dengan animasi smooth.
+ * Menggunakan Slide Panel API dari global-modal.js
  */
-
-function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    const content = modal.querySelector('.relative.w-full');
-    const isHidden = modal.classList.contains('hidden');
-
-    if (isHidden) {
-        // BUKA
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            modal.classList.remove('opacity-0');
-            modal.classList.add('opacity-100');
-            if (content) {
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }
-        });
-    } else {
-        // TUTUP
-        modal.classList.remove('opacity-100');
-        modal.classList.add('opacity-0');
-        if (content) {
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-        }
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            // Reset form setelah modal ditutup
-            const form = modal.querySelector('form');
-            if (form) form.reset();
-        }, 300);
-    }
-}
 
 /**
  * Buka modal edit dan isi data dari atribut data-* pada tombol yang diklik.
  */
 function openEditModal(button) {
-    const id       = button.dataset.id;
-    const kode     = button.dataset.kode;
-    const nama     = button.dataset.nama;
-    const ukuran   = button.dataset.ukuran;
-    const warna    = button.dataset.warna;
-    const harga    = button.dataset.harga;
-    const satuan   = button.dataset.satuan;
-    const stok     = button.dataset.stok;
+    const id = button.dataset.id;
+    const kode = button.dataset.kode;
+    const nama = button.dataset.nama;
+    const ukuran = button.dataset.ukuran;
+    const warna = button.dataset.warna;
+    const harga = button.dataset.harga;
+    const satuan = button.dataset.satuan;
+    const stok = button.dataset.stok;
+    const isAktif = button.dataset.isAktif;
 
     // Set action URL form edit
     const editForm = document.getElementById('editForm');
     editForm.action = `/admin/produk/${id}`;
 
     // Isi field
-    document.getElementById('edit_kode').value       = kode;
-    document.getElementById('edit_nama').value       = nama;
-    document.getElementById('edit_harga').value      = harga;
-    document.getElementById('edit_satuan').value     = satuan;
-    document.getElementById('edit_stok').value       = stok;
+    document.getElementById('edit_kode').value = kode;
+    document.getElementById('edit_nama').value = nama;
+    document.getElementById('edit_harga').value = harga;
+    document.getElementById('edit_satuan').value = satuan;
+    document.getElementById('edit_stok').value = stok;
 
     // Set custom dropdown values
     if (typeof setCustomDropdownValue === 'function') {
@@ -68,7 +34,16 @@ function openEditModal(button) {
         setCustomDropdownValue('edit_warna', warna);
     }
 
-    toggleModal('edit-modal');
+    // Set checkbox is_aktif
+    const checkboxAktif = document.getElementById('edit_is_aktif');
+    if (checkboxAktif) {
+        checkboxAktif.checked = isAktif === '1';
+        if (typeof updateCheckbox === 'function') {
+            updateCheckbox(checkboxAktif, 'edit_cb');
+        }
+    }
+
+    window.openPanel('edit-modal');
 }
 
 /**
@@ -109,7 +84,6 @@ document.addEventListener('click', (e) => {
 });
 
 // Expose ke global scope
-window.toggleModal = toggleModal;
 window.openEditModal = openEditModal;
 window.toggleFilterMenu = toggleFilterMenu;
 

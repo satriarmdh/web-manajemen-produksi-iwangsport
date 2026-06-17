@@ -20,7 +20,7 @@
                 <h3 class="text-lg font-bold text-[#0F034D]">Daftar Katalog Produk</h3>
                 <p class="text-sm text-gray-500 mt-1">Kelola data katalog produk celana yang siap dijual.</p>
             </div>
-            <button onclick="window.toggleModal('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
+            <button onclick="window.togglePanel('add-modal')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Tambah Produk
             </button>
@@ -178,6 +178,7 @@
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Harga Satuan</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Satuan</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Total Stok</th>
+                        <th scope="col" class="px-6 py-4 font-semibold text-center">Aktif</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -224,6 +225,20 @@
                                 @endif
                             </td>
 
+                            <td class="px-6 py-4 text-center">
+                                @if($item->is_aktif)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                        Aktif
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                                        Nonaktif
+                                    </span>
+                                @endif
+                            </td>
+
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button type="button"
@@ -236,6 +251,7 @@
                                             data-harga="{{ $item->harga_satuan }}"
                                             data-satuan="{{ $item->satuan }}"
                                             data-stok="{{ $item->stok }}"
+                                            data-is-aktif="{{ $item->is_aktif ? '1' : '0' }}"
                                             class="p-2 text-gray-400 hover:text-[#0F034D] hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" title="Edit Produk">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                     </button>
@@ -252,7 +268,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                     <p class="text-gray-500 font-medium">Data tidak ditemukan.</p>
@@ -275,21 +291,18 @@
     {{-- ========================================= --}}
     {{-- MODAL TAMBAH PRODUK --}}
     {{-- ========================================= --}}
-    <div id="add-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('add-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
-
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Tambah Produk</h3>
-                    <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+    <div id="add-modal" class="slide-panel">
+        <div class="slide-panel-backdrop" data-panel-close></div>
+        <div class="slide-panel-body">
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 </div>
-
-                <div class="p-6 overflow-y-auto">
-                    <form action="{{ route('admin.produk.store') }}" method="POST" id="addForm">
-                        @csrf
+                <h2 class="slide-panel-header-title">Tambah Produk</h2>
+                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <form action="{{ route('admin.produk.store') }}" method="POST" id="addForm" class="slide-panel-content">
+                @csrf
                         <div class="space-y-4">
                             <!-- Hidden input untuk kode produk (digenerate otomatis oleh backend) -->
                             <input type="hidden" id="add_kode_produk" data-next-number="{{ $nextNumber }}">
@@ -364,12 +377,10 @@
                             </div>
                         </div>
                     </form>
-                </div>
-
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end gap-3 shrink-0">
-                    <button type="button" onclick="toggleModal('add-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Batal</button>
-                    <button type="submit" form="addForm" class="px-5 py-2.5 text-sm font-medium text-white bg-[#0F034D] hover:bg-[#0a0235] shadow-md rounded-xl transition-all cursor-pointer">Simpan Data</button>
-                </div>
+            </form>
+            <div class="slide-panel-footer">
+                <button type="button" class="btn-panel-cancel" data-panel-close>Batal</button>
+                <button type="submit" form="addForm" class="btn-panel-submit">Simpan Data</button>
             </div>
         </div>
     </div>
@@ -377,108 +388,111 @@
     {{-- ========================================= --}}
     {{-- MODAL EDIT PRODUK --}}
     {{-- ========================================= --}}
-    <div id="edit-modal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
-        <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="toggleModal('edit-modal')"></div>
-        <div class="flex items-center justify-center min-h-screen px-4 py-8">
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
-
-                <div class="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <h3 class="text-lg font-bold text-[#0F034D]">Edit Produk</h3>
-                    <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+    <div id="edit-modal" class="slide-panel">
+        <div class="slide-panel-backdrop" data-panel-close></div>
+        <div class="slide-panel-body">
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 </div>
+                <h2 class="slide-panel-header-title">Edit Produk</h2>
+                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <form action="" method="POST" id="editForm" class="slide-panel-content">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <input type="hidden" id="edit_kode">
 
-                <div class="p-6 overflow-y-auto">
-                    <form action="" method="POST" id="editForm">
-                        @csrf
-                        @method('PUT')
-                        <div class="space-y-4">
-                            <!-- Hidden input untuk kode produk (digenerate otomatis oleh backend) -->
-                            <input type="hidden" id="edit_kode">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Produk <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_produk" id="edit_nama" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                    </div>
 
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Produk <span class="text-red-500">*</span></label>
-                                <input type="text" name="nama_produk" id="edit_nama" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Ukuran <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <input type="hidden" name="ukuran" id="edit_ukuran_value" required>
-                                        <input type="text" id="edit_ukuran_input" placeholder="Pilih Ukuran..." autocomplete="off" class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500">
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        </div>
-                                        <div id="edit_ukuran_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
-                                            <div class="p-2">
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="normal" data-text="Normal">
-                                                    <span class="text-sm font-medium text-gray-700">Normal</span>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                </div>
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="jumbo" data-text="Jumbo">
-                                                    <span class="text-sm font-medium text-gray-700">Jumbo</span>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                </div>
-                                            </div>
-                                            <div id="edit_ukuran_no_results" class="hidden p-4 text-center text-sm text-gray-500">Tidak ditemukan</div>
-                                        </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Ukuran <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="hidden" name="ukuran" id="edit_ukuran_value" required>
+                                <input type="text" id="edit_ukuran_input" placeholder="Pilih Ukuran..." autocomplete="off" class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                                <div id="edit_ukuran_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
+                                    <div class="p-2">
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="normal" data-text="Normal"><span class="text-sm font-medium text-gray-700">Normal</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="jumbo" data-text="Jumbo"><span class="text-sm font-medium text-gray-700">Jumbo</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
                                     </div>
+                                    <div id="edit_ukuran_no_results" class="hidden p-4 text-center text-sm text-gray-500">Tidak ditemukan</div>
                                 </div>
-
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Warna <span class="text-red-500">*</span></label>
-                                    <div class="relative">
-                                        <input type="hidden" name="warna" id="edit_warna_value" required>
-                                        <input type="text" id="edit_warna_input" placeholder="Pilih Warna..." autocomplete="off" class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500">
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        </div>
-                                        <div id="edit_warna_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
-                                            <div class="p-2">
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="hitam" data-text="Hitam"><span class="text-sm font-medium text-gray-700">Hitam</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="abu" data-text="Abu"><span class="text-sm font-medium text-gray-700">Abu</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="navy" data-text="Navy"><span class="text-sm font-medium text-gray-700">Navy</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="biru" data-text="Biru"><span class="text-sm font-medium text-gray-700">Biru</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                                                <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="misty" data-text="Misty"><span class="text-sm font-medium text-gray-700">Misty</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                                            </div>
-                                            <div id="edit_warna_no_results" class="hidden p-4 text-center text-sm text-gray-500">Tidak ditemukan</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Harga Satuan <span class="text-red-500">*</span></label>
-                                    <input type="number" name="harga_satuan" id="edit_harga" required min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Satuan <span class="text-red-500">*</span></label>
-                                    <input type="text" name="satuan" id="edit_satuan" readonly class="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 text-gray-600 font-semibold rounded-xl text-sm cursor-not-allowed">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Stok <span class="text-red-500">*</span></label>
-                                <input type="number" name="stok" id="edit_stok" min="0" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                <p class="text-xs text-gray-500 mt-1">Perubahan stok akan otomatis tercatat di riwayat pergerakan stok.</p>
                             </div>
                         </div>
-                    </form>
-                </div>
 
-                <div class="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl flex items-center justify-end gap-3 shrink-0">
-                    <button type="button" onclick="toggleModal('edit-modal')" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-xl transition-colors cursor-pointer">Batal</button>
-                    <button type="submit" form="editForm" class="px-5 py-2.5 text-sm font-medium text-white bg-[#0F034D] hover:bg-[#0a0235] shadow-md rounded-xl transition-all cursor-pointer">Simpan Perubahan</button>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Warna <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="hidden" name="warna" id="edit_warna_value" required>
+                                <input type="text" id="edit_warna_input" placeholder="Pilih Warna..." autocomplete="off" class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                                <div id="edit_warna_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
+                                    <div class="p-2">
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="hitam" data-text="Hitam"><span class="text-sm font-medium text-gray-700">Hitam</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="abu" data-text="Abu"><span class="text-sm font-medium text-gray-700">Abu</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="navy" data-text="Navy"><span class="text-sm font-medium text-gray-700">Navy</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="biru" data-text="Biru"><span class="text-sm font-medium text-gray-700">Biru</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="misty" data-text="Misty"><span class="text-sm font-medium text-gray-700">Misty</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                                    </div>
+                                    <div id="edit_warna_no_results" class="hidden p-4 text-center text-sm text-gray-500">Tidak ditemukan</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Harga Satuan <span class="text-red-500">*</span></label>
+                            <input type="number" name="harga_satuan" id="edit_harga" required min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Satuan <span class="text-red-500">*</span></label>
+                            <input type="text" name="satuan" id="edit_satuan" readonly class="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 text-gray-600 font-semibold rounded-xl text-sm cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Stok <span class="text-red-500">*</span></label>
+                        <input type="number" name="stok" id="edit_stok" min="0" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                        <p class="text-xs text-gray-500 mt-1">Perubahan stok akan otomatis tercatat di riwayat pergerakan stok.</p>
+                    </div>
+
+                    <!-- Checkbox is_aktif -->
+                    <div>
+                        <input type="hidden" name="is_aktif" value="0">
+                        <input type="checkbox" name="is_aktif" id="edit_is_aktif" value="1" class="hidden" onchange="updateCheckbox(this, 'edit_cb')">
+                        <div id="edit_cb_wrapper" onclick="document.getElementById('edit_is_aktif').click()" class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                            <div id="edit_cb_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                <svg id="edit_cb_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div>
+                                <span id="edit_cb_text" class="text-sm font-semibold text-gray-700">Aktif</span>
+                                <p class="text-xs text-gray-500">Produk ini tersedia untuk proses estimasi produksi.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </form>
+            <div class="slide-panel-footer">
+                <button type="button" class="btn-panel-cancel" data-panel-close>Batal</button>
+                <button type="submit" form="editForm" class="btn-panel-submit">Simpan Perubahan</button>
             </div>
         </div>
     </div>
 
     @vite([
+        'resources/css/global-modal.css',
         'resources/js/admin/custom-forms.js',
         'resources/js/admin/produk/toggle-modal.js',
         'resources/js/admin/produk/generate-kode.js'

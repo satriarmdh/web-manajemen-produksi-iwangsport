@@ -23,6 +23,7 @@ class UpdateProdukRequest extends FormRequest
             'harga_satuan' => 'required|integer|min:0',
             'satuan'       => 'required|string|max:50',
             'stok'         => 'required|integer|min:0',
+            'is_aktif'     => 'nullable|boolean',
         ];
     }
     public function messages(): array

@@ -22,7 +22,7 @@ class StoreSupplierRequest extends FormRequest
             'email'         => 'required|email|unique:suppliers,email|max:255',
             'alamat'        => 'required|string',
             'catatan'       => 'nullable|string',
-            'status'        => 'nullable|in:aktif,nonaktif',
+            'is_aktif'      => 'nullable|boolean',
         ];
     }
 
@@ -39,7 +39,7 @@ class StoreSupplierRequest extends FormRequest
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email ini sudah terdaftar.',
             'alamat.required' => 'Alamat harus diisi.',
-            'status.in' => 'Status harus aktif atau nonaktif.',
+            'is_aktif.boolean' => 'Status tidak valid.',
         ];
     }
 }
