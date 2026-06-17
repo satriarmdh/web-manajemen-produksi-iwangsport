@@ -419,7 +419,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Bahan <span class="text-red-500">*</span></label>
                         <div class="grid grid-cols-2 gap-2" id="edit_kategori_container">
                             <div>
-                                <input type="checkbox" name="kategori[]" value="kain" id="edit_kategori_kain" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kain')">
+                                <input type="checkbox" name="kategori[]" value="kain" id="edit_kategori_kain" class="edit_kategori hidden" onchange="updateKategoriCheckbox(this, 'edit_kategori_kain')">
                                 <div id="edit_kategori_kain_wrapper" onclick="document.getElementById('edit_kategori_kain').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                                     <div id="edit_kategori_kain_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
                                         <svg id="edit_kategori_kain_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -428,7 +428,7 @@
                                 </div>
                             </div>
                             <div>
-                                <input type="checkbox" name="kategori[]" value="benang" id="edit_kategori_benang" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_benang')">
+                                <input type="checkbox" name="kategori[]" value="benang" id="edit_kategori_benang" class="edit_kategori hidden" onchange="updateKategoriCheckbox(this, 'edit_kategori_benang')">
                                 <div id="edit_kategori_benang_wrapper" onclick="document.getElementById('edit_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                                     <div id="edit_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
                                         <svg id="edit_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -437,7 +437,7 @@
                                 </div>
                             </div>
                             <div>
-                                <input type="checkbox" name="kategori[]" value="kancing" id="edit_kategori_kancing" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_kancing')">
+                                <input type="checkbox" name="kategori[]" value="kancing" id="edit_kategori_kancing" class="edit_kategori hidden" onchange="updateKategoriCheckbox(this, 'edit_kategori_kancing')">
                                 <div id="edit_kategori_kancing_wrapper" onclick="document.getElementById('edit_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                                     <div id="edit_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
                                         <svg id="edit_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -446,7 +446,7 @@
                                 </div>
                             </div>
                             <div>
-                                <input type="checkbox" name="kategori[]" value="resleting" id="edit_kategori_resleting" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_resleting')">
+                                <input type="checkbox" name="kategori[]" value="resleting" id="edit_kategori_resleting" class="edit_kategori hidden" onchange="updateKategoriCheckbox(this, 'edit_kategori_resleting')">
                                 <div id="edit_kategori_resleting_wrapper" onclick="document.getElementById('edit_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                                     <div id="edit_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
                                         <svg id="edit_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -455,7 +455,7 @@
                                 </div>
                             </div>
                             <div>
-                                <input type="checkbox" name="kategori[]" value="aksesoris" id="edit_kategori_aksesoris" class="edit_kategori hidden" onchange="updateCheckbox(this, 'edit_kategori_aksesoris')">
+                                <input type="checkbox" name="kategori[]" value="aksesoris" id="edit_kategori_aksesoris" class="edit_kategori hidden" onchange="updateKategoriCheckbox(this, 'edit_kategori_aksesoris')">
                                 <div id="edit_kategori_aksesoris_wrapper" onclick="document.getElementById('edit_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                                     <div id="edit_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
                                         <svg id="edit_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -493,7 +493,9 @@
                         <input type="checkbox" name="is_aktif" id="edit_is_aktif" value="1" class="hidden" onchange="updateCheckbox(this, 'edit_cb')">
                         <div id="edit_cb_wrapper" onclick="document.getElementById('edit_is_aktif').click()" class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
                             <div id="edit_cb_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                <svg id="edit_cb_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <svg id="edit_cb_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
                             </div>
                             <div>
                                 <span id="edit_cb_text" class="text-sm font-semibold text-gray-700">Aktif</span>

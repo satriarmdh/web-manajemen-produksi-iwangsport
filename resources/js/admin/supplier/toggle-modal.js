@@ -146,8 +146,8 @@ function openEditModal(button) {
     // Uncheck semua checkbox edit_kategori terlebih dahulu
     document.querySelectorAll('.edit_kategori').forEach(cb => {
         cb.checked = false;
-        if (typeof updateCheckbox === 'function') {
-            updateCheckbox(cb, cb.id);
+        if (typeof updateKategoriCheckbox === 'function') {
+            updateKategoriCheckbox(cb, cb.id);
         }
     });
 
@@ -155,8 +155,8 @@ function openEditModal(button) {
     document.querySelectorAll('.edit_kategori').forEach(cb => {
         if (kategoriArray.includes(cb.value)) {
             cb.checked = true;
-            if (typeof updateCheckbox === 'function') {
-                updateCheckbox(cb, cb.id);
+            if (typeof updateKategoriCheckbox === 'function') {
+                updateKategoriCheckbox(cb, cb.id);
             }
         }
     });

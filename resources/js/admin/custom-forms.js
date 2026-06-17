@@ -182,12 +182,37 @@ function updateCheckbox(checkbox, prefix) {
     if (!wrapper || !box) return;
 
     if (checkbox.checked) {
-        wrapper.className = 'flex items-center gap-2 p-2 border border-[#0F034D] bg-[#0F034D]/5 ring-1 ring-[#0F034D] rounded-xl cursor-pointer hover:bg-gray-50 transition-all';
+        wrapper.className = 'flex items-center gap-3 p-4 border border-[#0F034D] bg-[#0F034D]/5 ring-1 ring-[#0F034D] rounded-xl cursor-pointer hover:bg-gray-50 transition-all';
         box.className = 'relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-[#0F034D] transition-all';
         if (icon) icon.style.display = 'block';
         if (text) text.className = 'text-sm font-semibold text-[#0F034D]';
     } else {
-        wrapper.className = 'flex items-center gap-2 p-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all';
+        wrapper.className = 'flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all';
+        box.className = 'relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all';
+        if (icon) icon.style.display = 'none';
+        if (text) text.className = 'text-sm font-semibold text-gray-700';
+    }
+}
+
+/**
+ * Update custom checkbox visual styling for kategori bahan (compact version).
+ * @param {HTMLElement} checkbox - The hidden checkbox input
+ * @param {string} prefix - Prefix for wrapper, box, icon, text element IDs
+ */
+function updateKategoriCheckbox(checkbox, prefix) {
+    const wrapper = document.getElementById(`${prefix}_wrapper`);
+    const box = document.getElementById(`${prefix}_box`);
+    const icon = document.getElementById(`${prefix}_icon`);
+    const text = document.getElementById(`${prefix}_text`);
+    if (!wrapper || !box) return;
+
+    if (checkbox.checked) {
+        wrapper.className = 'flex items-center gap-2 p-2 border border-[#0F034D] bg-[#0F034D]/5 ring-1 ring-[#0F034D] rounded-lg cursor-pointer hover:bg-gray-50 transition-all';
+        box.className = 'relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-[#0F034D] transition-all';
+        if (icon) icon.style.display = 'block';
+        if (text) text.className = 'text-sm font-semibold text-[#0F034D]';
+    } else {
+        wrapper.className = 'flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all';
         box.className = 'relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all';
         if (icon) icon.style.display = 'none';
         if (text) text.className = 'text-sm font-medium text-gray-700';
@@ -199,3 +224,4 @@ window.initCustomDropdown = initCustomDropdown;
 window.setCustomDropdownValue = setCustomDropdownValue;
 window.resetCustomDropdown = resetCustomDropdown;
 window.updateCheckbox = updateCheckbox;
+window.updateKategoriCheckbox = updateKategoriCheckbox;
