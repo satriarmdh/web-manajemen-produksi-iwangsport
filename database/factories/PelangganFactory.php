@@ -9,19 +9,14 @@ class PelangganFactory extends Factory
 {
     protected $model = Pelanggan::class;
 
+    protected static int $counter = 0;
+
     public function definition(): array
     {
-        $lastPelanggan = Pelanggan::withTrashed()
-            ->where('kode_pelanggan', 'like', 'PLG-%')
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $nextNumber = $lastPelanggan
-            ? (int) substr($lastPelanggan->kode_pelanggan, 4) + 1
-            : 1;
+        static::$counter++;
 
         return [
-            'kode_pelanggan' => 'PLG-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT),
+            'kode_pelanggan' => 'PLG-' . str_pad(static::$counter, 3, '0', STR_PAD_LEFT),
             'nama_pelanggan' => fake()->name(),
             'no_telp' => fake()->numerify('08##########'),
             'email' => fake()->unique()->safeEmail(),
@@ -36,5 +31,10 @@ class PelangganFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'is_aktif' => false,
         ]);
+    }
+
+    public static function resetCounter(): void
+    {
+        static::$counter = 0;
     }
 }

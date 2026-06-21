@@ -56,7 +56,7 @@
                     </div>
                     <svg id="icon-manajemen" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isManajemenGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-manajemen" class="overflow-hidden transition-all duration-300 {{ $isManajemenGroup ? 'max-h-[500px]' : 'max-h-0' }}">
+                <div id="menu-manajemen" class="overflow-hidden transition-all duration-300 {{ $isManajemenGroup ? 'max-h-96' : 'max-h-0' }}">
                     <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
                         
                         <li>

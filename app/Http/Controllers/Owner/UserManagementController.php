@@ -11,14 +11,6 @@ use Illuminate\Http\Request;
 
 class UserManagementController extends Controller
 {
-    // protected UserManagementService $userManagementService;
-
-    // // Inject UserService ke dalam controller
-    // public function __construct(UserManagementService $userManagementService)
-    // {
-    //     $this->userManagementService = $userManagementService;
-    // }
-
     public function __construct(
         protected UserManagementService $userManagementService
     ) {}

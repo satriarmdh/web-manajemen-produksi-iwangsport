@@ -22,14 +22,30 @@ class StandardBaselineProduksiTest extends TestCase
         parent::setUp();
 
         $this->user = User::factory()->create(['role' => 'admin']);
-        $this->produk = Produk::factory()->create();
-        $this->bahanBaku = BahanBaku::factory()->create(['kategori' => 'kain']);
+        $this->produk = Produk::factory()->create(['warna' => 'hitam']);
+        $this->bahanBaku = BahanBaku::factory()->create(['kategori' => 'kain', 'warna' => 'hitam']);
     }
 
     /**
-     * Test index page loads successfully
+     * Helper: buat pasangan Produk & BahanBaku dengan warna yang sama
+     * agar lolos validasi withValidator (warna harus cocok)
      */
-    public function test_index_page_loads_successfully()
+    private function createMatchingPair(string $warna = 'hitam', string $namaProduk = null, string $namaBahan = null): array
+    {
+        $produk = Produk::factory()->create([
+            'warna' => $warna,
+            'nama_produk' => $namaProduk ?? Produk::factory()->raw()['nama_produk'],
+        ]);
+        $bahanBaku = BahanBaku::factory()->create([
+            'kategori' => 'kain',
+            'warna' => $warna,
+            'nama_bahan' => $namaBahan ?? BahanBaku::factory()->raw()['nama_bahan'],
+        ]);
+
+        return [$produk, $bahanBaku];
+    }
+
+    public function test_admin_dapat_mengakses_halaman_standard_baseline_produksi()
     {
         $response = $this->actingAs($this->user)->get(route('admin.standard-baseline-produksi.index'));
 
@@ -38,10 +54,7 @@ class StandardBaselineProduksiTest extends TestCase
         $response->assertViewHas(['estimasi', 'produks', 'bahanBaku']);
     }
 
-    /**
-     * Test store creates new standard baseline produksi
-     */
-    public function test_store_creates_new_standard_baseline_produksi()
+    public function test_admin_dapat_menambahkan_standard_baseline_produksi()
     {
         $data = [
             'produk_id' => $this->produk->id,
@@ -66,10 +79,7 @@ class StandardBaselineProduksiTest extends TestCase
         ]);
     }
 
-    /**
-     * Test store validation fails with invalid data
-     */
-    public function test_store_validation_fails_with_invalid_data()
+    public function test_validasi_gagal_saat_menambahkan_data_tidak_valid()
     {
         $data = [
             'produk_id' => '',
@@ -84,19 +94,19 @@ class StandardBaselineProduksiTest extends TestCase
         $response->assertSessionHasErrors(['produk_id', 'bahan_baku_id', 'pcs_per_roll', 'toleransi_minus']);
     }
 
-    /**
-     * Test update modifies existing standard baseline produksi
-     */
-    public function test_update_modifies_existing_standard_baseline_produksi()
+    public function test_admin_dapat_memperbarui_standard_baseline_produksi()
     {
+        // Buat baseline dengan pasangan warna yang cocok
+        [$produk, $bahanBaku] = $this->createMatchingPair('navy');
+
         $baseline = StandardBaselineProduksi::factory()->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
+            'produk_id' => $produk->id,
+            'bahan_baku_id' => $bahanBaku->id,
         ]);
 
         $data = [
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
+            'produk_id' => $produk->id,
+            'bahan_baku_id' => $bahanBaku->id,
             'pcs_per_roll' => 200,
             'toleransi_minus' => 15,
             'keterangan' => 'Updated keterangan',
@@ -116,10 +126,7 @@ class StandardBaselineProduksiTest extends TestCase
         ]);
     }
 
-    /**
-     * Test destroy deletes standard baseline produksi
-     */
-    public function test_destroy_deletes_standard_baseline_produksi()
+    public function test_admin_dapat_menghapus_standard_baseline_produksi()
     {
         $baseline = StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,
@@ -135,103 +142,125 @@ class StandardBaselineProduksiTest extends TestCase
         $this->assertSoftDeleted('standard_baseline_produksi', ['id' => $baseline->id]);
     }
 
-    /**
-     * Test filter by status aktif
-     */
-    public function test_filter_by_status_aktif()
+    public function test_admin_dapat_memfilter_berdasarkan_status_aktif()
     {
-        $baselineAktif = StandardBaselineProduksi::factory()->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
+        // Buat pasangan unik untuk masing-masing status
+        [$produkAktif, $bahanAktif] = $this->createMatchingPair('hitam');
+        [$produkNonaktif, $bahanNonaktif] = $this->createMatchingPair('abu');
+
+        StandardBaselineProduksi::factory()->create([
+            'produk_id' => $produkAktif->id,
+            'bahan_baku_id' => $bahanAktif->id,
             'is_aktif' => true,
+            'pcs_per_roll' => 111,
         ]);
 
-        $baselineNonaktif = StandardBaselineProduksi::factory()->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
+        StandardBaselineProduksi::factory()->create([
+            'produk_id' => $produkNonaktif->id,
+            'bahan_baku_id' => $bahanNonaktif->id,
             'is_aktif' => false,
+            'pcs_per_roll' => 222,
         ]);
 
         $response = $this->actingAs($this->user)
             ->get(route('admin.standard-baseline-produksi.index', ['status' => 'aktif']));
 
         $response->assertStatus(200);
-        $response->assertSee($baselineAktif->id);
-        $response->assertDontSee($baselineNonaktif->id);
+        // Gunakan pcs_per_roll sebagai penanda unik karena hanya muncul di baris tabel
+        $response->assertSee('111')
+            ->assertDontSee('222');
     }
 
-    /**
-     * Test filter by status nonaktif
-     */
-    public function test_filter_by_status_nonaktif()
+    public function test_admin_dapat_memfilter_berdasarkan_status_nonaktif()
     {
-        $baselineAktif = StandardBaselineProduksi::factory()->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
+        // Buat pasangan unik untuk masing-masing status
+        [$produkAktif, $bahanAktif] = $this->createMatchingPair('hitam');
+        [$produkNonaktif, $bahanNonaktif] = $this->createMatchingPair('abu');
+
+        StandardBaselineProduksi::factory()->create([
+            'produk_id' => $produkAktif->id,
+            'bahan_baku_id' => $bahanAktif->id,
             'is_aktif' => true,
+            'pcs_per_roll' => 333,
         ]);
 
-        $baselineNonaktif = StandardBaselineProduksi::factory()->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
+        StandardBaselineProduksi::factory()->create([
+            'produk_id' => $produkNonaktif->id,
+            'bahan_baku_id' => $bahanNonaktif->id,
             'is_aktif' => false,
+            'pcs_per_roll' => 444,
         ]);
 
         $response = $this->actingAs($this->user)
             ->get(route('admin.standard-baseline-produksi.index', ['status' => 'nonaktif']));
 
         $response->assertStatus(200);
-        $response->assertDontSee($baselineAktif->id);
-        $response->assertSee($baselineNonaktif->id);
+        // Gunakan pcs_per_roll sebagai penanda unik karena hanya muncul di baris tabel
+        $response->assertDontSee('333')
+            ->assertSee('444');
     }
 
-    /**
-     * Test sort by newest
-     */
-    public function test_sort_by_newest()
+    public function test_admin_dapat_mengurutkan_berdasarkan_waktu_terbaru()
     {
-        StandardBaselineProduksi::factory()->count(3)->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
-        ]);
+        // Buat 3 baseline dengan pasangan produk & bahan baku yang unik
+        for ($i = 0; $i < 3; $i++) {
+            [$produk, $bahan] = $this->createMatchingPair('hitam');
+            StandardBaselineProduksi::factory()->create([
+                'produk_id' => $produk->id,
+                'bahan_baku_id' => $bahan->id,
+                'created_at' => now()->subDays(3 - $i),
+            ]);
+        }
 
         $response = $this->actingAs($this->user)
             ->get(route('admin.standard-baseline-produksi.index', ['sort' => 'newest']));
 
         $response->assertStatus(200);
+
+        $estimasi = $response->viewData('estimasi');
+        $this->assertGreaterThanOrEqual(
+            $estimasi->last()->created_at,
+            $estimasi->first()->created_at
+        );
     }
 
-    /**
-     * Test sort by oldest
-     */
-    public function test_sort_by_oldest()
+    public function test_admin_dapat_mengurutkan_berdasarkan_waktu_terlama()
     {
-        StandardBaselineProduksi::factory()->count(3)->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
-        ]);
+        // Buat 3 baseline dengan pasangan produk & bahan baku yang unik
+        for ($i = 0; $i < 3; $i++) {
+            [$produk, $bahan] = $this->createMatchingPair('hitam');
+            StandardBaselineProduksi::factory()->create([
+                'produk_id' => $produk->id,
+                'bahan_baku_id' => $bahan->id,
+                'created_at' => now()->subDays(3 - $i),
+            ]);
+        }
 
         $response = $this->actingAs($this->user)
             ->get(route('admin.standard-baseline-produksi.index', ['sort' => 'oldest']));
 
         $response->assertStatus(200);
+
+        $estimasi = $response->viewData('estimasi');
+        $this->assertLessThanOrEqual(
+            $estimasi->last()->created_at,
+            $estimasi->first()->created_at
+        );
     }
 
-    /**
-     * Test search by produk name
-     */
-    public function test_search_by_produk_name()
+    public function test_admin_dapat_mencari_berdasarkan_nama_produk()
     {
-        $produk = Produk::factory()->create(['nama_produk' => 'Kaos Polos']);
-        
+        $produk = Produk::factory()->create(['nama_produk' => 'Kaos Polos', 'warna' => 'hitam']);
+
         StandardBaselineProduksi::factory()->create([
             'produk_id' => $produk->id,
             'bahan_baku_id' => $this->bahanBaku->id,
         ]);
 
+        [$produkLain, $bahanLain] = $this->createMatchingPair('abu');
         StandardBaselineProduksi::factory()->create([
-            'produk_id' => $this->produk->id,
-            'bahan_baku_id' => $this->bahanBaku->id,
+            'produk_id' => $produkLain->id,
+            'bahan_baku_id' => $bahanLain->id,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -241,16 +270,14 @@ class StandardBaselineProduksiTest extends TestCase
         $response->assertSee('Kaos Polos');
     }
 
-    /**
-     * Test search by bahan baku name
-     */
-    public function test_search_by_bahan_baku_name()
+    public function test_admin_dapat_mencari_berdasarkan_nama_bahan_baku()
     {
         $bahanBaku = BahanBaku::factory()->create([
             'nama_bahan' => 'Kain Katun',
-            'kategori' => 'kain'
+            'kategori' => 'kain',
+            'warna' => 'hitam',
         ]);
-        
+
         StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,
             'bahan_baku_id' => $bahanBaku->id,
@@ -263,10 +290,7 @@ class StandardBaselineProduksiTest extends TestCase
         $response->assertSee('Kain Katun');
     }
 
-    /**
-     * Test range_bawah accessor
-     */
-    public function test_range_bawah_accessor()
+    public function test_accessor_range_bawah_menghasilkan_selisih_yang_benar()
     {
         $baseline = StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,
@@ -278,10 +302,7 @@ class StandardBaselineProduksiTest extends TestCase
         $this->assertEquals(140, $baseline->range_bawah);
     }
 
-    /**
-     * Test range_bawah accessor with negative result returns zero
-     */
-    public function test_range_bawah_accessor_returns_zero_when_negative()
+    public function test_accessor_range_bawah_mengembalikan_nol_ketika_negatif()
     {
         $baseline = StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,
@@ -293,10 +314,7 @@ class StandardBaselineProduksiTest extends TestCase
         $this->assertEquals(0, $baseline->range_bawah);
     }
 
-    /**
-     * Test relationship with produk
-     */
-    public function test_relationship_with_produk()
+    public function test_relasi_dengan_produk()
     {
         $baseline = StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,
@@ -307,10 +325,7 @@ class StandardBaselineProduksiTest extends TestCase
         $this->assertEquals($this->produk->id, $baseline->produk->id);
     }
 
-    /**
-     * Test relationship with bahan baku
-     */
-    public function test_relationship_with_bahan_baku()
+    public function test_relasi_dengan_bahan_baku()
     {
         $baseline = StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,
@@ -321,20 +336,14 @@ class StandardBaselineProduksiTest extends TestCase
         $this->assertEquals($this->bahanBaku->id, $baseline->bahanBaku->id);
     }
 
-    /**
-     * Test unauthenticated user cannot access index
-     */
-    public function test_unauthenticated_user_cannot_access_index()
+    public function test_user_belum_login_tidak_dapat_mengakses_halaman()
     {
         $response = $this->get(route('admin.standard-baseline-produksi.index'));
 
         $response->assertRedirect('/login');
     }
 
-    /**
-     * Test unauthenticated user cannot store
-     */
-    public function test_unauthenticated_user_cannot_store()
+    public function test_user_belum_login_tidak_dapat_menambahkan_data()
     {
         $data = [
             'produk_id' => $this->produk->id,
@@ -347,10 +356,7 @@ class StandardBaselineProduksiTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    /**
-     * Test unauthenticated user cannot update
-     */
-    public function test_unauthenticated_user_cannot_update()
+    public function test_user_belum_login_tidak_dapat_memperbarui_data()
     {
         $baseline = StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,
@@ -368,10 +374,7 @@ class StandardBaselineProduksiTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    /**
-     * Test unauthenticated user cannot destroy
-     */
-    public function test_unauthenticated_user_cannot_destroy()
+    public function test_user_belum_login_tidak_dapat_menghapus_data()
     {
         $baseline = StandardBaselineProduksi::factory()->create([
             'produk_id' => $this->produk->id,

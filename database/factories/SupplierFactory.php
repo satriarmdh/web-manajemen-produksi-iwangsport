@@ -19,7 +19,7 @@ class SupplierFactory extends Factory
             'email'         => $this->faker->unique()->safeEmail(),
             'alamat'        => $this->faker->address(),
             'catatan'       => $this->faker->optional()->sentence(),
-            'status'        => $this->faker->randomElement(['aktif', 'nonaktif']),
+            'is_aktif'      => $this->faker->boolean(),
         ];
     }
 }

@@ -4,7 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\BahanBaku;
 use App\Models\Supplier;
-use App\Models\StockMovement;
+use App\Models\RiwayatStok;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -30,15 +30,15 @@ class PergerakanStokBahanBakuTest extends TestCase
 
     public function test_admin_dapat_melihat_halaman_stok_masuk()
     {
-        $response = $this->actingAs($this->admin)->get('/admin/pemasukan-bahan');
+        $response = $this->actingAs($this->admin)->get('/admin/pergerakan-stok?tab=masuk');
 
         $response->assertStatus(200);
-        $response->assertViewIs('admin.pemasukan-bahan.index');
+        $response->assertViewIs('admin.pergerakan-stok.index');
     }
 
     public function test_karyawan_non_admin_tidak_dapat_mengakses_halaman_stok_masuk()
     {
-        $response = $this->actingAs($this->karyawanJahit)->get('/admin/pemasukan-bahan');
+        $response = $this->actingAs($this->karyawanJahit)->get('/admin/pergerakan-stok?tab=masuk');
 
         $response->assertStatus(403);
     }
@@ -64,7 +64,7 @@ class PergerakanStokBahanBakuTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->post('/admin/pemasukan-bahan', $data);
 
-        $response->assertRedirect('/admin/pemasukan-bahan');
+        $response->assertRedirect('/admin/pergerakan-stok?tab=masuk');
         $response->assertSessionHas('success');
 
         // Stok harus bertambah
@@ -73,15 +73,15 @@ class PergerakanStokBahanBakuTest extends TestCase
             'stok' => 15
         ]);
 
-        // StockMovement harus tercatat
-        $this->assertDatabaseHas('stock_movements', [
-            'item_type' => 'bahan_baku',
-            'item_id' => $bahan->id,
-            'movement_type' => 'in',
-            'quantity' => 5,
-            'previous_stock' => 10,
-            'new_stock' => 15,
-            'reason' => 'Pembelian dari toko',
+        // RiwayatStok harus tercatat
+        $this->assertDatabaseHas('riwayat_stok', [
+            'jenis_item' => 'bahan_baku',
+            'id_item' => $bahan->id,
+            'jenis_pergerakan' => 'masuk',
+            'jumlah' => 5,
+            'stok_sebelum' => 10,
+            'stok_sesudah' => 15,
+            'keterangan' => 'Pembelian dari toko',
         ]);
     }
 
@@ -100,12 +100,12 @@ class PergerakanStokBahanBakuTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->post('/admin/pemasukan-bahan', $data);
 
-        $response->assertRedirect('/admin/pemasukan-bahan');
+        $response->assertRedirect('/admin/pergerakan-stok?tab=masuk');
 
-        $this->assertDatabaseHas('stock_movements', [
-            'item_id' => $bahan->id,
-            'movement_type' => 'in',
-            'quantity' => 10,
+        $this->assertDatabaseHas('riwayat_stok', [
+            'id_item' => $bahan->id,
+            'jenis_pergerakan' => 'masuk',
+            'jumlah' => 10,
         ]);
     }
 
@@ -244,15 +244,15 @@ class PergerakanStokBahanBakuTest extends TestCase
 
     public function test_admin_dapat_melihat_halaman_stok_keluar()
     {
-        $response = $this->actingAs($this->admin)->get('/admin/pengeluaran-bahan');
+        $response = $this->actingAs($this->admin)->get('/admin/pergerakan-stok?tab=keluar');
 
         $response->assertStatus(200);
-        $response->assertViewIs('admin.pengeluaran-bahan.index');
+        $response->assertViewIs('admin.pergerakan-stok.index');
     }
 
     public function test_karyawan_non_admin_tidak_dapat_mengakses_halaman_stok_keluar()
     {
-        $response = $this->actingAs($this->karyawanJahit)->get('/admin/pengeluaran-bahan');
+        $response = $this->actingAs($this->karyawanJahit)->get('/admin/pergerakan-stok?tab=keluar');
 
         $response->assertStatus(403);
     }
@@ -279,7 +279,7 @@ class PergerakanStokBahanBakuTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->post('/admin/pengeluaran-bahan', $data);
 
-        $response->assertRedirect('/admin/pengeluaran-bahan');
+        $response->assertRedirect('/admin/pergerakan-stok?tab=keluar');
         $response->assertSessionHas('success');
 
         // Stok harus berkurang
@@ -288,15 +288,15 @@ class PergerakanStokBahanBakuTest extends TestCase
             'stok' => 80
         ]);
 
-        // StockMovement harus tercatat
-        $this->assertDatabaseHas('stock_movements', [
-            'item_type' => 'bahan_baku',
-            'item_id' => $bahan->id,
-            'movement_type' => 'out',
-            'quantity' => 20,
-            'previous_stock' => 100,
-            'new_stock' => 80,
-            'reason' => 'Untuk produksi batch A',
+        // RiwayatStok harus tercatat
+        $this->assertDatabaseHas('riwayat_stok', [
+            'jenis_item' => 'bahan_baku',
+            'id_item' => $bahan->id,
+            'jenis_pergerakan' => 'keluar',
+            'jumlah' => 20,
+            'stok_sebelum' => 100,
+            'stok_sesudah' => 80,
+            'keterangan' => 'Diberikan ke: Budi (Karyawan Jahit) | Untuk produksi batch A',
         ]);
     }
 
@@ -371,7 +371,7 @@ class PergerakanStokBahanBakuTest extends TestCase
                     'penerima' => 'Test User',
                 ]);
 
-            $response->assertRedirect('/admin/pengeluaran-bahan');
+            $response->assertRedirect('/admin/pergerakan-stok?tab=keluar');
             
             $bahan->refresh();
             $this->assertEquals(8, $bahan->stok, "Stok {$kategori} tidak berkurang");
@@ -499,7 +499,7 @@ class PergerakanStokBahanBakuTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->post('/admin/pengeluaran-bahan', $data);
 
-        $response->assertRedirect('/admin/pengeluaran-bahan');
+        $response->assertRedirect('/admin/pergerakan-stok?tab=keluar');
         
         // Stok harus jadi 0
         $this->assertDatabaseHas('bahan_baku', [
@@ -541,27 +541,28 @@ class PergerakanStokBahanBakuTest extends TestCase
     }
 
     // ============================================
-    // STOCK MOVEMENT RECORDS
+    // RIWAYAT STOK RECORDS
     // ============================================
 
-    public function test_stock_movement_mencatat_user_id_admin()
+    public function test_riwayat_stok_mencatat_user_id_admin()
     {
-        $bahan = BahanBaku::factory()->create(['stok' => 10]);
+        $bahan = BahanBaku::factory()->create(['stok' => 0]);
 
         $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
             'bahan_baku_id' => $bahan->id,
             'quantity' => 5,
         ]);
 
-        $this->assertDatabaseHas('stock_movements', [
-            'item_id' => $bahan->id,
+        $this->assertDatabaseHas('riwayat_stok', [
+            'id_item' => $bahan->id,
+            'jenis_pergerakan' => 'masuk',
             'user_id' => $this->admin->id,
         ]);
     }
 
-    public function test_stock_movement_mencatat_keterangan_sebagai_reason()
+    public function test_riwayat_stok_mencatat_keterangan()
     {
-        $bahan = BahanBaku::factory()->create(['stok' => 10]);
+        $bahan = BahanBaku::factory()->create(['stok' => 0]);
 
         $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
             'bahan_baku_id' => $bahan->id,
@@ -569,12 +570,15 @@ class PergerakanStokBahanBakuTest extends TestCase
             'keterangan' => 'Pembelian dari supplier A',
         ]);
 
-        $movement = StockMovement::where('item_id', $bahan->id)->first();
+        $riwayat = RiwayatStok::where('id_item', $bahan->id)
+            ->where('jenis_pergerakan', 'masuk')
+            ->latest()
+            ->first();
         
-        $this->assertEquals('Pembelian dari supplier A', $movement->reason);
+        $this->assertEquals('Pembelian dari supplier A', $riwayat->keterangan);
     }
 
-    public function test_multiple_transactions_create_multiple_stock_movements()
+    public function test_banyak_transaksi_membuat_banyak_riwayat_stok()
     {
         $bahan = BahanBaku::factory()->create(['stok' => 0]);
 
@@ -592,7 +596,7 @@ class PergerakanStokBahanBakuTest extends TestCase
             'keterangan' => 'Pembelian kedua',
         ]);
 
-        $this->assertDatabaseCount('stock_movements', 2);
+        $this->assertDatabaseCount('riwayat_stok', 2);
         
         $bahan->refresh();
         $this->assertEquals(15, $bahan->stok);

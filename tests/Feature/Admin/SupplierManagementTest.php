@@ -147,17 +147,18 @@ class SupplierManagementTest extends TestCase
             'email'         => 'premium@supplier.com',
             'alamat'        => 'Jl. Premium No. 100',
             'catatan'       => 'Supplier bahan premium untuk produk eksklusif',
+            'is_aktif'      => 1,
         ];
 
         $response = $this->actingAs($this->admin)->put('/admin/supplier/' . $supplier->id, $dataUpdate);
 
         $response->assertRedirect('/admin/supplier');
-        
+
         $this->assertDatabaseHas('suppliers', [
             'id'            => $supplier->id,
             'nama_supplier' => 'Supplier Premium',
         ]);
-        
+
         $updated = Supplier::find($supplier->id);
         $this->assertContains('benang', $updated->kategori);
         $this->assertContains('kancing', $updated->kategori);
@@ -168,7 +169,7 @@ class SupplierManagementTest extends TestCase
      */
     public function test_admin_dapat_mengubah_status_supplier(): void
     {
-        $supplier = Supplier::factory()->create(['status' => 'aktif']);
+        $supplier = Supplier::factory()->create(['is_aktif' => true]);
 
         $dataUpdate = [
             'nama_supplier' => $supplier->nama_supplier,
@@ -176,16 +177,16 @@ class SupplierManagementTest extends TestCase
             'kontak'        => $supplier->kontak,
             'email'         => $supplier->email,
             'alamat'        => $supplier->alamat,
-            'status'        => 'nonaktif',
+            'is_aktif'      => 0,
         ];
 
         $response = $this->actingAs($this->admin)->put('/admin/supplier/' . $supplier->id, $dataUpdate);
 
         $response->assertRedirect('/admin/supplier');
-        
+
         $this->assertDatabaseHas('suppliers', [
-            'id'     => $supplier->id,
-            'status' => 'nonaktif',
+            'id'       => $supplier->id,
+            'is_aktif' => false,
         ]);
     }
 
@@ -229,9 +230,6 @@ class SupplierManagementTest extends TestCase
         $this->assertStringStartsWith('SUP-', $supplier->kode_supplier);
     }
 
-    /**
-     * SCENARIO 11: Admin dapat mencari supplier berdasarkan nama
-     */
     public function test_admin_dapat_mencari_supplier_berdasarkan_nama(): void
     {
         Supplier::factory()->create(['nama_supplier' => 'PT Tekstil Jaya']);
@@ -268,9 +266,9 @@ class SupplierManagementTest extends TestCase
      */
     public function test_admin_dapat_memfilter_supplier_berdasarkan_status(): void
     {
-        Supplier::factory()->create(['nama_supplier' => 'Supplier Aktif 1', 'status' => 'aktif']);
-        Supplier::factory()->create(['nama_supplier' => 'Supplier Aktif 2', 'status' => 'aktif']);
-        Supplier::factory()->create(['nama_supplier' => 'Supplier Nonaktif', 'status' => 'nonaktif']);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Aktif 1', 'is_aktif' => true]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Aktif 2', 'is_aktif' => true]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Nonaktif', 'is_aktif' => false]);
 
         $response = $this->actingAs($this->admin)->get('/admin/supplier?status=aktif');
 
@@ -295,31 +293,151 @@ class SupplierManagementTest extends TestCase
         $response->assertSeeInOrder(['Alpha Supplier', 'Middle Supplier', 'Zebra Supplier']);
     }
 
-    /**
-     * SCENARIO 15: Admin dapat melihat detail lengkap supplier (via modal)
-     * Detail ditampilkan lewat modal pada halaman index, bukan halaman terpisah.
-     * Yang diuji: halaman index memuat data lengkap supplier untuk ditampilkan di modal detail.
-     */
-    public function test_admin_dapat_melihat_detail_lengkap_supplier(): void
+    public function test_sistem_auto_generate_kode_supplier_sequential()
     {
-        $supplier = Supplier::factory()->create([
-            'nama_supplier' => 'PT Detail Lengkap',
-            'kategori'      => ['kain', 'benang'],
-            'kontak'        => '08111222333',
-            'email'         => 'detail@supplier.com',
-            'alamat'        => 'Jl. Detail Panjang No. 99, Kota Bandung, Jawa Barat 40123',
-            'catatan'       => 'Supplier utama untuk bahan katun premium, pengiriman setiap minggu',
-            'status'        => 'aktif',
+        $service = new \App\Services\SupplierService();
+        
+        $supplier1 = Supplier::create([
+            'nama_supplier' => 'Supplier Pertama',
+            'kategori' => ['kain'],
+            'kontak' => '08111111111',
+            'email' => 'supplier1@test.com',
+            'alamat' => 'Alamat 1',
+            'kode_supplier' => $service->generateKode(),
         ]);
+        
+        $supplier2 = Supplier::create([
+            'nama_supplier' => 'Supplier Kedua',
+            'kategori' => ['benang'],
+            'kontak' => '08222222222',
+            'email' => 'supplier2@test.com',
+            'alamat' => 'Alamat 2',
+            'kode_supplier' => $service->generateKode(),
+        ]);
+        
+        $supplier3 = Supplier::create([
+            'nama_supplier' => 'Supplier Ketiga',
+            'kategori' => ['kancing'],
+            'kontak' => '08333333333',
+            'email' => 'supplier3@test.com',
+            'alamat' => 'Alamat 3',
+            'kode_supplier' => $service->generateKode(),
+        ]);
+
+        $this->assertEquals('SUP-001', $supplier1->kode_supplier);
+        $this->assertEquals('SUP-002', $supplier2->kode_supplier);
+        $this->assertEquals('SUP-003', $supplier3->kode_supplier);
+    }
+
+    public function test_admin_dapat_mengurutkan_supplier_berdasarkan_nama_desc(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'Alpha Supplier']);
+        Supplier::factory()->create(['nama_supplier' => 'Zebra Supplier']);
+
+        $response = $this->actingAs($this->admin)->get('/admin/supplier?sort=nama_desc');
+
+        $response->assertStatus(200);
+        $suppliers = $response->viewData('suppliers');
+        $this->assertEquals('Zebra Supplier', $suppliers->first()->nama_supplier);
+    }
+
+    public function test_admin_dapat_mengurutkan_supplier_berdasarkan_waktu_terbaru(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Lama', 'created_at' => now()->subDays(5)]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Baru', 'created_at' => now()]);
+
+        $response = $this->actingAs($this->admin)->get('/admin/supplier?sort=newest');
+
+        $response->assertStatus(200);
+        $suppliers = $response->viewData('suppliers');
+        $this->assertEquals('Supplier Baru', $suppliers->first()->nama_supplier);
+    }
+
+    public function test_admin_dapat_mengurutkan_supplier_berdasarkan_waktu_terlama(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Baru', 'created_at' => now()]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Lama', 'created_at' => now()->subDays(5)]);
+
+        $response = $this->actingAs($this->admin)->get('/admin/supplier?sort=oldest');
+
+        $response->assertStatus(200);
+        $suppliers = $response->viewData('suppliers');
+        $this->assertEquals('Supplier Lama', $suppliers->first()->nama_supplier);
+    }
+
+    public function test_default_sort_adalah_terbaru(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Lama', 'created_at' => now()->subDays(5)]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Baru', 'created_at' => now()]);
 
         $response = $this->actingAs($this->admin)->get('/admin/supplier');
 
         $response->assertStatus(200);
-        // Data detail supplier tersedia di halaman (untuk modal detail)
-        $response->assertSee('PT Detail Lengkap');
-        $response->assertSee('Jl. Detail Panjang No. 99, Kota Bandung, Jawa Barat 40123');
-        $response->assertSee('Supplier utama untuk bahan katun premium');
-        $response->assertSee('detail@supplier.com');
-        $response->assertSee('08111222333');
+        $suppliers = $response->viewData('suppliers');
+        $this->assertEquals('Supplier Baru', $suppliers->first()->nama_supplier);
+    }
+
+    public function test_halaman_index_menampilkan_pagination_ketika_data_lebih_dari_10(): void
+    {
+        Supplier::factory()->count(15)->create();
+
+        $response = $this->actingAs($this->admin)->get('/admin/supplier');
+
+        $response->assertStatus(200)
+            ->assertSee('Pagination Navigation')
+            ->assertSee('Menampilkan');
+    }
+
+    public function test_pencarian_tidak_menemukan_hasil(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'CV Makmur Sejahtera']);
+
+        $response = $this->actingAs($this->admin)->get('/admin/supplier?search=Zzzzzz');
+
+        $response->assertStatus(200);
+        $suppliers = $response->viewData('suppliers');
+        $this->assertCount(0, $suppliers);
+    }
+
+    public function test_data_supplier_yang_dihapus_tidak_muncul_di_halaman_index(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Aktif']);
+        $deleted = Supplier::factory()->create(['nama_supplier' => 'Supplier Dihapus']);
+        $deleted->delete();
+
+        $response = $this->actingAs($this->admin)->get('/admin/supplier');
+
+        $response->assertSee('Supplier Aktif')
+            ->assertDontSee('Supplier Dihapus');
+    }
+
+    public function test_admin_dapat_menggabungkan_filter_dan_search(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Kain Aktif', 'kategori' => ['kain'], 'is_aktif' => true]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Kain Nonaktif', 'kategori' => ['kain'], 'is_aktif' => false]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Benang Aktif', 'kategori' => ['benang'], 'is_aktif' => true]);
+
+        $response = $this->actingAs($this->admin)
+            ->get('/admin/supplier?search=Supplier Kain&status=aktif');
+
+        $response->assertStatus(200)
+            ->assertSee('Supplier Kain Aktif')
+            ->assertDontSee('Supplier Kain Nonaktif')
+            ->assertDontSee('Supplier Benang Aktif');
+    }
+
+    public function test_admin_dapat_menggabungkan_filter_kategori_dan_sort(): void
+    {
+        Supplier::factory()->create(['nama_supplier' => 'Zebra Kain', 'kategori' => ['kain'], 'created_at' => now()]);
+        Supplier::factory()->create(['nama_supplier' => 'Alpha Kain', 'kategori' => ['kain'], 'created_at' => now()->subDay()]);
+        Supplier::factory()->create(['nama_supplier' => 'Beta Benang', 'kategori' => ['benang'], 'created_at' => now()]);
+
+        $response = $this->actingAs($this->admin)
+            ->get('/admin/supplier?kategori=kain&sort=nama_asc');
+
+        $response->assertStatus(200);
+        $suppliers = $response->viewData('suppliers');
+        $this->assertEquals('Alpha Kain', $suppliers->first()->nama_supplier);
+        $this->assertCount(2, $suppliers);
     }
 }
