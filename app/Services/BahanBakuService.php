@@ -3,10 +3,11 @@
 namespace App\Services;
 
 use App\Models\BahanBaku;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class BahanBakuService
 {
-    public function getAllPaginated(array $filters = [], int $perPage = 10)
+    public function getAllPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         $query = BahanBaku::query();
 

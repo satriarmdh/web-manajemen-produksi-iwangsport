@@ -282,7 +282,7 @@
 
         @if($suppliers->hasPages())
             <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
-                {{ $suppliers->links() }}
+                <x-pagination.custom-global-pagination :paginator="$suppliers" />
             </div>
         @endif
     </div>

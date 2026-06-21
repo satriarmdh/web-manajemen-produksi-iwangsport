@@ -22,13 +22,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (modalId === 'add-modal-masuk') {
                     resetCustomDropdown('masuk_bahan_baku');
                     resetCustomDropdown('masuk_supplier');
+                    updateSatuanDisplay('masuk', '');
                 } else if (modalId === 'add-modal-keluar') {
                     resetCustomDropdown('keluar_bahan_baku');
                     resetCustomDropdown('keluar_penerima');
+                    updateSatuanDisplay('keluar', '');
                 }
             });
         }
     });
+});
+
+// ============================================
+// UPDATE SATUAN DINAMIS SAAT BAHAN BAKU DIPILIH
+// ============================================
+function updateSatuanDisplay(type, satuan) {
+    const badge = document.getElementById(`${type}_satuan_badge`);
+    const label = document.getElementById(`${type}_satuan_label`);
+    
+    if (satuan) {
+        if (badge) {
+            badge.textContent = satuan;
+            badge.className = 'absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#0F034D] bg-[#0F034D]/10 px-2 py-1 rounded-md';
+        }
+        if (label) label.textContent = `(${satuan})`;
+    } else {
+        if (badge) {
+            badge.textContent = '—';
+            badge.className = 'absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md';
+        }
+        if (label) label.textContent = '';
+    }
+}
+
+// Listen for bahan baku selection changes
+document.addEventListener('DOMContentLoaded', () => {
+    // Stok Masuk
+    const masukHidden = document.getElementById('masuk_bahan_baku_value');
+    if (masukHidden) {
+        masukHidden.addEventListener('change', function () {
+            const dropdown = document.getElementById('masuk_bahan_baku_dropdown');
+            if (!dropdown) return;
+            const selected = dropdown.querySelector(`.dropdown-option[data-value="${this.value}"]`);
+            const satuan = selected ? selected.dataset.satuan : '';
+            updateSatuanDisplay('masuk', satuan);
+        });
+    }
+
+    // Stok Keluar
+    const keluarHidden = document.getElementById('keluar_bahan_baku_value');
+    if (keluarHidden) {
+        keluarHidden.addEventListener('change', function () {
+            const dropdown = document.getElementById('keluar_bahan_baku_dropdown');
+            if (!dropdown) return;
+            const selected = dropdown.querySelector(`.dropdown-option[data-value="${this.value}"]`);
+            const satuan = selected ? selected.dataset.satuan : '';
+            updateSatuanDisplay('keluar', satuan);
+        });
+    }
 });
 
 // ============================================
@@ -178,3 +229,4 @@ function showDetail(type, data) {
 window.toggleDropdown = toggleDropdown;
 window.toggleFilterMenu = toggleFilterMenu;
 window.showDetail = showDetail;
+window.updateSatuanDisplay = updateSatuanDisplay;

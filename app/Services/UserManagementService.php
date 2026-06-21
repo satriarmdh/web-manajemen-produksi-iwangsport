@@ -4,16 +4,43 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserManagementService
 {
     /**
-     * Mengambil semua data pengguna terbaru
+     * Get users dengan filter, search, sorting, dan pagination
      */
-    public function getAllUsers(): Collection
+    public function getUsersPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
-        return User::latest()->get();
+        $query = User::query();
+
+        // Pencarian berdasarkan nama atau email
+        if (!empty($filters['search'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('email', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        // Filter berdasarkan role
+        if (!empty($filters['role'])) {
+            $query->where('role', $filters['role']);
+        }
+
+        // Sorting
+        if (!empty($filters['sort'])) {
+            match ($filters['sort']) {
+                'nama_asc' => $query->orderBy('name', 'asc'),
+                'nama_desc' => $query->orderBy('name', 'desc'),
+                'terlama' => $query->orderBy('created_at', 'asc'),
+                default => $query->orderBy('created_at', 'desc'),
+            };
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
     
     /**

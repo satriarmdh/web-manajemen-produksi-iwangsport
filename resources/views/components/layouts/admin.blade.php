@@ -44,8 +44,9 @@
                 $isBahanBaku = request()->routeIs('admin.bahan-baku.*'); 
                 $isProduk = request()->routeIs('admin.produk.*'); 
                 $isSupplier = request()->routeIs('admin.supplier.*');
+                $isPelanggan = request()->routeIs('admin.pelanggan.*');
                 $isStandardBaseline = request()->routeIs('admin.standard-baseline-produksi.*');
-                $isManajemenGroup = $isBahanBaku || $isProduk || $isSupplier || $isStandardBaseline;
+                $isManajemenGroup = $isBahanBaku || $isProduk || $isSupplier || $isPelanggan || $isStandardBaseline;
             @endphp
             <div>
                 <button onclick="toggleMenu('menu-manajemen', 'icon-manajemen')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isManajemenGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
@@ -55,12 +56,12 @@
                     </div>
                     <svg id="icon-manajemen" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isManajemenGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-manajemen" class="overflow-hidden transition-all duration-300 {{ $isManajemenGroup ? 'max-h-96' : 'max-h-0' }}">
+                <div id="menu-manajemen" class="overflow-hidden transition-all duration-300 {{ $isManajemenGroup ? 'max-h-[500px]' : 'max-h-0' }}">
                     <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
                         
                         <li>
                             <a href="{{ route('admin.bahan-baku.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isBahanBaku ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isProduk || $isSupplier || $isStandardBaseline) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isProduk || $isSupplier || $isPelanggan || $isStandardBaseline) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isBahanBaku ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Bahan Baku
@@ -69,7 +70,7 @@
                         
                         <li>
                             <a href="{{ route('admin.produk.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isProduk ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isSupplier || $isStandardBaseline) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isStandardBaseline || $isSupplier || $isPelanggan) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isProduk ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Produk
@@ -77,19 +78,28 @@
                         </li>
                         
                         <li>
+                            <a href="{{ route('admin.standard-baseline-produksi.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isStandardBaseline ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ ($isSupplier || $isPelanggan) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
+                                Standard Baseline Produksi
+                            </a>
+                        </li>
+
+                        <li>
                             <a href="{{ route('admin.supplier.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isSupplier ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isPelanggan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isSupplier ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Supplier
                             </a>
                         </li>
-                        
+
                         <li>
-                            <a href="{{ route('admin.standard-baseline-produksi.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isStandardBaseline ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isStandardBaseline ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                Standard Baseline Produksi
+                            <a href="{{ route('admin.pelanggan.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPelanggan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                                <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isPelanggan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isPelanggan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                Pelanggan
                             </a>
                         </li>
 

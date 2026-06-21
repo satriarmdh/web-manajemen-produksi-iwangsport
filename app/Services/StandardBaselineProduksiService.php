@@ -12,7 +12,7 @@ class StandardBaselineProduksiService
     /**
      * Get standard baseline produksi dengan filter, search, dan sorting
      */
-    public function getEstimasi(array $filters = []): LengthAwarePaginator
+    public function getEstimasi(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         $query = StandardBaselineProduksi::with(['produk', 'bahanBaku']);
 
@@ -57,7 +57,7 @@ class StandardBaselineProduksiService
             $query->latest();
         }
 
-        return $query->paginate(10)->withQueryString();
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**

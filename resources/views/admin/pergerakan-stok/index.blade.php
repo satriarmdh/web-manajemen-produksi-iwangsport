@@ -13,22 +13,6 @@
         Pergerakan Stok Bahan Baku
     </x-slot:header>
 
-    @if(session('success'))
-        <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-            <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <!-- Tab Navigation -->
         <div class="border-b border-gray-200">
@@ -269,7 +253,7 @@
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jumlah</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Supplier</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</th>
-                            <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 bg-white">
@@ -290,8 +274,8 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $item->supplier?->nama_supplier ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex items-center justify-center gap-1">
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-1">
                                         <button onclick="showDetail('masuk', {{ json_encode([
                                             'tanggal' => $item->created_at->format('d M Y H:i'),
                                             'bahan_baku' => $item->bahanBaku?->nama_bahan,
@@ -305,7 +289,7 @@
                                         ]) }})" class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </button>
-                                        <form method="POST" action="{{ route('admin.pemasukan-bahan.destroy', $item) }}" onsubmit="return confirm('Yakin hapus transaksi ini?')">
+                                        <form method="POST" action="{{ route('admin.pemasukan-bahan.destroy', $item) }}" onsubmit="return confirmDelete(event)">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -325,9 +309,11 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-6 py-4 border-t border-gray-100">
-                {{ $stokMasuk->links() }}
-            </div>
+            @if($stokMasuk->hasPages())
+                <div class="px-6 py-4 border-t border-gray-100">
+                    <x-pagination.custom-global-pagination :paginator="$stokMasuk" />
+                </div>
+            @endif
         </div>
 
         <!-- Tab Content: Stok Keluar -->
@@ -341,7 +327,7 @@
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jumlah</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Penerima</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</th>
-                            <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 bg-white">
@@ -362,8 +348,8 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $item->penerima }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex items-center justify-center gap-1">
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-1">
                                         <button onclick="showDetail('keluar', {{ json_encode([
                                             'tanggal' => $item->created_at->format('d M Y H:i'),
                                             'bahan_baku' => $item->bahanBaku?->nama_bahan,
@@ -377,7 +363,7 @@
                                         ]) }})" class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </button>
-                                        <form method="POST" action="{{ route('admin.pengeluaran-bahan.destroy', $item) }}" onsubmit="return confirm('Yakin hapus transaksi ini?')">
+                                        <form method="POST" action="{{ route('admin.pengeluaran-bahan.destroy', $item) }}" onsubmit="return confirmDelete(event)">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -397,9 +383,11 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-6 py-4 border-t border-gray-100">
-                {{ $stokKeluar->links() }}
-            </div>
+            @if($stokKeluar->hasPages())
+                <div class="px-6 py-4 border-t border-gray-100">
+                    <x-pagination.custom-global-pagination :paginator="$stokKeluar" />
+                </div>
+            @endif
         </div>
     </div>
 
@@ -479,8 +467,8 @@
                             <div id="masuk_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
                                 <div class="p-2">
                                     @foreach($bahanBakuAll as $b)
-                                    <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $b->id }}" data-text="{{ $b->nama_bahan }}">
-                                        <span class="text-sm font-medium text-gray-700">{{ $b->nama_bahan }} <span class="text-gray-400">({{ $b->kode_bahan }})</span></span>
+                                    <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $b->id }}" data-text="{{ ucwords($b->nama_bahan.' - '.$b->warna) }}" data-satuan="{{ $b->satuan }}">
+                                        <span class="text-sm font-medium text-gray-700">{{ ucwords($b->nama_bahan.' - '.$b->warna) }} <span class="text-gray-400">({{ $b->kode_bahan }})</span></span>
                                         <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
                                     @endforeach
@@ -491,8 +479,11 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah <span class="text-red-500">*</span></label>
-                        <input type="number" name="quantity" min="1" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] text-sm transition-colors" placeholder="Masukkan jumlah">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah <span id="masuk_satuan_label" class="text-gray-400 font-normal"></span><span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="number" name="quantity" min="1" required class="w-full px-4 py-2.5 pr-20 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] text-sm transition-colors" placeholder="Masukkan jumlah">
+                            <span id="masuk_satuan_badge" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">—</span>
+                        </div>
                     </div>
 
                     <div>
@@ -575,8 +566,8 @@
                             <div id="keluar_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto hidden">
                                 <div class="p-2">
                                     @foreach($bahanBakuNonKain as $b)
-                                    <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $b->id }}" data-text="{{ $b->nama_bahan }}">
-                                        <span class="text-sm font-medium text-gray-700">{{ $b->nama_bahan }} <span class="text-gray-400">({{ $b->kode_bahan }})</span> <span class="text-xs text-gray-400">- Stok: {{ $b->stok }}</span></span>
+                                    <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $b->id }}" data-text="{{ ucwords($b->nama_bahan.' - '.$b->warna) }}" data-satuan="{{ $b->satuan }}">
+                                        <span class="text-sm font-medium text-gray-700">{{ ucwords($b->nama_bahan.' - '.$b->warna) }} <span class="text-gray-400">({{ $b->kode_bahan }})</span> <span class="text-xs text-gray-400">- Stok: {{ $b->stok }}</span></span>
                                         <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
                                     @endforeach
@@ -587,8 +578,11 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah <span class="text-red-500">*</span></label>
-                        <input type="number" name="quantity" min="1" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] text-sm transition-colors" placeholder="Masukkan jumlah">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah <span id="keluar_satuan_label" class="text-gray-400 font-normal"></span><span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="number" name="quantity" min="1" required class="w-full px-4 py-2.5 pr-20 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] text-sm transition-colors" placeholder="Masukkan jumlah">
+                            <span id="keluar_satuan_badge" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">—</span>
+                        </div>
                     </div>
 
                     <div>
@@ -638,4 +632,31 @@
         'resources/js/admin/custom-forms.js',
         'resources/js/admin/pergerakan-stok/toggle-modal.js',
     ])
+
+    <script>
+        function confirmDelete(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Hapus Transaksi?',
+                text: 'Data yang dihapus tidak dapat dikembalikan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-xl font-sans',
+                    confirmButton: 'px-5 py-2.5 text-sm font-semibold rounded-lg',
+                    cancelButton: 'px-5 py-2.5 text-sm font-semibold rounded-lg'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    event.target.submit();
+                }
+            });
+            return false;
+        }
+    </script>
 </x-layouts.admin>

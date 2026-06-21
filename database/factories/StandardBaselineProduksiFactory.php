@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\EstimasiProduksi;
+use App\Models\StandardBaselineProduksi;
 use App\Models\Produk;
 use App\Models\BahanBaku;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<EstimasiProduksi>
+ * @extends Factory<StandardBaselineProduksi>
  */
-class EstimasiProduksiFactory extends Factory
+class StandardBaselineProduksiFactory extends Factory
 {
-    protected $model = EstimasiProduksi::class;
+    protected $model = StandardBaselineProduksi::class;
 
     /**
      * Define the model's default state.
@@ -32,7 +32,7 @@ class EstimasiProduksiFactory extends Factory
     }
 
     /**
-     * State untuk estimasi nonaktif
+     * State untuk baseline nonaktif
      */
     public function nonaktif(): static
     {

@@ -286,7 +286,7 @@
 
         @if($bahanBaku->hasPages())
             <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
-                {{ $bahanBaku->links() }}
+                <x-pagination.custom-global-pagination :paginator="$bahanBaku" />
             </div>
         @endif
     </div>

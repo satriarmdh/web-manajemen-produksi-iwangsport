@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\UserManagementService;
 use App\Http\Requests\Owner\StoreUserRequest;
 use App\Http\Requests\Owner\UpdateUserRequest;
+use Illuminate\Http\Request;
 
 class UserManagementController extends Controller
 {
@@ -22,11 +23,15 @@ class UserManagementController extends Controller
         protected UserManagementService $userManagementService
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = $this->userManagementService->getAllUsers();
+        $users = $this->userManagementService->getUsersPaginated([
+            'search' => $request->search,
+            'role' => $request->role,
+            'sort' => $request->sort,
+        ]);
         
-        return view('owner.manajemen-pengguna.index', compact('users')); 
+        return view('owner.manajemen-pengguna.index', compact('users'));
     }
 
     public function create()

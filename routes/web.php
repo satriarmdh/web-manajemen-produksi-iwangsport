@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\StandardBaselineProduksiController;
 use App\Http\Controllers\Admin\PergerakanStokController;
 use App\Http\Controllers\Admin\PemasukanBahanController;
 use App\Http\Controllers\Admin\PengeluaranBahanController;
+use App\Http\Controllers\Admin\PelangganController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,7 +49,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('produk', ProdukController::class)->except(['create', 'show', 'edit']);
 
     // Rute pengelolaan Supplier
-    Route::resource('supplier', SupplierController::class)->except(['create', 'show', 'edit']);
+    Route::resource('supplier', SupplierController::class)->except(['create', 'edit']);
+
+    // Rute pengelolaan Pelanggan
+    Route::resource('pelanggan', PelangganController::class)->except(['create', 'edit']);
 
     // Rute pengelolaan Standard Baseline Produksi
     Route::resource('standard-baseline-produksi', StandardBaselineProduksiController::class)->except(['create', 'show', 'edit']);

@@ -31,7 +31,7 @@ class SupplierService
     /**
      * Get suppliers dengan filter, search, dan sorting
      */
-    public function getSuppliers(array $filters = []): LengthAwarePaginator
+    public function getSuppliers(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         $query = Supplier::query();
 
@@ -71,7 +71,7 @@ class SupplierService
             $query->latest();
         }
 
-        return $query->paginate(10)->withQueryString();
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**

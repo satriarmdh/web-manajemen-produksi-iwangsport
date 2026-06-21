@@ -124,5 +124,10 @@
                 </tbody>
             </table>
         </div>
+        @if($users->hasPages())
+            <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
+                <x-pagination.custom-global-pagination :paginator="$users" />
+            </div>
+        @endif
     </div>
 </x-layouts.owner>

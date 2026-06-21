@@ -267,7 +267,7 @@
 
         @if($estimasi->hasPages())
             <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
-                {{ $estimasi->links() }}
+                <x-pagination.custom-global-pagination :paginator="$estimasi" />
             </div>
         @endif
     </div>

@@ -6,12 +6,102 @@ use App\Models\BahanBaku;
 use App\Models\RiwayatStok;
 use App\Models\StokMasukBahanBaku;
 use App\Models\StokKeluarBahanBaku;
+use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PergerakanStokService
 {
+    /**
+     * Get stok masuk dengan filter dan pagination
+     */
+    public function getStokMasukPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    {
+        $query = StokMasukBahanBaku::with(['bahanBaku', 'supplier', 'user'])->latest();
+
+        // Filter pencarian
+        if (!empty($filters['search'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->whereHas('bahanBaku', function ($q2) use ($filters) {
+                    $q2->where('nama_bahan', 'like', "%{$filters['search']}%")
+                       ->orWhere('kode_bahan', 'like', "%{$filters['search']}%");
+                })->orWhereHas('supplier', function ($q2) use ($filters) {
+                    $q2->where('nama_supplier', 'like', "%{$filters['search']}%");
+                });
+            });
+        }
+
+        // Filter kategori bahan baku
+        if (!empty($filters['kategori'])) {
+            $query->whereHas('bahanBaku', function ($q) use ($filters) {
+                $q->where('kategori', $filters['kategori']);
+            });
+        }
+
+        // Filter supplier
+        if (!empty($filters['supplier'])) {
+            $query->where('supplier_id', $filters['supplier']);
+        }
+
+        // Filter tanggal
+        if (!empty($filters['tanggal'])) {
+            $query->whereDate('created_at', $filters['tanggal']);
+        }
+
+        return $query->paginate($perPage, ['*'], 'page_masuk')->withQueryString();
+    }
+
+    /**
+     * Get stok keluar dengan filter dan pagination
+     */
+    public function getStokKeluarPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    {
+        $query = StokKeluarBahanBaku::with(['bahanBaku', 'user'])->latest();
+
+        // Filter pencarian
+        if (!empty($filters['search'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->whereHas('bahanBaku', function ($q2) use ($filters) {
+                    $q2->where('nama_bahan', 'like', "%{$filters['search']}%")
+                       ->orWhere('kode_bahan', 'like', "%{$filters['search']}%");
+                })->orWhere('penerima', 'like', "%{$filters['search']}%");
+            });
+        }
+
+        // Filter kategori bahan baku
+        if (!empty($filters['kategori'])) {
+            $query->whereHas('bahanBaku', function ($q) use ($filters) {
+                $q->where('kategori', $filters['kategori']);
+            });
+        }
+
+        // Filter tanggal
+        if (!empty($filters['tanggal'])) {
+            $query->whereDate('created_at', $filters['tanggal']);
+        }
+
+        return $query->paginate($perPage, ['*'], 'page_keluar')->withQueryString();
+    }
+
+    /**
+     * Get data untuk form dan filter dropdown
+     */
+    public function getFormData(): array
+    {
+        return [
+            'bahanBakuAll' => BahanBaku::where('is_aktif', true)->orderBy('nama_bahan')->get(),
+            'bahanBakuNonKain' => BahanBaku::where('is_aktif', true)
+                ->where('kategori', '!=', 'kain')
+                ->orderBy('nama_bahan')
+                ->get(),
+            'suppliers' => Supplier::where('is_aktif', true)->orderBy('nama_supplier')->get(),
+            'karyawan' => User::whereNotIn('role', ['admin', 'owner'])->orderBy('name')->get(),
+        ];
+    }
+    
     /**
      * Simpan transaksi stok MASUK + catat riwayat + update stok bahan baku.
      */
