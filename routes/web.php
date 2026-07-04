@@ -12,6 +12,9 @@ use App\Http\Controllers\Admin\PergerakanStokController;
 use App\Http\Controllers\Admin\PemasukanBahanController;
 use App\Http\Controllers\Admin\PengeluaranBahanController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\PerintahProduksiController;
+use App\Http\Controllers\Owner\PerintahProduksiOwnerController;
+use App\Http\Controllers\Produksi\PotongController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,6 +34,11 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     })->name('persetujuan-workorder');
 
     Route::resource('users', UserManagementController::class)->except(['show']);
+
+    // Rute Perintah Produksi untuk Approval Owner (BELEUM DIPAKAI)
+    Route::get('perintah-produksi', [PerintahProduksiOwnerController::class, 'index'])->name('perintah-produksi.index');
+    Route::post('perintah-produksi/{perintahProduksi}/approve', [PerintahProduksiOwnerController::class, 'approve'])->name('perintah-produksi.approve');
+    Route::post('perintah-produksi/{perintahProduksi}/reject', [PerintahProduksiOwnerController::class, 'reject'])->name('perintah-produksi.reject');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -65,6 +73,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Rute Pengeluaran Bahan Baku (Stok Keluar)
     Route::resource('pengeluaran-bahan', PengeluaranBahanController::class)->except(['create', 'show', 'edit']);
+
+    // Rute Perintah Produksi
+    Route::resource('perintah-produksi', PerintahProduksiController::class);
+    Route::post('perintah-produksi/{perintahProduksi}/selesai', [PerintahProduksiController::class, 'selesai'])->name('perintah-produksi.selesai');
+    Route::get('perintah-produksi/{perintahProduksi}/cetak-pdf', [PerintahProduksiController::class, 'cetakPdf'])->name('perintah-produksi.cetak-pdf');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -73,4 +86,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/produksi/potong', function () { return 'Produksi Potong'; })->name('produksi.potong');
     Route::get('/produksi/jahit', function () { return 'Produksi Jahit'; })->name('produksi.jahit');
     Route::get('/produksi/finishing', function () { return 'Produksi Finishing'; })->name('produksi.finishing');
+
+    // Rute Input Hasil Potong (BELUM DIPAKAI)
+    Route::post('/produksi/potong/{detail}/input-hasil', [PotongController::class, 'inputHasil'])->name('produksi.potong.input-hasil');
 });
