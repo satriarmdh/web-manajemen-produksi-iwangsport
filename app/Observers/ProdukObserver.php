@@ -23,6 +23,8 @@ class ProdukObserver
                 'stok_sesudah'     => $produk->stok,
                 'user_id'          => auth()->id(),
                 'keterangan'       => 'Stok awal produk ' . $produk->nama_produk,
+                'referensi_type'   => Produk::class,
+                'referensi_id'     => $produk->id,
             ]);
         }
     }
@@ -46,6 +48,8 @@ class ProdukObserver
                 'stok_sesudah'     => $stokSesudah,
                 'user_id'          => auth()->id(),
                 'keterangan'       => 'Koreksi stok saat edit data produk',
+                'referensi_type'   => Produk::class,
+                'referensi_id'     => $produk->id,
             ]);
         }
     }

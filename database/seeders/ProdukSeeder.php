@@ -21,7 +21,7 @@ class ProdukSeeder extends Seeder
                 'warna' => 'hitam',
                 'harga_satuan' => 85000,
                 'satuan' => 'pcs',
-                'stok' => 0,
+                'stok' => 1000,
             ],
             [
                 'kode_produk' => 'CLN-002',
@@ -30,7 +30,7 @@ class ProdukSeeder extends Seeder
                 'warna' => 'navy',
                 'harga_satuan' => 85000,
                 'satuan' => 'pcs',
-                'stok' => 0,
+                'stok' => 1200,
             ],
             [
                 'kode_produk' => 'CLN-003',
@@ -39,7 +39,7 @@ class ProdukSeeder extends Seeder
                 'warna' => 'abu-abu',
                 'harga_satuan' => 95000,
                 'satuan' => 'pcs',
-                'stok' => 0,
+                'stok' => 2000,
             ],
             // Celana Olahraga - Ukuran Jumbo
             [
@@ -49,7 +49,7 @@ class ProdukSeeder extends Seeder
                 'warna' => 'hitam',
                 'harga_satuan' => 100000,
                 'satuan' => 'pcs',
-                'stok' => 0,
+                'stok' => 500,
             ],
             [
                 'kode_produk' => 'CLN-005',
@@ -58,7 +58,7 @@ class ProdukSeeder extends Seeder
                 'warna' => 'navy',
                 'harga_satuan' => 100000,
                 'satuan' => 'pcs',
-                'stok' => 0,
+                'stok' => 200,
             ],
             [
                 'kode_produk' => 'CLN-006',
@@ -67,12 +67,15 @@ class ProdukSeeder extends Seeder
                 'warna' => 'hitam',
                 'harga_satuan' => 110000,
                 'satuan' => 'pcs',
-                'stok' => 0,
+                'stok' => 800,
             ],
         ];
 
         foreach ($produks as $produk) {
-            Produk::create($produk);
+            Produk::updateOrCreate(
+                ['kode_produk' => $produk['kode_produk']],
+                $produk
+            );
         }
     }
 }

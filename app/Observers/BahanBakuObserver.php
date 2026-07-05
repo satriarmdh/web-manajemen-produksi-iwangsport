@@ -23,6 +23,8 @@ class BahanBakuObserver
                 'stok_sesudah'     => $bahanBaku->stok,
                 'user_id'          => auth()->id(),
                 'keterangan'       => 'Stok awal bahan baku ' . $bahanBaku->nama_bahan,
+                'referensi_type'   => BahanBaku::class,
+                'referensi_id'     => $bahanBaku->id,
             ]);
         }
     }
@@ -46,6 +48,8 @@ class BahanBakuObserver
                 'stok_sesudah'     => $stokSesudah,
                 'user_id'          => auth()->id(),
                 'keterangan'       => 'Koreksi stok saat edit data bahan baku',
+                'referensi_type'   => BahanBaku::class,
+                'referensi_id'     => $bahanBaku->id,
             ]);
         }
     }

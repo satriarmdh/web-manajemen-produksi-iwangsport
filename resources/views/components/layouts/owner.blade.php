@@ -41,7 +41,7 @@
                 <span class="sidebar-text font-medium text-sm whitespace-nowrap">Dashboard</span>
             </a>
 
-            @php $isProduksiGroup = request()->routeIs('owner.persetujuan-workorder', 'owner.pantau-progres'); @endphp
+            @php $isProduksiGroup = request()->routeIs('owner.persetujuan-workorder', 'owner.perintah-produksi.*', 'owner.pantau-progres'); @endphp
             <div>
                 <button onclick="toggleMenu('menu-produksi', 'icon-produksi')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isProduksiGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}" title="Produksi & Persetujuan">
                     <div class="flex items-center gap-3">
@@ -56,10 +56,10 @@
                         
                         <li>
                             @php 
-                                $isWorkOrder = request()->routeIs('owner.persetujuan-workorder'); 
+                                $isWorkOrder = request()->routeIs('owner.persetujuan-workorder', 'owner.perintah-produksi.*'); 
                                 $isPantau = request()->routeIs('owner.pantau-progress'); 
                             @endphp
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isWorkOrder ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                            <a href="{{ route('owner.perintah-produksi.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isWorkOrder ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                                 <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-transparent' }}"></span>

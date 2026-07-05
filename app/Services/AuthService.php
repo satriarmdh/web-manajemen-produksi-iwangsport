@@ -19,9 +19,9 @@ class AuthService
         return match ($role) {
             'admin'     => '/admin/dashboard',
             'owner'     => '/owner/dashboard',
-            'potong'    => '/produksi/potong',
-            'jahit'     => '/produksi/jahit',
-            'finishing' => '/produksi/finishing',
+            'potong'    => '/produksi/dashboard',
+            'jahit'     => '/produksi/dashboard',
+            'finishing' => '/produksi/dashboard',
             default     => '/login',
         };
     }

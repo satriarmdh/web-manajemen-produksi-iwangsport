@@ -308,6 +308,26 @@ function showAllKainOptions(dropdown, noResults) {
     }
 }
 
+function renderColorDot(elementId, warna) {
+    const dot = document.getElementById(elementId);
+    if (!dot) return;
+
+    const normalized = (warna || '-').toLowerCase();
+    const colorMap = {
+        'hitam': '#111827',
+        'navy': '#061952',
+        'abu-abu': '#9CA3AF',
+        'abu': '#9CA3AF',
+        'putih': '#FFFFFF',
+    };
+    const needsStroke = ['abu-abu', 'abu', 'putih'].includes(normalized);
+
+    dot.style.backgroundColor = colorMap[normalized] || '#CBD5E1';
+    dot.title = `Warna ${warna || '-'}`;
+    dot.classList.toggle('ring-1', needsStroke);
+    dot.classList.toggle('ring-gray-300', needsStroke);
+}
+
 /**
  * Buka modal detail dan tampilkan data lengkap baseline
  */
@@ -330,9 +350,11 @@ function openDetailModal(button) {
     // Isi field detail
     document.getElementById('detail_produk').textContent = produkNama;
     document.getElementById('detail_produk_sub').textContent = `${produkKode} · ${produkUkuran.charAt(0).toUpperCase() + produkUkuran.slice(1)} · ${produkWarna}`;
+    renderColorDot('detail_produk_dot', produkWarna);
 
     document.getElementById('detail_bahan').textContent = bahanNama;
     document.getElementById('detail_bahan_sub').textContent = `${bahanKode} · ${bahanWarna} · ${bahanKategori.charAt(0).toUpperCase() + bahanKategori.slice(1)}`;
+    renderColorDot('detail_bahan_dot', bahanWarna);
 
     document.getElementById('detail_pcs').textContent = pcs;
     document.getElementById('detail_toleransi').textContent = toleransi > 0 ? `−${toleransi}` : '0';

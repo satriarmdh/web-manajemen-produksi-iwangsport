@@ -203,7 +203,22 @@
                             </td>
 
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-medium text-gray-600 capitalize">{{ $bahan->warna }}</span>
+                                @php
+                                    $warnaBahan = strtolower($bahan->warna ?? '-');
+                                    $warnaDotMap = [
+                                        'hitam' => '#111827',
+                                        'navy' => '#061952',
+                                        'abu-abu' => '#9CA3AF',
+                                        'abu' => '#9CA3AF',
+                                        'putih' => '#FFFFFF',
+                                    ];
+                                    $warnaDot = $warnaDotMap[$warnaBahan] ?? '#CBD5E1';
+                                    $needsStroke = in_array($warnaBahan, ['abu-abu', 'abu', 'putih'], true);
+                                @endphp
+                                <span class="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-600 capitalize">
+                                    {{ $bahan->warna }}
+                                    <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}" title="Warna {{ ucfirst($bahan->warna ?? '-') }}"></span>
+                                </span>
                             </td>
 
                             <td class="px-6 py-4 text-center">

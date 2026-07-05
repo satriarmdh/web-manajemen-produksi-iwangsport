@@ -92,6 +92,38 @@ class PerintahProduksiTest extends TestCase
         ]);
     }
 
+    public function test_toleransi_perintah_produksi_dihitung_berdasarkan_jumlah_roll()
+    {
+        $produk = Produk::factory()->create();
+        $bahanBaku = BahanBaku::factory()->create(['kategori' => 'kain']);
+
+        StandardBaselineProduksi::factory()->create([
+            'produk_id' => $produk->id,
+            'bahan_baku_id' => $bahanBaku->id,
+            'pcs_per_roll' => 120,
+            'toleransi_minus' => 5,
+        ]);
+
+        $this->actingAs($this->admin)->post('/admin/perintah-produksi', [
+            'tgl_mulai' => now()->format('Y-m-d'),
+            'details' => [
+                [
+                    'produk_id' => $produk->id,
+                    'bahan_baku_id' => $bahanBaku->id,
+                    'qty_roll_pakai' => 5,
+                ],
+            ],
+        ]);
+
+        $this->assertDatabaseHas('detail_perintah_produksi', [
+            'produk_id' => $produk->id,
+            'bahan_baku_id' => $bahanBaku->id,
+            'qty_roll_pakai' => 5,
+            'estimasi_pcs' => 600,
+            'toleransi_minus' => 25,
+        ]);
+    }
+
     public function test_sistem_auto_generate_nomor_wo_sequential()
     {
         $produk = Produk::factory()->create();
@@ -502,7 +534,7 @@ class PerintahProduksiTest extends TestCase
     // RIWAYAT PENGGUNAAN KAIN
     // ============================================
 
-    public function test_riwayat_penggunaan_kain_tercatat_saat_perintah_produksi_dibuat()
+    public function test_riwayat_penggunaan_kain_belum_tercatat_saat_perintah_produksi_masih_pending()
     {
         $produk = Produk::factory()->create();
         $bahanBaku = BahanBaku::factory()->create(['kategori' => 'kain']);
@@ -524,7 +556,7 @@ class PerintahProduksiTest extends TestCase
 
         $this->actingAs($this->admin)->post('/admin/perintah-produksi', $data);
 
-        $this->assertDatabaseHas('riwayat_penggunaan_kain', [
+        $this->assertDatabaseMissing('riwayat_penggunaan_kain', [
             'bahan_baku_id' => $bahanBaku->id,
             'jumlah_pakai' => 2,
         ]);

@@ -14,7 +14,10 @@ use App\Http\Controllers\Admin\PengeluaranBahanController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\PerintahProduksiController;
 use App\Http\Controllers\Owner\PerintahProduksiOwnerController;
+use App\Http\Controllers\Produksi\DashboardProduksiController;
+use App\Http\Controllers\Produksi\PerintahProduksiKaryawanController;
 use App\Http\Controllers\Produksi\PotongController;
+use App\Http\Controllers\Produksi\InputHasilPekerjaanController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -80,13 +83,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('perintah-produksi/{perintahProduksi}/cetak-pdf', [PerintahProduksiController::class, 'cetakPdf'])->name('perintah-produksi.cetak-pdf');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:potong,jahit,finishing'])->prefix('produksi')->name('produksi.')->group(function () {
+    Route::get('/dashboard', [DashboardProduksiController::class, 'index'])->name('dashboard');
+    Route::get('/perintah-produksi', [PerintahProduksiKaryawanController::class, 'index'])->name('perintah-produksi.index');
+    Route::get('/perintah-produksi/{perintahProduksi}', [PerintahProduksiKaryawanController::class, 'show'])->name('perintah-produksi.show');
 
-    // RUTE AWAL Produksi HANYA UNTUK TESTING
-    Route::get('/produksi/potong', function () { return 'Produksi Potong'; })->name('produksi.potong');
-    Route::get('/produksi/jahit', function () { return 'Produksi Jahit'; })->name('produksi.jahit');
-    Route::get('/produksi/finishing', function () { return 'Produksi Finishing'; })->name('produksi.finishing');
+    Route::get('/input-hasil', function () {
+        return view('produksi.dashboard');
+    })->name('input-hasil.index');
+    Route::post('/input-hasil', [InputHasilPekerjaanController::class, 'store'])->name('input-hasil.store');
 
-    // Rute Input Hasil Potong (BELUM DIPAKAI)
-    Route::post('/produksi/potong/{detail}/input-hasil', [PotongController::class, 'inputHasil'])->name('produksi.potong.input-hasil');
+    Route::get('/ajuan-pengambilan', function () {
+        return view('produksi.dashboard');
+    })->name('ajuan-pengambilan.index');
+
+    Route::post('/potong/{detail}/input-hasil', [PotongController::class, 'inputHasil'])->name('potong.input-hasil');
 });

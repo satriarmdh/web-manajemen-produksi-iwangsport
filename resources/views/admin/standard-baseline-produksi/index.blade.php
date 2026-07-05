@@ -569,14 +569,20 @@
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Produk</label>
                             <p id="detail_produk" class="text-sm font-bold text-gray-900">-</p>
-                            <p id="detail_produk_sub" class="text-xs text-gray-400 mt-0.5">-</p>
+                            <div class="inline-flex items-center gap-1.5 text-xs text-gray-400 mt-0.5">
+                                <span id="detail_produk_sub">-</span>
+                                <span id="detail_produk_dot" class="inline-block w-2.5 h-2.5 rounded-full shrink-0"></span>
+                            </div>
                         </div>
 
                         {{-- Bahan Baku --}}
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Bahan Baku</label>
                             <p id="detail_bahan" class="text-sm font-bold text-gray-900">-</p>
-                            <p id="detail_bahan_sub" class="text-xs text-gray-400 mt-0.5">-</p>
+                            <div class="inline-flex items-center gap-1.5 text-xs text-gray-400 mt-0.5">
+                                <span id="detail_bahan_sub">-</span>
+                                <span id="detail_bahan_dot" class="inline-block w-2.5 h-2.5 rounded-full shrink-0"></span>
+                            </div>
                         </div>
 
                         {{-- Estimasi Grid --}}

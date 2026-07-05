@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\PerintahProduksi;
 use App\Models\DetailPerintahProduksi;
 use App\Models\RiwayatPenggunaanKain;
+use App\Models\RiwayatStok;
+use App\Models\BahanBaku;
 use App\Models\StandardBaselineProduksi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -25,7 +27,13 @@ class PerintahProduksiService
 
         // Search berdasarkan nomor WO
         if (!empty($filters['search'])) {
-            $query->where('nomor_wo', 'like', '%' . $filters['search'] . '%');
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_wo', 'like', '%' . $search . '%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            });
         }
 
         // Sorting
@@ -100,18 +108,11 @@ class PerintahProduksiService
                     'bahan_baku_id' => $detail['bahan_baku_id'],
                     'qty_roll_pakai' => $detail['qty_roll_pakai'],
                     'estimasi_pcs' => $estimasiPcs,
-                    'toleransi_minus' => $baseline->toleransi_minus,
+                    'toleransi_minus' => $baseline->toleransi_minus * $detail['qty_roll_pakai'],
                     'status_validasi_potong' => 'pending',
                 ]);
 
-                // Buat riwayat penggunaan kain
-                RiwayatPenggunaanKain::create([
-                    'perintah_produksi_id' => $perintahProduksi->id,
-                    'detail_perintah_produksi_id' => $detailProduksi->id,
-                    'bahan_baku_id' => $detail['bahan_baku_id'],
-                    'jumlah_pakai' => $detail['qty_roll_pakai'],
-                    'keterangan' => 'Penggunaan kain untuk ' . $perintahProduksi->nomor_wo,
-                ]);
+                // Riwayat penggunaan kain dan pengurangan stok dicatat saat WO disetujui owner.
             }
 
             return $perintahProduksi;
@@ -135,9 +136,8 @@ class PerintahProduksiService
                 'tgl_selesai' => $data['tgl_selesai'] ?? null,
             ]);
 
-            // Hapus semua detail lama
+            // Hapus semua detail lama. Riwayat penggunaan kain belum dibuat selama status masih pending.
             DetailPerintahProduksi::where('perintah_produksi_id', $perintahProduksi->id)->delete();
-            RiwayatPenggunaanKain::where('perintah_produksi_id', $perintahProduksi->id)->delete();
 
             // Buat detail baru
             foreach ($data['details'] as $detail) {
@@ -157,17 +157,11 @@ class PerintahProduksiService
                     'bahan_baku_id' => $detail['bahan_baku_id'],
                     'qty_roll_pakai' => $detail['qty_roll_pakai'],
                     'estimasi_pcs' => $estimasiPcs,
-                    'toleransi_minus' => $baseline->toleransi_minus,
+                    'toleransi_minus' => $baseline->toleransi_minus * $detail['qty_roll_pakai'],
                     'status_validasi_potong' => 'pending',
                 ]);
 
-                RiwayatPenggunaanKain::create([
-                    'perintah_produksi_id' => $perintahProduksi->id,
-                    'detail_perintah_produksi_id' => $detailProduksi->id,
-                    'bahan_baku_id' => $detail['bahan_baku_id'],
-                    'jumlah_pakai' => $detail['qty_roll_pakai'],
-                    'keterangan' => 'Penggunaan kain untuk ' . $perintahProduksi->nomor_wo,
-                ]);
+                // Riwayat penggunaan kain dan pengurangan stok dicatat saat WO disetujui owner.
             }
 
             return $perintahProduksi->fresh();
@@ -196,13 +190,55 @@ class PerintahProduksiService
             throw new \Exception('Hanya perintah produksi dengan status pending yang bisa disetujui');
         }
 
-        $perintahProduksi->update([
-            'status_produksi' => 'disetujui',
-            'approved_by' => auth()->id(),
-            'approved_at' => now(),
-        ]);
+        return DB::transaction(function () use ($perintahProduksi) {
+            $perintahProduksi->loadMissing(['details.bahanBaku']);
 
-        return $perintahProduksi;
+            foreach ($perintahProduksi->details as $detail) {
+                $bahanBaku = BahanBaku::lockForUpdate()->findOrFail($detail->bahan_baku_id);
+                $jumlahPakai = (int) $detail->qty_roll_pakai;
+                $stokSebelum = (int) $bahanBaku->stok;
+
+                if ($stokSebelum < $jumlahPakai) {
+                    throw new \Exception("Stok kain {$bahanBaku->nama_bahan} tidak mencukupi untuk WO {$perintahProduksi->nomor_wo}");
+                }
+
+                $stokSesudah = $stokSebelum - $jumlahPakai;
+
+                $riwayatPenggunaanKain = RiwayatPenggunaanKain::create([
+                    'perintah_produksi_id' => $perintahProduksi->id,
+                    'detail_perintah_produksi_id' => $detail->id,
+                    'bahan_baku_id' => $bahanBaku->id,
+                    'jumlah_pakai' => $jumlahPakai,
+                    'keterangan' => 'Penggunaan kain untuk ' . $perintahProduksi->nomor_wo,
+                ]);
+
+                RiwayatStok::create([
+                    'jenis_item' => 'bahan_baku',
+                    'id_item' => $bahanBaku->id,
+                    'jenis_pergerakan' => 'keluar',
+                    'jumlah' => $jumlahPakai,
+                    'stok_sebelum' => $stokSebelum,
+                    'stok_sesudah' => $stokSesudah,
+                    'user_id' => auth()->id(),
+                    'keterangan' => 'Penggunaan kain untuk WO ' . $perintahProduksi->nomor_wo,
+                    'referensi_type' => RiwayatPenggunaanKain::class,
+                    'referensi_id' => $riwayatPenggunaanKain->id,
+                ]);
+
+                BahanBaku::withoutEvents(function () use ($bahanBaku, $stokSesudah) {
+                    $bahanBaku->stok = $stokSesudah;
+                    $bahanBaku->save();
+                });
+            }
+
+            $perintahProduksi->update([
+                'status_produksi' => 'disetujui',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+
+            return $perintahProduksi->fresh(['details.bahanBaku', 'riwayatPenggunaanKain']);
+        });
     }
 
     /**

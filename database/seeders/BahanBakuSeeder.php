@@ -85,7 +85,10 @@ class BahanBakuSeeder extends Seeder
         ];
 
         foreach ($bahanBaku as $bahan) {
-            BahanBaku::create($bahan);
+            BahanBaku::updateOrCreate(
+                ['kode_bahan' => $bahan['kode_bahan']],
+                $bahan
+            );
         }
     }
 }

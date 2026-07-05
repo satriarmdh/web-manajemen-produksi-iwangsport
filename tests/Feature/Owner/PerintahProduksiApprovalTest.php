@@ -3,6 +3,9 @@
 namespace Tests\Feature\Owner;
 
 use App\Models\PerintahProduksi;
+use App\Models\DetailPerintahProduksi;
+use App\Models\BahanBaku;
+use App\Models\RiwayatPenggunaanKain;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -62,6 +65,50 @@ class PerintahProduksiApprovalTest extends TestCase
 
         $wo->refresh();
         $this->assertNotNull($wo->approved_at);
+    }
+
+    public function test_approval_owner_mengurangi_stok_kain_dan_mencatat_riwayat_stok()
+    {
+        $wo = PerintahProduksi::factory()->pending()->create();
+        $bahanBaku = BahanBaku::factory()->create([
+            'kategori' => 'kain',
+            'stok' => 10,
+        ]);
+
+        DetailPerintahProduksi::factory()->create([
+            'perintah_produksi_id' => $wo->id,
+            'bahan_baku_id' => $bahanBaku->id,
+            'qty_roll_pakai' => 3,
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->post("/owner/perintah-produksi/{$wo->id}/approve");
+
+        $response->assertRedirect('/owner/perintah-produksi');
+
+        $this->assertDatabaseHas('bahan_baku', [
+            'id' => $bahanBaku->id,
+            'stok' => 7,
+        ]);
+
+        $riwayatPenggunaanKain = RiwayatPenggunaanKain::where('perintah_produksi_id', $wo->id)->first();
+
+        $this->assertNotNull($riwayatPenggunaanKain);
+        $this->assertDatabaseHas('riwayat_penggunaan_kain', [
+            'id' => $riwayatPenggunaanKain->id,
+            'bahan_baku_id' => $bahanBaku->id,
+            'jumlah_pakai' => 3,
+        ]);
+        $this->assertDatabaseHas('riwayat_stok', [
+            'jenis_item' => 'bahan_baku',
+            'id_item' => $bahanBaku->id,
+            'jenis_pergerakan' => 'keluar',
+            'jumlah' => 3,
+            'stok_sebelum' => 10,
+            'stok_sesudah' => 7,
+            'referensi_type' => RiwayatPenggunaanKain::class,
+            'referensi_id' => $riwayatPenggunaanKain->id,
+        ]);
     }
 
     // ============================================

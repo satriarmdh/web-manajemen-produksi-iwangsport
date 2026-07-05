@@ -167,7 +167,22 @@
                     <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
                         <div class="flex-1 min-w-0">
                             <div class="flex flex-wrap items-center gap-3 mb-3">
-                                <h4 class="text-base font-bold text-[#0F034D]">{{ $detail->produk->nama_produk ?? '-' }}</h4>
+                                @php
+                                    $warnaProduk = strtolower($detail->produk->warna ?? '-');
+                                    $warnaDotMap = [
+                                        'hitam' => '#111827',
+                                        'navy' => '#061952',
+                                        'abu-abu' => '#9CA3AF',
+                                        'abu' => '#9CA3AF',
+                                        'putih' => '#FFFFFF',
+                                    ];
+                                    $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
+                                    $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+                                @endphp
+                                <h4 class="inline-flex items-center gap-2 text-base font-bold text-[#0F034D] min-w-0">
+                                    <span class="truncate">{{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}</span>
+                                    <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}" title="Warna {{ ucfirst($detail->produk->warna ?? '-') }}"></span>
+                                </h4>
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $validasiColors[$detail->status_validasi_potong] ?? 'bg-gray-50 text-gray-600 border-gray-100' }}">
                                     Validasi: {{ $validasiLabel[$detail->status_validasi_potong] ?? ucfirst($detail->status_validasi_potong) }}
                                 </span>

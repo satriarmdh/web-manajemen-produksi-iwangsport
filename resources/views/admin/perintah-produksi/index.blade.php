@@ -120,9 +120,9 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-2 mb-4">
-                        <div class="rounded-xl bg-gray-50 p-3"><p class="text-[11px] text-gray-400 mb-1">Produk</p><p class="text-sm font-bold text-[#0F034D]">{{ $wo->details->count() }}</p></div>
-                        <div class="rounded-xl bg-gray-50 p-3"><p class="text-[11px] text-gray-400 mb-1">Roll</p><p class="text-sm font-bold text-[#0F034D]">{{ number_format($totalRoll, 0, ',', '.') }}</p></div>
-                        <div class="rounded-xl bg-gray-50 p-3"><p class="text-[11px] text-gray-400 mb-1">Estimasi</p><p class="text-sm font-bold text-[#0F034D]">{{ number_format($totalEstimasi, 0, ',', '.') }}</p></div>
+                        <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60 mb-1">Jenis Produk</p><p class="text-sm font-bold text-[#0F034D]">{{ $wo->details->count() }}</p></div>
+                        <div class="rounded-xl bg-amber-50 border border-amber-100 p-3"><p class="text-[11px] text-amber-700/70 mb-1">Total Roll</p><p class="text-sm font-bold text-amber-800">{{ number_format($totalRoll, 0, ',', '.') }}</p></div>
+                        <div class="rounded-xl bg-green-50 border border-green-100 p-3"><p class="text-[11px] text-green-700/70 mb-1">Total Estimasi</p><p class="text-sm font-bold text-green-800">{{ number_format($totalEstimasi, 0, ',', '.') }} pcs</p></div>
                     </div>
 
                     <div class="space-y-2.5 mb-4">
@@ -145,11 +145,13 @@
                         <div class="mb-4 pt-3 border-t border-gray-50">
                             <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">Produk dalam WO</p>
                             <div class="flex flex-wrap gap-1.5">
-                                @foreach($wo->details->take(3) as $detail)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-[#0F034D]/5 text-[#0F034D] text-[11px] font-medium">{{ $detail->produk->nama_produk ?? '-' }}</span>
+                                @foreach($wo->details->take(4) as $detail)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-[#0F034D]/5 text-[#0F034D] text-[11px] font-medium">
+                                        {{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}
+                                    </span>
                                 @endforeach
-                                @if($wo->details->count() > 3)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-gray-100 text-gray-500 text-[11px] font-medium">+{{ $wo->details->count() - 3 }} lainnya</span>
+                                @if($wo->details->count() > 4)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-gray-100 text-gray-600 border border-gray-200 text-[11px] font-semibold">+{{ $wo->details->count() - 4 }}</span>
                                 @endif
                             </div>
                         </div>
