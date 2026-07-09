@@ -175,6 +175,31 @@ class InputHasilPekerjaanTest extends TestCase
         ]);
     }
 
+    public function test_tandai_produk_selesai_menyimpan_status_final_walau_total_di_bawah_estimasi()
+    {
+        $detail = $this->buatDetailProduksiDisetujui([
+            'estimasi_pcs' => 500,
+            'toleransi_minus' => 80,
+        ]);
+
+        $this->actingAs($this->potong)
+            ->from("/produksi/perintah-produksi/{$detail->perintah_produksi_id}")
+            ->post('/produksi/input-hasil', [
+                'detail_perintah_produksi_id' => $detail->id,
+                'qty_selesai' => 430,
+                'tandai_selesai' => 1,
+            ])
+            ->assertRedirect("/produksi/perintah-produksi/{$detail->perintah_produksi_id}");
+
+        $this->assertDatabaseHas('stok_virtual', [
+            'id_detail_perintah' => $detail->id,
+            'id_karyawan' => $this->potong->id,
+            'peran' => 'potong',
+            'total_selesai' => 430,
+            'is_selesai' => true,
+        ]);
+    }
+
     public function test_hanya_tukang_potong_yang_dapat_input_hasil_awal_dari_detail_wo()
     {
         $detail = $this->buatDetailProduksiDisetujui();
@@ -221,7 +246,7 @@ class InputHasilPekerjaanTest extends TestCase
             'id' => 1,
             'id_karyawan' => $this->jahit->id,
             'peran' => 'jahit',
-            'qty_hold' => 70,
+            'qty_hold' => 10,
             'total_selesai' => 70,
             'status_barang' => 'Ready',
         ]);

@@ -34,7 +34,7 @@
         <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-xl">
             <div>
                 <h3 class="text-lg font-bold text-[#0F034D]">Daftar Perintah Produksi</h3>
-                <p class="text-sm text-gray-500 mt-1">Kelola work order produksi, detail penggunaan kain, dan status pengerjaan.</p>
+                <p class="text-sm text-gray-500 mt-1">Kelola perintah produksi, detail penggunaan kain, dan status pengerjaan.</p>
             </div>
             <a href="{{ route('admin.perintah-produksi.create') }}"
                 class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
@@ -110,7 +110,7 @@
                     $statusClass = $statusColors[$wo->status_produksi] ?? 'bg-gray-50 text-gray-600 border-gray-100';
                     $statusLabel = $statusLabels[$wo->status_produksi] ?? $wo->status_produksi;
                 @endphp
-                <div class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-[0_12px_40px_rgba(15,3,77,0.08)] hover:-translate-y-0.5 transition-all duration-200">
+                <div class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-[0_12px_40px_rgba(15,3,77,0.08)] hover:-translate-y-0.5 transition-all duration-200 h-full flex flex-col">
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
                             <h3 class="font-bold text-[#0F034D] text-sm tracking-tight">{{ $wo->nomor_wo }}</h3>
@@ -143,21 +143,21 @@
 
                     @if($wo->details->count() > 0)
                         <div class="mb-4 pt-3 border-t border-gray-50">
-                            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">Produk dalam WO</p>
+                            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">Produk dalam Perintah Produksi</p>
                             <div class="flex flex-wrap gap-1.5">
-                                @foreach($wo->details->take(4) as $detail)
+                                @foreach($wo->details->take(3) as $detail)
                                     <span class="inline-flex items-center px-2 py-1 rounded-lg bg-[#0F034D]/5 text-[#0F034D] text-[11px] font-medium">
                                         {{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}
                                     </span>
                                 @endforeach
-                                @if($wo->details->count() > 4)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-gray-100 text-gray-600 border border-gray-200 text-[11px] font-semibold">+{{ $wo->details->count() - 4 }}</span>
+                                @if($wo->details->count() > 3)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-gray-100 text-gray-600 border border-gray-200 text-[11px] font-semibold">+{{ $wo->details->count() - 3 }}</span>
                                 @endif
                             </div>
                         </div>
                     @endif
 
-                    <div class="flex items-center gap-2 pt-3 border-t border-gray-50">
+                    <div class="flex items-center gap-2 pt-3 border-t border-gray-50 mt-auto">
                         <a href="{{ route('admin.perintah-produksi.show', $wo) }}" class="flex-1 text-center py-2 text-xs font-semibold text-[#0F034D] bg-gray-50 rounded-lg hover:bg-[#0F034D]/5 transition-colors">Detail</a>
                         @if($wo->status_produksi === 'pending')
                             <a href="{{ route('admin.perintah-produksi.edit', $wo) }}" class="flex-1 text-center py-2 text-xs font-semibold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">Edit</a>

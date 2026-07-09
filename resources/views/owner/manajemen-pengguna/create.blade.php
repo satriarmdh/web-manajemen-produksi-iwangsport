@@ -210,6 +210,19 @@
                             <p class="text-xs text-gray-500 mt-2">Gunakan kata sandi sementara. Pengguna dapat mengubahnya nanti.</p>
                             @error('password') <p class="text-xs text-red-500 mt-1.5">{{ $message }}</p> @enderror
                         </div>
+
+                        <!-- Konfirmasi Password -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Kata Sandi <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="password" name="password_confirmation" id="password_confirmation_input" required placeholder="Ulangi kata sandi" class="w-full pl-4 pr-12 py-3 border rounded-xl transition-colors text-sm {{ $errors->has('password') ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-[#0F034D]/20 focus:border-[#0F034D]' }}">
+                                <button type="button" id="toggle_password_confirmation_btn" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-[#0F034D] transition-colors cursor-pointer focus:outline-none">
+                                    <svg id="eye_confirmation_icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg id="eye_confirmation_off_icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Pastikan sama persis dengan kata sandi awal.</p>
+                        </div>
                     </div>
                 </div>
 

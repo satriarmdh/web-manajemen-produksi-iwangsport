@@ -11,8 +11,8 @@
     <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h3 class="font-bold text-[#0F034D]">Daftar Work Order</h3>
-                <p class="text-sm text-gray-500 mt-1">WO yang sudah disetujui owner dan siap diproses pada tahap {{ $stageLabel }}.</p>
+                <h3 class="font-bold text-[#0F034D]">Daftar Perintah Produksi</h3>
+                <p class="text-sm text-gray-500 mt-1">Perintah produksi yang sudah disetujui owner dan siap diproses pada tahap {{ $stageLabel }}.</p>
             </div>
         </div>
     </div>
@@ -27,7 +27,7 @@
             'terbaru' => 'Terbaru dibuat',
             'mulai_terbaru' => 'Mulai terbaru',
             'mulai_terlama' => 'Mulai terlama',
-            'wo_asc' => 'Nomor WO A-Z',
+            'wo_asc' => 'Nomor perintah produksi A-Z',
         ];
         $hasActiveFilters = $search !== '' || $status !== '' || $sort !== 'terbaru';
     @endphp
@@ -38,7 +38,7 @@
                 <label for="search-pekerjaan" class="block text-xs font-bold text-gray-500 mb-1.5">Cari pekerjaan</label>
                 <div class="relative">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.35-4.35"></path><circle cx="11" cy="11" r="8"></circle></svg>
-                    <input id="search-pekerjaan" type="text" name="search" value="{{ $search }}" placeholder="Cari nomor WO, produk, warna, bahan..." class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm focus:bg-white focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" data-search-input>
+                    <input id="search-pekerjaan" type="text" name="search" value="{{ $search }}" placeholder="Cari nomor perintah produksi, produk, warna, bahan..." class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm focus:bg-white focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" data-search-input>
                 </div>
             </div>
 
@@ -72,7 +72,7 @@
 
             @if($hasActiveFilters)
                 <div class="lg:flex lg:items-end">
-                    <a href="{{ route('produksi.perintah-produksi.index') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-100 transition-colors">
+                    <a href="{{ route('produksi.perintah-produksi.index') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
                         Reset
                     </a>
@@ -146,7 +146,7 @@
                         @if($remainingDetails > 0)
                             <div class="rounded-xl bg-[#0F034D]/5 border border-dashed border-[#0F034D]/20 px-3 py-3 text-center">
                                 <p class="text-sm font-bold text-[#0F034D]">+{{ $remainingDetails }} produk lainnya</p>
-                                <p class="text-xs text-gray-500 mt-0.5">Lihat detail pekerjaan untuk daftar lengkap dan input hasil.</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Lihat detail pekerjaan untuk melihat daftar lengkapnya.</p>
                             </div>
                         @endif
                     </div>

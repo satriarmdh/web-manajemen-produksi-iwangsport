@@ -62,40 +62,77 @@
                     ->where('id_karyawan', auth()->id())
                     ->where('peran', $role)
                     ->first();
-                $sudahDiinput = (int) ($stokVirtualSaya?->total_selesai ?? 0);
+                $hasilBaik = (int) ($stokVirtualSaya?->total_selesai ?? 0);
+                $totalReject = (int) ($stokVirtualSaya?->total_reject ?? 0);
+                $sudahDiinput = $hasilBaik + $totalReject;
                 $sisaEstimasi = max(0, $detail->estimasi_pcs - $sudahDiinput);
-                $inputSelesai = $sudahDiinput >= $detail->estimasi_pcs;
+                $progressPersen = $detail->estimasi_pcs > 0 ? min(100, round(($sudahDiinput / $detail->estimasi_pcs) * 100)) : 0;
+                $inputSelesai = (bool) ($stokVirtualSaya?->is_selesai ?? false) || $sudahDiinput >= $detail->estimasi_pcs;
             @endphp
 
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
                 <div class="flex items-start justify-between gap-3 mb-4">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 min-w-0">
-                            <h3 class="text-sm font-bold text-[#0F034D] truncate">{{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}</h3>
+                            <h3 class="text-md font-bold text-[#0F034D] truncate">{{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}</h3>
                             <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}"></span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Bahan: {{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Bahan: {{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3">
-                        <p class="text-[10px] uppercase tracking-wide text-[#0F034D]/60">Estimasi</p>
-                        <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->estimasi_pcs, 0, ',', '.') }} pcs</p>
+                <div class="rounded-2xl border border-[#0F034D]/10 bg-gradient-to-br from-[#0F034D]/5 via-white to-indigo-50/70 p-4 mb-4">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                            <p class="text-[11px] uppercase tracking-wide text-[#0F034D]/60 font-semibold">Progress input</p>
+                            <p class="text-2xl font-bold text-[#0F034D] mt-0.5">
+                                {{ number_format($sudahDiinput, 0, ',', '.') }}
+                                <span class="text-sm font-semibold text-gray-400">/ {{ number_format($detail->estimasi_pcs, 0, ',', '.') }} pcs</span>
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $inputSelesai ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                {{ $inputSelesai ? 'Selesai' : 'Sisa ' . number_format($sisaEstimasi, 0, ',', '.') . ' pcs' }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="rounded-xl bg-green-50 border border-green-100 p-3">
-                        <p class="text-[10px] uppercase tracking-wide text-green-700/70">Batas normal</p>
-                        <p class="text-sm font-bold text-green-800">≥ {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
+
+                    <div class="h-3 rounded-full bg-white border border-[#0F034D]/10 overflow-hidden">
+                        <div class="h-full rounded-full {{ $inputSelesai ? 'bg-green-500' : 'bg-[#0F034D]' }} transition-all" style="width: {{ $progressPersen }}%"></div>
                     </div>
-                    <div class="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                        <p class="text-[10px] uppercase tracking-wide text-blue-700/70">Sudah diinput</p>
-                        <p class="text-sm font-bold text-blue-800">{{ number_format($sudahDiinput, 0, ',', '.') }} pcs</p>
-                    </div>
-                    <div class="rounded-xl {{ $inputSelesai ? 'bg-gray-50 border-gray-100' : 'bg-amber-50 border-amber-100' }} border p-3">
-                        <p class="text-[10px] uppercase tracking-wide {{ $inputSelesai ? 'text-gray-500' : 'text-amber-700/70' }}">Sisa estimasi</p>
-                        <p class="text-sm font-bold {{ $inputSelesai ? 'text-gray-600' : 'text-amber-800' }}">{{ number_format($sisaEstimasi, 0, ',', '.') }} pcs</p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Hasil baik</p>
+                            <p class="text-sm font-bold text-blue-700">{{ number_format($hasilBaik, 0, ',', '.') }} pcs</p>
+                        </div>
+                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Barang cacat</p>
+                            <p class="text-sm font-bold text-red-600">{{ number_format($totalReject, 0, ',', '.') }} pcs</p>
+                        </div>
+                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Batas normal</p>
+                            <p class="text-sm font-bold text-green-700">≥ {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
+                        </div>
+                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Progress</p>
+                            <p class="text-sm font-bold text-[#0F034D]">{{ $progressPersen }}%</p>
+                        </div>
                     </div>
                 </div>
+
+                @if(! $inputSelesai)
+                    <label class="group mb-4 flex items-start gap-4 rounded-2xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
+                        <input type="checkbox" value="1" class="sr-only peer" data-finish-toggle="{{ $detail->id }}">
+                        <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+                        </span>
+                        <span>
+                            <span class="block text-sm font-bold text-[#0F034D]">Tandai produk ini selesai</span>
+                            <span class="block text-xs text-gray-500 mt-1 leading-relaxed">Centang sekali jika hasil produk ini sudah final. Pilihan ini berlaku saat menyimpan hasil pekerjaan maupun barang cacat.</span>
+                        </span>
+                    </label>
+                @endif
 
                 @if($role === 'potong')
                     @if($inputSelesai)
@@ -112,22 +149,16 @@
                         <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3">
                             @csrf
                             <input type="hidden" name="detail_perintah_produksi_id" value="{{ $detail->id }}">
+                            <input type="hidden" name="tandai_selesai" value="0" data-finish-input="{{ $detail->id }}">
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Jumlah hasil selesai</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai</label>
                                 <input type="number" name="qty_selesai" min="1" max="{{ $sisaEstimasi }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, $sisaEstimasi) }}">
-                            </div>
-                            <label class="flex items-start gap-3 rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3">
-                                <input type="checkbox" name="tandai_selesai" value="1" class="mt-0.5 rounded border-gray-300 text-[#0F034D] focus:ring-[#0F034D]">
-                                <span>
-                                    <span class="block text-xs font-bold text-[#0F034D]">Tandai produk ini selesai</span>
-                                    <span class="block text-[11px] text-gray-500 mt-0.5">Centang hanya jika hasil untuk produk ini sudah final. Jika total final masih di bawah batas normal, alasan wajib diisi.</span>
-                                </span>
-                            </label>
+                            </div> 
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Alasan jika hasil final di bawah toleransi</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Dibawah Toleransi</label>
                                 <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi totalnya kurang dari batas normal"></textarea>
                             </div>
-                            <button type="submit" class="w-full py-3 rounded-xl bg-[#0F034D] text-white text-sm font-bold shadow-md shadow-[#0F034D]/20 hover:bg-[#24116f] transition-colors">Simpan hasil pekerjaan</button>
+                            <button type="submit" class="w-full py-3 rounded-xl bg-[#0F034D] text-white text-sm font-semibold shadow-md shadow-[#0F034D]/20 hover:bg-[#24116f] transition-colors">Simpan Hasil Pekerjaan</button>
                         </form>
                     @endif
                 @else
@@ -135,7 +166,54 @@
                         <p class="text-xs text-amber-700 leading-relaxed">Input untuk tahap {{ ucfirst($role) }} dilakukan dari stok virtual/barang yang sudah diajukan dan diterima. Daftar stok pegangan akan ditampilkan pada pengembangan berikutnya.</p>
                     </div>
                 @endif
+
+                @if(! $inputSelesai)
+                    <details class="mt-3 group rounded-2xl border border-red-100 bg-red-50/60 overflow-hidden">
+                        <summary class="list-none cursor-pointer px-4 py-3 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-red-700">Catat Barang Cacat</p>
+                                    <p class="text-xs text-red-600/70 truncate">Laporkan produk reject/cacat untuk produk ini.</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-red-500 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+                        </summary>
+                        <form action="{{ route('produksi.produk-cacat.store') }}" method="POST" class="px-4 pb-4 space-y-3">
+                            @csrf
+                            <input type="hidden" name="detail_perintah_produksi_id" value="{{ $detail->id }}">
+                            <input type="hidden" name="tandai_selesai" value="0" data-finish-input="{{ $detail->id }}">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Barang Cacat</label>
+                                <input type="number" name="qty_reject" min="1" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-white text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: 30">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan Cacat</label>
+                                <textarea name="keterangan" rows="2" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-white text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-3 rounded-xl bg-red-600 text-white text-sm font-bold shadow-md shadow-red-600/20 hover:bg-red-700 transition-colors">Simpan barang cacat</button>
+                        </form>
+                    </details>
+                @endif
             </div>
         @endforeach
     </div>
+
+    <script>
+        document.querySelectorAll('[data-finish-toggle]').forEach((toggle) => {
+            const detailId = toggle.dataset.finishToggle;
+            const inputs = document.querySelectorAll(`[data-finish-input="${detailId}"]`);
+
+            const syncFinishInputs = () => {
+                inputs.forEach((input) => {
+                    input.value = toggle.checked ? '1' : '0';
+                });
+            };
+
+            toggle.addEventListener('change', syncFinishInputs);
+            syncFinishInputs();
+        });
+    </script>
 </x-layouts.produksi>

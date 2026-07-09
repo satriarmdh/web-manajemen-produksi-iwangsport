@@ -5,21 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class StokVirtual extends Model
+class ProdukCacat extends Model
 {
-    protected $table = 'stok_virtual';
+    protected $table = 'produk_cacat';
 
     protected $fillable = [
         'id_perintah',
         'id_detail_perintah',
         'id_karyawan',
         'id_produk',
-        'peran',
-        'qty_hold',
-        'total_selesai',
-        'total_reject',
-        'status_barang',
-        'is_selesai',
+        'tahapan',
+        'qty_reject',
+        'keterangan',
+        'tgl_lapor',
+    ];
+
+    protected $casts = [
+        'tgl_lapor' => 'datetime',
     ];
 
     public function perintahProduksi(): BelongsTo

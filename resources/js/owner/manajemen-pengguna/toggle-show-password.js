@@ -1,21 +1,22 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const passwordInput = document.getElementById("password_input");
-    const togglePasswordBtn = document.getElementById("toggle_password_btn");
-    const eyeIcon = document.getElementById("eye_icon");
-    const eyeOffIcon = document.getElementById("eye_off_icon");
+    const setupPasswordToggle = (inputId, buttonId, eyeId, eyeOffId) => {
+        const passwordInput = document.getElementById(inputId);
+        const togglePasswordBtn = document.getElementById(buttonId);
+        const eyeIcon = document.getElementById(eyeId);
+        const eyeOffIcon = document.getElementById(eyeOffId);
 
-    if (togglePasswordBtn && passwordInput) {
+        if (!togglePasswordBtn || !passwordInput || !eyeIcon || !eyeOffIcon) {
+            return;
+        }
+
         togglePasswordBtn.addEventListener("click", function () {
-            // Ubah tipe input dari password ke text dan sebaliknya
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                eyeIcon.classList.add("hidden");
-                eyeOffIcon.classList.remove("hidden");
-            } else {
-                passwordInput.type = "password";
-                eyeIcon.classList.remove("hidden");
-                eyeOffIcon.classList.add("hidden");
-            }
+            const isHidden = passwordInput.type === "password";
+            passwordInput.type = isHidden ? "text" : "password";
+            eyeIcon.classList.toggle("hidden", isHidden);
+            eyeOffIcon.classList.toggle("hidden", !isHidden);
         });
-    }
+    };
+
+    setupPasswordToggle("password_input", "toggle_password_btn", "eye_icon", "eye_off_icon");
+    setupPasswordToggle("password_confirmation_input", "toggle_password_confirmation_btn", "eye_confirmation_icon", "eye_confirmation_off_icon");
 });

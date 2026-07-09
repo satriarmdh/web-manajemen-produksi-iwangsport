@@ -21,7 +21,7 @@ class StoreUserRequest extends FormRequest
                 'email', 
                 Rule::unique('users', 'email')->withoutTrashed()
             ],
-            'password' => 'required|min:8',
+            'password' => 'required|min:8|confirmed',
             'role' => 'required|in:admin,potong,jahit,finishing',
             'alamat' => 'nullable|string|max:500',
             'no_hp' => 'nullable|string|max:20',
@@ -45,6 +45,7 @@ class StoreUserRequest extends FormRequest
             
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             
             'role.required' => 'Peran atau hak akses wajib dipilih.',
             'role.in' => 'Peran yang dipilih tidak valid.',

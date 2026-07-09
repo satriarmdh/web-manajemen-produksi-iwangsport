@@ -22,7 +22,13 @@
         $roleLabel = $roleLabels[$role] ?? 'Karyawan Produksi';
         $isDashboard = request()->routeIs('produksi.dashboard');
         $isPekerjaan = request()->routeIs('produksi.perintah-produksi.*');
-        $isAjuan = request()->routeIs('produksi.ajuan-pengambilan.*');
+        $isAjuanSaya = request()->routeIs('produksi.ajuan-pengambilan.index');
+        $isAjuanMasuk = request()->routeIs('produksi.ajuan-pengambilan.masuk');
+        $jumlahPerintahAjuanMasuk = \App\Models\AjuanPengambilanProduksi::query()
+            ->where('dari_karyawan_id', auth()->id())
+            ->where('status', 'pending')
+            ->distinct('id_perintah')
+            ->count('id_perintah');
         $navItems = [
             [
                 'label' => 'Dashboard',
@@ -38,10 +44,17 @@
             ],
 
             [
-                'label' => 'Ajuan',
+                'label' => 'Ajuan Saya',
                 'route' => route('produksi.ajuan-pengambilan.index'),
-                'active' => $isAjuan,
-                'icon' => 'M8 7h8m-8 4h8m-8 4h5M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5z',
+                'active' => $isAjuanSaya,
+                'icon' => 'M12 5v14m-7-7h14 M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z',
+            ],
+            [
+                'label' => 'Ajuan Masuk',
+                'route' => route('produksi.ajuan-pengambilan.masuk'),
+                'active' => $isAjuanMasuk,
+                'icon' => 'M8 7h8m-8 4h8m-8 4h5 M12 3v10m0 0 4-4m-4 4-4-4 M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5z',
+                'badge' => $jumlahPerintahAjuanMasuk,
             ],
         ];
     @endphp
@@ -60,6 +73,9 @@
                     <a href="{{ $item['route'] }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $item['active'] ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
                         <svg class="w-5 h-5 shrink-0 {{ $item['active'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $item['icon'] }}"></path></svg>
                         <span class="font-medium text-sm">{{ $item['label'] }}</span>
+                        @if(($item['badge'] ?? 0) > 0)
+                            <span class="ml-auto inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white">{{ $item['badge'] }}</span>
+                        @endif
                     </a>
                 @endforeach
             </nav>
@@ -118,10 +134,15 @@
     </div>
 
     <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-100 shadow-[0_-10px_30px_rgba(15,3,77,0.08)]">
-        <div class="grid grid-cols-3 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+        <div class="grid grid-cols-4 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
             @foreach($navItems as $item)
                 <a href="{{ $item['route'] }}" class="flex flex-col items-center justify-center gap-1 py-2 rounded-2xl transition-all {{ $item['active'] ? 'text-[#0F034D] bg-[#0F034D]/5' : 'text-gray-400' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $item['icon'] }}"></path></svg>
+                    <div class="relative">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $item['icon'] }}"></path></svg>
+                        @if(($item['badge'] ?? 0) > 0)
+                            <span class="absolute -right-2 -top-2 inline-flex min-w-4 h-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{{ $item['badge'] }}</span>
+                        @endif
+                    </div>
                     <span class="text-[11px] font-semibold">{{ $item['label'] }}</span>
                 </a>
             @endforeach

@@ -18,6 +18,8 @@ use App\Http\Controllers\Produksi\DashboardProduksiController;
 use App\Http\Controllers\Produksi\PerintahProduksiKaryawanController;
 use App\Http\Controllers\Produksi\PotongController;
 use App\Http\Controllers\Produksi\InputHasilPekerjaanController;
+use App\Http\Controllers\Produksi\ProdukCacatController;
+use App\Http\Controllers\Produksi\AjuanPengambilanProduksiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -91,11 +93,16 @@ Route::middleware(['auth', 'role:potong,jahit,finishing'])->prefix('produksi')->
     Route::get('/input-hasil', function () {
         return view('produksi.dashboard');
     })->name('input-hasil.index');
+    
     Route::post('/input-hasil', [InputHasilPekerjaanController::class, 'store'])->name('input-hasil.store');
+    Route::post('/produk-cacat', [ProdukCacatController::class, 'store'])->name('produk-cacat.store');
 
-    Route::get('/ajuan-pengambilan', function () {
-        return view('produksi.dashboard');
-    })->name('ajuan-pengambilan.index');
+    Route::get('/ajuan-saya', [AjuanPengambilanProduksiController::class, 'index'])->name('ajuan-pengambilan.index');
+    Route::get('/ajuan-masuk', [AjuanPengambilanProduksiController::class, 'masuk'])->name('ajuan-pengambilan.masuk');
+    Route::get('/ajuan-pengambilan', [AjuanPengambilanProduksiController::class, 'redirectLegacy']);
+    Route::post('/ajuan-pengambilan', [AjuanPengambilanProduksiController::class, 'store'])->name('ajuan-pengambilan.store');
+    Route::post('/ajuan-pengambilan/{ajuan}/approve', [AjuanPengambilanProduksiController::class, 'approve'])->name('ajuan-pengambilan.approve');
+    Route::post('/ajuan-pengambilan/{ajuan}/reject', [AjuanPengambilanProduksiController::class, 'reject'])->name('ajuan-pengambilan.reject');
 
     Route::post('/potong/{detail}/input-hasil', [PotongController::class, 'inputHasil'])->name('potong.input-hasil');
 });

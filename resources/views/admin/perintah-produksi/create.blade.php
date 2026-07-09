@@ -27,7 +27,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {{-- Nomor WO Preview --}}
                 <div>
-                    <label class="block text-sm font-medium text-[#0F034D] mb-2">Nomor Work Order</label>
+                    <label class="block text-sm font-medium text-[#0F034D] mb-2">Nomor Perintah Produksi</label>
                     <input type="text" value="{{ $previewNomorWO }}" readonly
                         class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 cursor-not-allowed">
                     <p class="text-xs text-gray-500 mt-1">Otomatis di-generate oleh sistem</p>

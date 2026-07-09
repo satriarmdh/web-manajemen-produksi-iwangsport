@@ -152,6 +152,20 @@ class UserManagementTest extends TestCase
         $response->assertSessionHasErrors(['password']);
     }
 
+    public function test_validasi_konfirmasi_password_harus_sama()
+    {
+        $response = $this->actingAs($this->owner)->post('/owner/users', [
+            'name' => 'New User',
+            'email' => 'newuser@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password456',
+            'role' => 'admin',
+            'jenis_kelamin' => 'Laki-laki',
+        ]);
+
+        $response->assertSessionHasErrors(['password']);
+    }
+
     public function test_validasi_role_harus_ada_di_daftar_role()
     {
         $response = $this->actingAs($this->owner)->post('/owner/users', [
