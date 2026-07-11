@@ -36,9 +36,10 @@
     <div class="rounded-3xl bg-gradient-to-br from-[#0F034D] to-[#24116f] p-5 text-white shadow-xl shadow-[#0F034D]/20 mb-5">
         <div class="flex items-start justify-between gap-3">
             <div>
-                <p class="text-xs text-white/60">Nomor WO</p>
-                <h2 class="text-xl font-bold mt-1">{{ $perintahProduksi->nomor_wo }}</h2>
-                <p class="text-sm text-white/75 mt-2">Mulai {{ \Carbon\Carbon::parse($perintahProduksi->tgl_mulai)->format('d M Y') }}</p>
+                <p class="text-xs text-white/60">Perintah Produksi</p>
+                <h2 class="text-xl font-bold mt-1">Perintah Produksi: {{ $perintahProduksi->nomor_wo }}</h2>
+                <p class="text-sm text-white/75 mt-2">Periode: {{ \Carbon\Carbon::parse($perintahProduksi->tgl_mulai)->format('d M Y') }} - {{ $perintahProduksi->tgl_selesai ? \Carbon\Carbon::parse($perintahProduksi->tgl_selesai)->format('d M Y') : '-' }}</p>
+                <p class="mt-3 rounded-2xl bg-white/10 border border-white/15 px-3 py-2 text-xs font-semibold text-white/85">Pastikan hasil yang diinput sesuai Perintah Produksi ini agar produk yang sama dari PP berbeda tidak tertukar.</p>
             </div>
             <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold">{{ ucfirst(str_replace('_', ' ', $perintahProduksi->status_produksi)) }}</span>
         </div>
@@ -57,17 +58,24 @@
                 ];
                 $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
                 $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
-                $batasBawah = $detail->estimasi_pcs - $detail->toleransi_minus;
                 $stokVirtualSaya = \App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
                     ->where('id_karyawan', auth()->id())
                     ->where('peran', $role)
                     ->first();
+                if ($role === 'potong') {
+                    $targetInput = (int) $detail->estimasi_pcs;
+                    $batasBawah = $detail->estimasi_pcs - $detail->toleransi_minus;
+                } else {
+                    $targetInput = $stokVirtualSaya ? ((int) $stokVirtualSaya->qty_hold + (int) $stokVirtualSaya->total_selesai + (int) $stokVirtualSaya->total_reject) : 0;
+                    $batasBawah = $targetInput;
+                }
                 $hasilBaik = (int) ($stokVirtualSaya?->total_selesai ?? 0);
                 $totalReject = (int) ($stokVirtualSaya?->total_reject ?? 0);
                 $sudahDiinput = $hasilBaik + $totalReject;
-                $sisaEstimasi = max(0, $detail->estimasi_pcs - $sudahDiinput);
-                $progressPersen = $detail->estimasi_pcs > 0 ? min(100, round(($sudahDiinput / $detail->estimasi_pcs) * 100)) : 0;
-                $inputSelesai = (bool) ($stokVirtualSaya?->is_selesai ?? false) || $sudahDiinput >= $detail->estimasi_pcs;
+                $sisaEstimasi = max(0, $targetInput - $sudahDiinput);
+                $progressPersen = $targetInput > 0 ? min(100, round(($sudahDiinput / $targetInput) * 100)) : 0;
+                $inputSelesai = (bool) ($stokVirtualSaya?->is_selesai ?? false) || ($targetInput > 0 && $sudahDiinput >= $targetInput);
+                $perluPengajuan = $role !== 'potong' && (! $stokVirtualSaya || $targetInput <= 0);
             @endphp
 
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
@@ -81,13 +89,14 @@
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-[#0F034D]/10 bg-gradient-to-br from-[#0F034D]/5 via-white to-indigo-50/70 p-4 mb-4">
+                @if(! $perluPengajuan)
+                    <div class="rounded-2xl border border-[#0F034D]/10 bg-gradient-to-br from-[#0F034D]/5 via-white to-indigo-50/70 p-4 mb-4">
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <div>
                             <p class="text-[11px] uppercase tracking-wide text-[#0F034D]/60 font-semibold">Progress input</p>
                             <p class="text-2xl font-bold text-[#0F034D] mt-0.5">
                                 {{ number_format($sudahDiinput, 0, ',', '.') }}
-                                <span class="text-sm font-semibold text-gray-400">/ {{ number_format($detail->estimasi_pcs, 0, ',', '.') }} pcs</span>
+                                <span class="text-sm font-semibold text-gray-400">/ {{ number_format($targetInput, 0, ',', '.') }} pcs</span>
                             </p>
                         </div>
                         <div class="text-right shrink-0">
@@ -119,19 +128,20 @@
                             <p class="text-sm font-bold text-[#0F034D]">{{ $progressPersen }}%</p>
                         </div>
                     </div>
-                </div>
+                    </div>
 
-                @if(! $inputSelesai)
-                    <label class="group mb-4 flex items-start gap-4 rounded-2xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
-                        <input type="checkbox" value="1" class="sr-only peer" data-finish-toggle="{{ $detail->id }}">
-                        <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
-                        </span>
-                        <span>
-                            <span class="block text-sm font-bold text-[#0F034D]">Tandai produk ini selesai</span>
-                            <span class="block text-xs text-gray-500 mt-1 leading-relaxed">Centang sekali jika hasil produk ini sudah final. Pilihan ini berlaku saat menyimpan hasil pekerjaan maupun barang cacat.</span>
-                        </span>
-                    </label>
+                    @if(! $inputSelesai)
+                        <label class="group mb-4 flex items-start gap-4 rounded-2xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
+                            <input type="checkbox" value="1" class="sr-only peer" data-finish-toggle="{{ $detail->id }}">
+                            <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-bold text-[#0F034D]">Tandai produk ini selesai</span>
+                                <span class="block text-xs text-gray-500 mt-1 leading-relaxed">Centang sekali jika hasil produk ini sudah final. Pilihan ini berlaku saat menyimpan hasil pekerjaan maupun barang cacat.</span>
+                            </span>
+                        </label>
+                    @endif
                 @endif
 
                 @if($role === 'potong')
@@ -162,12 +172,46 @@
                         </form>
                     @endif
                 @else
-                    <div class="rounded-xl bg-amber-50 border border-amber-100 p-3">
-                        <p class="text-xs text-amber-700 leading-relaxed">Input untuk tahap {{ ucfirst($role) }} dilakukan dari stok virtual/barang yang sudah diajukan dan diterima. Daftar stok pegangan akan ditampilkan pada pengembangan berikutnya.</p>
-                    </div>
+                    @if(! $stokVirtualSaya || $targetInput <= 0)
+                        <div class="rounded-xl border border-amber-200 bg-amber-50/70 p-4 flex items-start gap-3">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-amber-800">Ajukan pengambilan dulu</p>
+                                <p class="mt-1 text-xs leading-relaxed text-amber-700">Produk ini belum memiliki barang yang disetujui untuk tahap {{ ucfirst($role) }}. Ajukan pengambilan barang terlebih dahulu agar bisa input hasil.</p>
+                                <a href="{{ route('produksi.ajuan-pengambilan.index') }}" class="mt-3 inline-flex text-xs font-bold text-[#0F034D] hover:underline">Buka Ajuan Saya</a>
+                            </div>
+                        </div>
+                    @elseif($inputSelesai)
+                        <div class="rounded-xl bg-green-50 border border-green-100 p-3 flex items-start gap-3">
+                            <div class="w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-green-800">Hasil {{ ucfirst($role) }} {{ $detail->produk->nama_produk ?? 'produk ini' }} - {{ ucfirst($detail->produk->warna ?? '-') }} selesai diinputkan</p>
+                                <p class="text-xs text-green-700 mt-0.5">Ready untuk tahap berikutnya: {{ number_format($stokVirtualSaya->qty_hold, 0, ',', '.') }} pcs.</p>
+                            </div>
+                        </div>
+                    @else
+                        <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3">
+                            @csrf
+                            <input type="hidden" name="stok_virtual_id" value="{{ $stokVirtualSaya->id }}">
+                            <input type="hidden" name="tandai_selesai" value="0" data-finish-input="{{ $detail->id }}">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai</label>
+                                <input type="number" name="qty_selesai" min="1" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, (int) $stokVirtualSaya->qty_hold) }}">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Kurang Dari Target</label>
+                                <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi total hasil masih kurang dari target barang diterima"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-3 rounded-xl bg-[#0F034D] text-white text-sm font-semibold shadow-md shadow-[#0F034D]/20 hover:bg-[#24116f] transition-colors">Simpan Hasil Pekerjaan</button>
+                        </form>
+                    @endif
                 @endif
 
-                @if(! $inputSelesai)
+                @if(! $inputSelesai && ($role === 'potong' || ($stokVirtualSaya && $targetInput > 0)))
                     <details class="mt-3 group rounded-2xl border border-red-100 bg-red-50/60 overflow-hidden">
                         <summary class="list-none cursor-pointer px-4 py-3 flex items-center justify-between gap-3">
                             <div class="flex items-center gap-3 min-w-0">

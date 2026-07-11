@@ -20,6 +20,8 @@ class StokVirtual extends Model
         'total_reject',
         'status_barang',
         'is_selesai',
+        'status_validasi',
+        'alasan',
     ];
 
     public function perintahProduksi(): BelongsTo

@@ -78,10 +78,18 @@ class InputHasilPekerjaanService
         $stokVirtual = StokVirtual::lockForUpdate()->findOrFail($data['stok_virtual_id']);
         $qtySelesai = (int) $data['qty_selesai'];
 
+        $target = (int) $stokVirtual->qty_hold + (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject;
+        $progressSetelahInput = (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject + $qtySelesai;
+        $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false);
+
         $stokVirtual->qty_hold = max(0, ((int) $stokVirtual->qty_hold) - $qtySelesai);
         $stokVirtual->total_selesai = ((int) $stokVirtual->total_selesai) + $qtySelesai;
         $stokVirtual->status_barang = 'Ready';
-        $stokVirtual->is_selesai = (bool) ($data['tandai_selesai'] ?? false) || (bool) $stokVirtual->is_selesai;
+        $stokVirtual->is_selesai = $ditandaiSelesai || (bool) $stokVirtual->is_selesai;
+        if ($ditandaiSelesai) {
+            $stokVirtual->status_validasi = $progressSetelahInput < $target ? 'flag' : 'normal';
+            $stokVirtual->alasan = $progressSetelahInput < $target ? ($data['alasan'] ?? null) : null;
+        }
         $stokVirtual->save();
     }
 }

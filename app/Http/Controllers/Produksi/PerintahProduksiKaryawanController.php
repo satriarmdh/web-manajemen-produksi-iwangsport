@@ -13,7 +13,8 @@ class PerintahProduksiKaryawanController extends Controller
         $role = $request->user()->role;
         $search = $request->string('search')->toString();
         $status = $request->string('status')->toString();
-        $sort = $request->string('sort', 'terbaru')->toString();
+        $filterTanggal = $request->string('tanggal')->toString();
+        $sort = $request->string('sort', 'mulai_terlama')->toString();
 
         $perintahProduksi = PerintahProduksi::with(['user', 'details.produk', 'details.bahanBaku'])
             ->whereIn('status_produksi', ['disetujui', 'dalam_produksi'])
@@ -32,14 +33,17 @@ class PerintahProduksiKaryawanController extends Controller
             ->when(in_array($status, ['disetujui', 'dalam_produksi'], true), function ($query) use ($status) {
                 $query->where('status_produksi', $status);
             })
-            ->when($sort === 'mulai_terlama', fn ($query) => $query->orderBy('tgl_mulai'))
+            ->when($filterTanggal !== '', function ($query) use ($filterTanggal) {
+                $query->whereDate('tgl_mulai', $filterTanggal);
+            })
+            ->when($sort === 'mulai_terlama', fn ($query) => $query->orderBy('tgl_mulai')->orderBy('created_at')->orderBy('id'))
             ->when($sort === 'mulai_terbaru', fn ($query) => $query->orderByDesc('tgl_mulai'))
             ->when($sort === 'wo_asc', fn ($query) => $query->orderBy('nomor_wo'))
-            ->when(! in_array($sort, ['mulai_terlama', 'mulai_terbaru', 'wo_asc'], true), fn ($query) => $query->latest())
+            ->when(! in_array($sort, ['mulai_terlama', 'mulai_terbaru', 'wo_asc'], true), fn ($query) => $query->orderBy('tgl_mulai')->orderBy('created_at')->orderBy('id'))
             ->paginate(10)
             ->withQueryString();
 
-        return view('produksi.perintah-produksi.index', compact('perintahProduksi', 'role', 'search', 'status', 'sort'));
+        return view('produksi.perintah-produksi.index', compact('perintahProduksi', 'role', 'search', 'status', 'filterTanggal', 'sort'));
     }
 
     public function show(Request $request, PerintahProduksi $perintahProduksi)

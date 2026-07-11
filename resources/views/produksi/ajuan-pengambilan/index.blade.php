@@ -62,28 +62,38 @@
             <p class="text-sm text-gray-500 mt-1">Cari perintah produksi atau produk ready yang ingin diajukan.</p>
 
             @php
-                $hasActiveFilters = $search !== '' || $filterSumber !== '' || $filterTanggal !== '' || $sort !== 'terbaru';
+                $hasActiveFilters = $search !== '' || $filterSumber !== '' || $filterTanggal !== '' || $sort !== 'fifo';
             @endphp
 
-            <form id="filter-ajuan-form" action="{{ route('produksi.ajuan-pengambilan.index') }}" method="GET" class="mt-4 grid gap-3 {{ $hasActiveFilters ? 'lg:grid-cols-[1fr_170px_180px_180px_auto]' : 'lg:grid-cols-[1fr_170px_180px_180px]' }}">
+            <form id="filter-ajuan-form" action="{{ route('produksi.ajuan-pengambilan.index') }}" method="GET" class="mt-4 grid gap-3 {{ $hasActiveFilters ? 'lg:grid-cols-[1fr_170px_180px_180px_auto]' : 'lg:grid-cols-[1fr_170px_180px_180px]' }} lg:items-end">
                 <div class="relative">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.35-4.35"></path><circle cx="11" cy="11" r="8"></circle></svg>
-                    <input id="ajuan-search" type="search" name="search" value="{{ $search }}" class="w-full rounded-xl border border-gray-200 pl-11 pr-4 py-3 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Cari nomor perintah produksi, produk, warna...">
+                    <label for="ajuan-search" class="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400">Cari Data</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.35-4.35"></path><circle cx="11" cy="11" r="8"></circle></svg>
+                        <input id="ajuan-search" type="search" name="search" value="{{ $search }}" class="w-full rounded-xl border border-gray-200 pl-11 pr-4 py-3 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Cari nomor perintah, produk, warna...">
+                    </div>
                 </div>
 
                 <input type="hidden" name="sumber" value="{{ $filterSumber }}" data-custom-dropdown-input="sumber">
                 <input type="hidden" name="sort" value="{{ $sort }}" data-custom-dropdown-input="sort">
 
                 <div class="relative">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path></svg>
-                    <input id="ajuan-date-filter" type="date" name="tanggal" value="{{ $filterTanggal }}" class="w-full rounded-xl border {{ $filterTanggal !== '' ? 'border-[#0F034D] bg-[#0F034D]/5 text-[#0F034D]' : 'border-gray-200 bg-white text-gray-600' }} pl-11 pr-4 py-3 text-sm font-semibold focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20">
+                    <label for="ajuan-date-filter" class="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400">Tanggal Mulai Produksi</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path></svg>
+                        <input id="ajuan-date-filter" type="date" name="tanggal" value="{{ $filterTanggal }}" class="w-full rounded-xl border {{ $filterTanggal !== '' ? 'border-[#0F034D] bg-[#0F034D]/5 text-[#0F034D]' : 'border-gray-200 bg-white text-gray-600' }} pl-11 pr-4 py-3 text-sm font-semibold focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20">
+                    </div>
                 </div>
 
                 <div class="relative">
+                    <label class="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400">Sumber Barang</label>
                     <button type="button" data-custom-dropdown-button="sumber" class="w-full flex items-center justify-between gap-3 rounded-xl border {{ $filterSumber !== '' ? 'border-[#0F034D] bg-[#0F034D]/5 text-[#0F034D]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50' }} px-4 py-3 text-sm font-semibold transition-colors shadow-sm">
                         <span class="truncate">
                             @if($filterSumber !== '')
-                                {{ $sumberOptions->firstWhere('id', (int) $filterSumber)?->name ?? 'Sumber terpilih' }}
+                                @php
+                                    $sumberTerpilih = $sumberOptions->firstWhere('id', (int) $filterSumber);
+                                @endphp
+                                {{ $sumberTerpilih ? $sumberTerpilih->name . ' - ' . ucfirst($sumberTerpilih->role) : 'Sumber terpilih' }}
                             @else
                                 Semua sumber
                             @endif
@@ -97,7 +107,7 @@
                         </button>
                         @foreach($sumberOptions as $sumber)
                             <button type="button" data-custom-dropdown-option="sumber" data-value="{{ $sumber->id }}" class="w-full flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium hover:bg-gray-50 {{ (string) $filterSumber === (string) $sumber->id ? 'text-[#0F034D] bg-[#0F034D]/5' : 'text-gray-600' }}">
-                                <span class="truncate">{{ $sumber->name }}</span>
+                                <span class="truncate">{{ $sumber->name }} - {{ ucfirst($sumber->role) }}</span>
                                 @if((string) $filterSumber === (string) $sumber->id)<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>@endif
                             </button>
                         @endforeach
@@ -107,15 +117,16 @@
                 <div class="relative">
                     @php
                         $sortLabels = [
-                            'terbaru' => 'Terbaru',
+                            'fifo' => 'Urutan Pengerjaan',
                             'wo_az' => 'Nomor perintah A-Z',
                             'produk_az' => 'Produk A-Z',
                             'qty_terbesar' => 'Qty terbesar',
                             'qty_terkecil' => 'Qty terkecil',
                         ];
                     @endphp
-                    <button type="button" data-custom-dropdown-button="sort" class="w-full flex items-center justify-between gap-3 rounded-xl border {{ $sort !== 'terbaru' ? 'border-[#0F034D] bg-[#0F034D]/5 text-[#0F034D]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50' }} px-4 py-3 text-sm font-semibold transition-colors shadow-sm">
-                        <span class="truncate">{{ $sortLabels[$sort] ?? 'Terbaru' }}</span>
+                    <label class="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400">Urutkan</label>
+                    <button type="button" data-custom-dropdown-button="sort" class="w-full flex items-center justify-between gap-3 rounded-xl border {{ $sort !== 'fifo' ? 'border-[#0F034D] bg-[#0F034D]/5 text-[#0F034D]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50' }} px-4 py-3 text-sm font-semibold transition-colors shadow-sm">
+                        <span class="truncate">{{ $sortLabels[$sort] ?? 'Urutan Pengerjaan' }}</span>
                         <svg class="w-4 h-4 text-gray-400 transition-transform" data-custom-dropdown-arrow="sort" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
                     </button>
                     <div data-custom-dropdown-menu="sort" class="hidden absolute left-0 right-0 mt-2 rounded-xl border border-gray-100 bg-white shadow-[0_10px_40px_rgba(15,3,77,0.12)] z-40 p-2">
@@ -137,8 +148,13 @@
             </form>
         </div>
 
+        <div class="rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-800">
+            Ikuti urutan dari atas ke bawah. Perintah Produksi dengan tanggal mulai lebih lama sebaiknya dikerjakan lebih dulu.
+        </div>
+
         @forelse($barangReadyPerWo as $idPerintah => $stokDalamWo)
             @php
+                $fifoIndex = $loop->iteration;
                 $perintah = $stokDalamWo->first()->perintahProduksi;
                 $totalReady = $stokDalamWo->sum('qty_hold');
                 $totalProduk = $stokDalamWo->count();
@@ -149,9 +165,10 @@
                         <div class="min-w-0">
                             <div class="flex flex-wrap items-center gap-2">
                                 <h4 class="font-bold text-[#0F034D] text-sm sm:text-base">{{ $perintah->nomor_wo ?? 'Perintah Produksi' }}</h4>
+                                <span class="rounded-full bg-[#0F034D]/5 px-2.5 py-1 text-xs font-bold text-[#0F034D]">Prioritas #{{ $fifoIndex }}</span>
                                 <span class="rounded-full bg-green-50 px-2.5 py-1 text-xs font-bold text-green-700">{{ $totalProduk }} produk ready</span>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Mulai: {{ $perintah?->tgl_mulai ? \Carbon\Carbon::parse($perintah->tgl_mulai)->format('d M Y') : '-' }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Periode: {{ $perintah?->tgl_mulai ? \Carbon\Carbon::parse($perintah->tgl_mulai)->format('d M Y') : '-' }} - {{ $perintah?->tgl_selesai ? \Carbon\Carbon::parse($perintah->tgl_selesai)->format('d M Y') : '-' }}</p>
                         </div>
                         <svg class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
                     </div>
@@ -183,10 +200,22 @@
                                     <tr class="hover:bg-gray-50/70 transition-colors">
                                         <td class="px-4 py-3 align-top">
                                             <p class="font-bold text-[#0F034D] whitespace-nowrap">{{ $stok->produk->nama_produk ?? '-' }} - {{ ucfirst($stok->produk->warna ?? '-') }}</p>
+                                            @if($fifoWarnings->get($stok->id))
+                                                <div class="mt-2 rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3">
+                                                    <div class="flex items-start gap-3">
+                                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+                                                        </div>
+                                                        <div>
+                                                            <p class="text-xs font-bold text-amber-800">Ada perintah lebih lama</p>
+                                                            <p class="mt-1 text-xs leading-relaxed text-amber-700">Masih ada {{ $stok->produk->nama_produk ?? 'produk ini' }} pada PP {{ $fifoWarnings->get($stok->id)->perintahProduksi->nomor_wo ?? '-' }}. Utamakan PP tersebut lebih dulu jika barangnya masih dibutuhkan.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3 align-top whitespace-nowrap">
-                                            <p class="font-semibold text-gray-700">{{ $stok->karyawan->name ?? '-' }}</p>
-                                            <p class="text-xs text-gray-400">{{ ucfirst($stok->peran) }}</p>
+                                            <p class="font-semibold text-gray-700">{{ $stok->karyawan->name ?? '-' }} - {{ ucfirst($stok->peran) }}</p>
                                         </td>
                                         <td class="px-4 py-3 align-top text-right whitespace-nowrap">
                                             <span class="inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{{ number_format($stok->qty_hold, 0, ',', '.') }} pcs</span>
@@ -242,7 +271,8 @@
                         @foreach($ajuanDalamPerintah as $ajuan)
                             <div class="p-4">
                                 <p class="text-sm font-bold text-[#0F034D]">{{ $ajuan->produk->nama_produk ?? '-' }} - {{ ucfirst($ajuan->produk->warna ?? '-') }}</p>
-                                <p class="text-xs text-gray-500 mt-1">Ke {{ $ajuan->dariKaryawan->name ?? '-' }} • {{ number_format($ajuan->qty_ajuan, 0, ',', '.') }} pcs</p>
+                                <p class="text-xs text-gray-500 mt-1">Ke {{ $ajuan->dariKaryawan->name ?? '-' }} - {{ ucfirst($ajuan->dari_tahapan) }} • {{ number_format($ajuan->qty_ajuan, 0, ',', '.') }} pcs</p>
+                                <p class="mt-1 inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-500">Diajukan {{ $ajuan->created_at?->format('d M Y H:i') }}</p>
                                 @if($ajuan->catatan_pengaju)
                                     <p class="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">Catatan: {{ $ajuan->catatan_pengaju }}</p>
                                 @endif

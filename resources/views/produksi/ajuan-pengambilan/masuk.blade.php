@@ -21,10 +21,14 @@
     </div>
 
     <section class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+        <div class="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-800">
+            Konfirmasi dari Perintah Produksi paling lama terlebih dahulu jika memungkinkan.
+        </div>
         <h3 class="font-bold text-[#0F034D] mb-3">Daftar Ajuan Masuk</h3>
         <div class="space-y-4">
             @forelse($ajuanMasuk->groupBy('id_perintah') as $idPerintah => $ajuanDalamPerintah)
                 @php
+                    $fifoIndex = $loop->iteration;
                     $perintah = $ajuanDalamPerintah->first()->perintahProduksi;
                     $totalQty = $ajuanDalamPerintah->sum('qty_ajuan');
                 @endphp
@@ -32,7 +36,11 @@
                     <summary class="list-none cursor-pointer bg-gray-50/80 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <p class="text-sm font-bold text-[#0F034D]">{{ $perintah->nomor_wo ?? 'Perintah Produksi' }}</p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <p class="text-sm font-bold text-[#0F034D]">{{ $perintah->nomor_wo ?? 'Perintah Produksi' }}</p>
+                                    <span class="rounded-full bg-[#0F034D]/5 px-2.5 py-1 text-xs font-bold text-[#0F034D]">Prioritas #{{ $fifoIndex }}</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Periode: {{ $perintah?->tgl_mulai ? \Carbon\Carbon::parse($perintah->tgl_mulai)->format('d M Y') : '-' }} - {{ $perintah?->tgl_selesai ? \Carbon\Carbon::parse($perintah->tgl_selesai)->format('d M Y') : '-' }}</p>
                                 <p class="text-xs text-gray-500 mt-1">{{ $ajuanDalamPerintah->count() }} ajuan • {{ number_format($totalQty, 0, ',', '.') }} pcs diajukan</p>
                             </div>
                             <svg class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"></path></svg>
@@ -45,7 +53,8 @@
                                 <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                                     <div>
                                         <p class="text-sm font-bold text-[#0F034D]">{{ $ajuan->produk->nama_produk ?? '-' }} - {{ ucfirst($ajuan->produk->warna ?? '-') }}</p>
-                                        <p class="text-xs text-gray-500 mt-1">Dari {{ $ajuan->keKaryawan->name ?? '-' }} • {{ number_format($ajuan->qty_ajuan, 0, ',', '.') }} pcs</p>
+                                        <p class="text-xs text-gray-500 mt-1">Dari {{ $ajuan->keKaryawan->name ?? '-' }} - {{ ucfirst($ajuan->ke_tahapan) }} • {{ number_format($ajuan->qty_ajuan, 0, ',', '.') }} pcs</p>
+                                        <p class="mt-1 inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-500">Diajukan {{ $ajuan->created_at?->format('d M Y H:i') }}</p>
                                         @if($ajuan->catatan_pengaju)
                                             <p class="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">Catatan pengaju: {{ $ajuan->catatan_pengaju }}</p>
                                         @endif

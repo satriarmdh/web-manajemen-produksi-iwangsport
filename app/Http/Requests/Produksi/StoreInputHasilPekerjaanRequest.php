@@ -108,6 +108,13 @@ class StoreInputHasilPekerjaanRequest extends FormRequest
                 if ($qtySelesai > $stokVirtual->qty_hold) {
                     $validator->errors()->add('qty_selesai', 'Qty selesai tidak boleh melebihi qty yang dipegang.');
                 }
+
+                $target = (int) $stokVirtual->qty_hold + (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject;
+                $progressSetelahInput = (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject + $qtySelesai;
+
+                if ($this->boolean('tandai_selesai') && $progressSetelahInput < $target && ! $this->filled('alasan')) {
+                    $validator->errors()->add('alasan', 'Alasan wajib diisi jika produk ditandai selesai tetapi total hasil masih kurang dari target barang diterima.');
+                }
             }
         });
     }

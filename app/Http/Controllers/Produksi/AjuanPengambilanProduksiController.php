@@ -140,8 +140,14 @@ class AjuanPengambilanProduksiController extends Controller
         $ajuanMasuk = AjuanPengambilanProduksi::with(['produk', 'perintahProduksi', 'dariKaryawan', 'keKaryawan'])
             ->where('dari_karyawan_id', $user->id)
             ->where('status', 'pending')
-            ->latest()
-            ->get();
+            ->get()
+            ->sortBy(fn ($ajuan) => sprintf(
+                '%s-%010d-%010d',
+                $ajuan->perintahProduksi?->tgl_mulai?->format('Y-m-d') ?? '9999-12-31',
+                $ajuan->perintahProduksi?->created_at?->timestamp ?? 0,
+                $ajuan->perintahProduksi?->id ?? 0
+            ))
+            ->values();
 
         return view('produksi.ajuan-pengambilan.masuk', compact('ajuanMasuk'));
     }

@@ -12,7 +12,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
                 <h3 class="font-bold text-[#0F034D]">Daftar Perintah Produksi</h3>
-                <p class="text-sm text-gray-500 mt-1">Perintah produksi yang sudah disetujui owner dan siap diproses pada tahap {{ $stageLabel }}.</p>
+                <p class="text-sm text-gray-500 mt-1">Perintah produksi yang sudah disetujui owner dan siap dikerjakan.</p>
             </div>
         </div>
     </div>
@@ -24,21 +24,29 @@
             'dalam_produksi' => 'Dalam Produksi',
         ];
         $sortOptions = [
-            'terbaru' => 'Terbaru dibuat',
+            'mulai_terlama' => 'Urutan Pengerjaan',
             'mulai_terbaru' => 'Mulai terbaru',
-            'mulai_terlama' => 'Mulai terlama',
+            'terbaru' => 'Terbaru dibuat',
             'wo_asc' => 'Nomor perintah produksi A-Z',
         ];
-        $hasActiveFilters = $search !== '' || $status !== '' || $sort !== 'terbaru';
+        $hasActiveFilters = $search !== '' || $status !== '' || $filterTanggal !== '' || $sort !== 'mulai_terlama';
     @endphp
 
     <form method="GET" action="{{ route('produksi.perintah-produksi.index') }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm mb-5">
-        <div class="grid gap-3 {{ $hasActiveFilters ? 'lg:grid-cols-[1fr_180px_180px_auto]' : 'lg:grid-cols-[1fr_180px_180px]' }} lg:items-end">
+        <div class="grid gap-3 {{ $hasActiveFilters ? 'lg:grid-cols-[1fr_170px_180px_180px_auto]' : 'lg:grid-cols-[1fr_170px_180px_180px]' }} lg:items-end">
             <div>
                 <label for="search-pekerjaan" class="block text-xs font-bold text-gray-500 mb-1.5">Cari pekerjaan</label>
                 <div class="relative">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.35-4.35"></path><circle cx="11" cy="11" r="8"></circle></svg>
                     <input id="search-pekerjaan" type="text" name="search" value="{{ $search }}" placeholder="Cari nomor perintah produksi, produk, warna, bahan..." class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm focus:bg-white focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" data-search-input>
+                </div>
+            </div>
+
+            <div>
+                <label for="tanggal-pekerjaan" class="block text-xs font-bold text-gray-500 mb-1.5">Tanggal Mulai Produksi</label>
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path></svg>
+                    <input id="tanggal-pekerjaan" type="date" name="tanggal" value="{{ $filterTanggal }}" class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm font-semibold text-[#0F034D] focus:bg-white focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" data-date-input>
                 </div>
             </div>
 
@@ -60,7 +68,7 @@
                 <label class="block text-xs font-bold text-gray-500 mb-1.5">Urutkan</label>
                 <input type="hidden" name="sort" value="{{ $sort }}" data-dropdown-input>
                 <button type="button" class="w-full flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm font-semibold text-[#0F034D]" data-dropdown-button>
-                    <span data-dropdown-label>{{ $sortOptions[$sort] ?? 'Terbaru dibuat' }}</span>
+                    <span data-dropdown-label>{{ $sortOptions[$sort] ?? 'Urutan Pengerjaan' }}</span>
                     <svg class="w-4 h-4 text-gray-400 transition-transform" data-dropdown-arrow fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
                 </button>
                 <div class="absolute left-0 right-0 top-full mt-2 z-20 rounded-xl border border-gray-100 bg-white shadow-xl shadow-[#0F034D]/10 p-1 opacity-0 scale-95 pointer-events-none transition-all" data-dropdown-menu>
@@ -85,6 +93,7 @@
         <div class="space-y-4 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0">
             @foreach($perintahProduksi as $wo)
                 @php
+                    $fifoIndex = $loop->iteration + (($perintahProduksi->currentPage() - 1) * $perintahProduksi->perPage());
                     $totalRoll = $wo->details->sum('qty_roll_pakai');
                     $totalEstimasi = $wo->details->sum('estimasi_pcs');
                     $displayDetails = $wo->details->take(2);
@@ -93,16 +102,18 @@
                 <div class="bg-white rounded-2xl border border-[#0F034D]/10 p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,3,77,0.08)] h-full flex flex-col">
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
-                            <h4 class="font-bold text-[#0F034D]">{{ $wo->nomor_wo }}</h4>
-                            <p class="text-xs text-gray-400 mt-1">Mulai {{ \Carbon\Carbon::parse($wo->tgl_mulai)->format('d M Y') }}</p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="font-bold text-[#0F034D]">{{ $wo->nomor_wo }}</h4>
+                                <span class="rounded-full bg-[#0F034D]/5 px-2.5 py-1 text-xs font-bold text-[#0F034D]">Prioritas Pengerjaan #{{ $fifoIndex }}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Periode: {{ \Carbon\Carbon::parse($wo->tgl_mulai)->format('d M Y') }} - {{ $wo->tgl_selesai ? \Carbon\Carbon::parse($wo->tgl_selesai)->format('d M Y') : '-' }}</p>
                         </div>
                         <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">{{ ucfirst(str_replace('_', ' ', $wo->status_produksi)) }}</span>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2 mb-3">
+                    <div class="grid grid-cols-2 gap-2 mb-3">
                         <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60">Jenis Produk</p><p class="font-bold text-sm text-[#0F034D]">{{ $wo->details->count() }}</p></div>
                         <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60">Total Roll</p><p class="font-bold text-sm text-[#0F034D]">{{ number_format($totalRoll, 0, ',', '.') }}</p></div>
-                        <div class="rounded-xl bg-green-50 border border-green-100 p-3"><p class="text-[11px] text-green-700/70">Total Estimasi</p><p class="font-bold text-sm text-green-800">{{ number_format($totalEstimasi, 0, ',', '.') }} pcs</p></div>
                     </div>
 
                     <div class="space-y-2 mb-4 flex-1">
@@ -131,15 +142,9 @@
                                         <p class="text-xs text-gray-500 truncate mt-0.5">Bahan: {{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div class="rounded-lg bg-[#0F034D]/5 border border-[#0F034D]/10 px-3 py-2">
-                                        <p class="text-[10px] text-[#0F034D] uppercase tracking-wide">Roll produk ini</p>
-                                        <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->qty_roll_pakai, 0, ',', '.') }} roll</p>
-                                    </div>
-                                    <div class="rounded-lg bg-green-50 border border-green-100 px-3 py-2">
-                                        <p class="text-[10px] text-green-700/70 uppercase tracking-wide">Estimasi hasil</p>
-                                        <p class="text-sm font-bold text-green-800">{{ number_format($detail->estimasi_pcs, 0, ',', '.') }} pcs</p>
-                                    </div>
+                                <div class="rounded-lg bg-[#0F034D]/5 border border-[#0F034D]/10 px-3 py-2">
+                                    <p class="text-[10px] text-[#0F034D] uppercase tracking-wide">Roll produk ini</p>
+                                    <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->qty_roll_pakai, 0, ',', '.') }} roll</p>
                                 </div>
                             </div>
                         @endforeach
@@ -209,6 +214,12 @@
                 searchSubmitTimer = setTimeout(() => {
                     input.closest('form')?.submit();
                 }, 600);
+            });
+        });
+
+        document.querySelectorAll('[data-date-input]').forEach((input) => {
+            input.addEventListener('change', () => {
+                input.closest('form')?.submit();
             });
         });
 

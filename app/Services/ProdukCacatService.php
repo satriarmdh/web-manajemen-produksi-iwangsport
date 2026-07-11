@@ -45,12 +45,20 @@ class ProdukCacatService
                 ]);
             }
 
+            $target = (int) $stokVirtual->qty_hold + (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject;
+            $progressSetelahInput = (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject + $qtyReject;
+            $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false);
+
             if (in_array($user->role, ['jahit', 'finishing'], true)) {
                 $stokVirtual->qty_hold = max(0, ((int) $stokVirtual->qty_hold) - $qtyReject);
             }
 
             $stokVirtual->total_reject = ((int) $stokVirtual->total_reject) + $qtyReject;
-            $stokVirtual->is_selesai = (bool) ($data['tandai_selesai'] ?? false) || (bool) $stokVirtual->is_selesai;
+            $stokVirtual->is_selesai = $ditandaiSelesai || (bool) $stokVirtual->is_selesai;
+            if ($ditandaiSelesai) {
+                $stokVirtual->status_validasi = $progressSetelahInput < $target ? 'flag' : 'normal';
+                $stokVirtual->alasan = $progressSetelahInput < $target ? $data['keterangan'] : null;
+            }
             $stokVirtual->save();
 
             return $produkCacat;
