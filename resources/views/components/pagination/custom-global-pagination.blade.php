@@ -30,7 +30,7 @@
     <nav role="navigation" aria-label="Pagination Navigation" {{ $attributes->class(['flex flex-col sm:flex-row items-center justify-between gap-3']) }}>
         {{-- Info --}}
         <div class="text-sm text-gray-500 order-2 sm:order-1">
-            Menampilkan <span class="font-semibold text-[#0F034D]">{{ $paginator->firstItem() ?? 0 }}</span>–<span class="font-semibold text-[#0F034D]">{{ $paginator->lastItem() ?? 0 }}</span> dari <span class="font-semibold text-[#0F034D]">{{ $paginator->total() }}</span> data
+            Menampilkan <span class="font-semibold text-[#0F034D]">{{ $paginator->firstItem() ?? 0 }}</span>-<span class="font-semibold text-[#0F034D]">{{ $paginator->lastItem() ?? 0 }}</span> dari <span class="font-semibold text-[#0F034D]">{{ $paginator->total() }}</span> data
         </div>
 
         {{-- Buttons --}}

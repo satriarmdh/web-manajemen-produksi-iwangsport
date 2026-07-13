@@ -39,10 +39,10 @@
                                     <div id="add_produk_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($produks as $produk)
-                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) â€” {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
+                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) - {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
                                                     <div style="flex:1; min-width:0; overflow:hidden;">
                                                         <div class="font-medium text-gray-900 truncate">{{ $produk->nama_produk }}</div>
-                                                        <div class="text-xs text-gray-500 truncate">{{ $produk->kode_produk }} â€¢ {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
+                                                        <div class="text-xs text-gray-500 truncate">{{ $produk->kode_produk }} - {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
                                                     </div>
                                                     <svg class="check-icon hidden" style="width:16px; height:16px; color:#0F034D; flex-shrink:0; margin-left:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -69,10 +69,10 @@
                                     <div id="add_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($bahanBaku as $bahan)
-                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) â€” {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
+                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) - {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
                                                     <div style="flex:1; min-width:0; overflow:hidden;">
                                                         <div class="font-medium text-gray-900 truncate">{{ $bahan->nama_bahan }}</div>
-                                                        <div class="text-xs text-gray-500 truncate">{{ $bahan->kode_bahan }} â€¢ {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
+                                                        <div class="text-xs text-gray-500 truncate">{{ $bahan->kode_bahan }} - {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
                                                     </div>
                                                     <svg class="check-icon hidden" style="width:16px; height:16px; color:#0F034D; flex-shrink:0; margin-left:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>

@@ -140,7 +140,7 @@
                         <th scope="col" class="px-6 py-4 font-semibold">Produk</th>
                         <th scope="col" class="px-6 py-4 font-semibold">Bahan Baku</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Pcs per Roll</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Toleransi (âˆ’)</th>
+                        <th scope="col" class="px-6 py-4 font-semibold text-center">Toleransi (-)</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Status</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Aksi</th>
                     </tr>
@@ -152,14 +152,14 @@
                                 <div class="flex items-center gap-3">
                                     <div>
                                         <div class="font-bold text-gray-900">{{ $item->produk->nama_produk }}</div>
-                                        <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $item->produk->kode_produk }} Â· {{ ucfirst($item->produk->ukuran) }} Â· {{ ucfirst($item->produk->warna) }}</div>
+                                        <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $item->produk->kode_produk }}  -  {{ ucfirst($item->produk->ukuran) }}  -  {{ ucfirst($item->produk->warna) }}</div>
                                     </div>
                                 </div>
                             </td>
 
                             <td class="px-6 py-4">
                                 <div class="font-medium text-gray-900">{{ $item->bahanBaku->nama_bahan }}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">{{ $item->bahanBaku->kode_bahan }} Â· {{ ucfirst($item->bahanBaku->warna) }} Â· {{ ucfirst($item->bahanBaku->kategori) }}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">{{ $item->bahanBaku->kode_bahan }}  -  {{ ucfirst($item->bahanBaku->warna) }}  -  {{ ucfirst($item->bahanBaku->kategori) }}</div>
                             </td>
 
                             <td class="px-6 py-4 text-center">
@@ -170,10 +170,10 @@
                             <td class="px-6 py-4 text-center">
                                 @if($item->toleransi_minus > 0)
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-600 border border-amber-100">
-                                        âˆ’{{ $item->toleransi_minus }} pcs
+                                        -{{ $item->toleransi_minus }} pcs
                                     </span>
                                 @else
-                                    <span class="text-xs text-gray-400">â€”</span>
+                                    <span class="text-xs text-gray-400">-</span>
                                 @endif
                             </td>
 

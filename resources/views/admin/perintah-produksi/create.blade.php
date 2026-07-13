@@ -83,10 +83,10 @@
                                     @foreach($produks as $produk)
                                         <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm"
                                             data-value="{{ $produk->id }}"
-                                            data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) â€” {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}">
+                                            data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) - {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}">
                                             <div class="flex-1 min-w-0">
                                                 <div class="font-medium text-gray-900 truncate">{{ $produk->nama_produk }}</div>
-                                                <div class="text-xs text-gray-500 truncate">{{ $produk->kode_produk }} â€¢ {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
+                                                <div class="text-xs text-gray-500 truncate">{{ $produk->kode_produk }}  -  {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
                                             </div>
                                             <svg class="check-icon w-4 h-4 text-[#0F034D] hidden shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -115,10 +115,10 @@
                                     @foreach($bahanBakus as $bahanBaku)
                                         <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm"
                                             data-value="{{ $bahanBaku->id }}"
-                                            data-text="{{ $bahanBaku->nama_bahan }} ({{ $bahanBaku->kode_bahan }}) â€” {{ ucfirst($bahanBaku->warna) }}, {{ ucfirst($bahanBaku->kategori) }}">
+                                            data-text="{{ $bahanBaku->nama_bahan }} ({{ $bahanBaku->kode_bahan }}) - {{ ucfirst($bahanBaku->warna) }}, {{ ucfirst($bahanBaku->kategori) }}">
                                             <div class="flex-1 min-w-0">
                                                 <div class="font-medium text-gray-900 truncate">{{ $bahanBaku->nama_bahan }}</div>
-                                                <div class="text-xs text-gray-500 truncate">{{ $bahanBaku->kode_bahan }} â€¢ {{ ucfirst($bahanBaku->warna) }}, {{ ucfirst($bahanBaku->kategori) }}</div>
+                                                <div class="text-xs text-gray-500 truncate">{{ $bahanBaku->kode_bahan }}  -  {{ ucfirst($bahanBaku->warna) }}, {{ ucfirst($bahanBaku->kategori) }}</div>
                                             </div>
                                             <svg class="check-icon w-4 h-4 text-[#0F034D] hidden shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -203,7 +203,7 @@
                 <p class="text-red-500 text-sm mt-4">{{ $message }}</p>
             @enderror
 
-            <p class="text-xs text-gray-500 mt-4 italic">* Estimasi PCS dihitung otomatis berdasarkan standar baseline (Qty Roll Ã— PCS per Roll)</p>
+            <p class="text-xs text-gray-500 mt-4 italic">* Estimasi PCS dihitung otomatis berdasarkan standar baseline (Qty Roll Ã- PCS per Roll)</p>
         </div>
 
         {{-- Actions --}}

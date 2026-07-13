@@ -51,7 +51,7 @@
                                 <p id="detail_pcs" class="text-xl font-bold text-[#0F034D]">-</p>
                             </div>
                             <div class="bg-amber-50 rounded-xl p-3 text-center">
-                                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Toleransi (âˆ’)</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Toleransi (-)</p>
                                 <p id="detail_toleransi" class="text-xl font-bold text-amber-600">-</p>
                             </div>
                             <div class="bg-blue-50 rounded-xl p-3 text-center">

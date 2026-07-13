@@ -41,10 +41,10 @@
                                     <div id="edit_produk_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($produks as $produk)
-                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) â€” {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
+                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) - {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
                                                     <div class="flex-1 min-w-0">
                                                         <div class="font-medium text-gray-900">{{ $produk->nama_produk }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $produk->kode_produk }} â€¢ {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
+                                                        <div class="text-xs text-gray-500">{{ $produk->kode_produk }} - {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
                                                     </div>
                                                     <svg class="check-icon w-4 h-4 text-[#0F034D] hidden flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -71,10 +71,10 @@
                                     <div id="edit_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                         <div class="p-2">
                                             @foreach($bahanBaku as $bahan)
-                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) â€” {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
+                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) - {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
                                                     <div class="flex-1 min-w-0">
                                                         <div class="font-medium text-gray-900">{{ $bahan->nama_bahan }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $bahan->kode_bahan }} â€¢ {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
+                                                        <div class="text-xs text-gray-500">{{ $bahan->kode_bahan }} - {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
                                                     </div>
                                                     <svg class="check-icon w-4 h-4 text-[#0F034D] hidden flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>

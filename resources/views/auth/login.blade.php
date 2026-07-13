@@ -82,7 +82,7 @@
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
                         <div class="relative">
-                            <input type="password" name="password" id="password" placeholder="••••••••" required 
+                            <input type="password" name="password" id="password" placeholder=" -  -  -  -  -  -  -  - " required 
                                 class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F034D] focus:border-transparent transition text-sm">
                             <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-[#0F034D] transition-colors focus:outline-none cursor-pointer">
                                 <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

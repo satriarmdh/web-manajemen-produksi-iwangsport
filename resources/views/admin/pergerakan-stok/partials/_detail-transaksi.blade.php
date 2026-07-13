@@ -88,7 +88,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah <span id="masuk_satuan_label" class="text-gray-400 font-normal"></span><span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="number" name="quantity" min="1" required class="w-full px-4 py-2.5 pr-20 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] text-sm transition-colors" placeholder="Masukkan jumlah">
-                            <span id="masuk_satuan_badge" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">â€”</span>
+                            <span id="masuk_satuan_badge" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">-</span>
                         </div>
                     </div>
 
@@ -187,7 +187,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah <span id="keluar_satuan_label" class="text-gray-400 font-normal"></span><span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="number" name="quantity" min="1" required class="w-full px-4 py-2.5 pr-20 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] text-sm transition-colors" placeholder="Masukkan jumlah">
-                            <span id="keluar_satuan_badge" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">â€”</span>
+                            <span id="keluar_satuan_badge" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">-</span>
                         </div>
                     </div>
 
