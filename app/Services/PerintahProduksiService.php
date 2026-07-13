@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\PerintahProduksi;
+use App\Models\BahanBaku;
 use App\Models\DetailPerintahProduksi;
+use App\Models\PerintahProduksi;
+use App\Models\Produk;
 use App\Models\RiwayatPenggunaanKain;
 use App\Models\RiwayatStok;
-use App\Models\BahanBaku;
 use App\Models\StandardBaselineProduksi;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class PerintahProduksiService
 {
@@ -42,6 +43,76 @@ class PerintahProduksiService
               ->when($sort === 'terlama', fn($q) => $q->oldest());
 
         return $query->paginate($perPage)->withQueryString();
+    }
+
+    public function getFormData(bool $includePreviewNomor = true): array
+    {
+        $data = [
+            'produks' => Produk::where('is_aktif', true)->get(),
+            'bahanBakus' => BahanBaku::where('is_aktif', true)
+                ->where('kategori', 'kain')
+                ->get(),
+            'baselines' => StandardBaselineProduksi::where('is_aktif', true)
+                ->with(['produk', 'bahanBaku'])
+                ->get(),
+        ];
+
+        if ($includePreviewNomor) {
+            $data['previewNomorWO'] = $this->generateNomorWO();
+        }
+
+        return $data;
+    }
+
+    public function loadForDetail(PerintahProduksi $perintahProduksi): PerintahProduksi
+    {
+        return $perintahProduksi->load(['details.produk', 'details.bahanBaku', 'user', 'approver']);
+    }
+
+    public function ensurePending(PerintahProduksi $perintahProduksi): void
+    {
+        abort_unless($perintahProduksi->status_produksi === 'pending', 403, 'Perintah produksi hanya bisa diproses saat status pending');
+    }
+
+    public function getForKaryawan(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    {
+        $query = PerintahProduksi::with(['user', 'details.produk', 'details.bahanBaku'])
+            ->whereIn('status_produksi', ['disetujui', 'dalam_produksi']);
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery->where('nomor_wo', 'like', "%{$search}%")
+                    ->orWhereHas('details.produk', function ($produkQuery) use ($search) {
+                        $produkQuery->where('nama_produk', 'like', "%{$search}%")
+                            ->orWhere('warna', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('details.bahanBaku', function ($bahanQuery) use ($search) {
+                        $bahanQuery->where('nama_bahan', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if (in_array($filters['status'] ?? '', ['disetujui', 'dalam_produksi'], true)) {
+            $query->where('status_produksi', $filters['status']);
+        }
+
+        if (!empty($filters['tanggal'])) {
+            $query->whereDate('tgl_mulai', $filters['tanggal']);
+        }
+
+        match ($filters['sort'] ?? 'mulai_terlama') {
+            'mulai_terbaru' => $query->orderByDesc('tgl_mulai'),
+            'wo_asc' => $query->orderBy('nomor_wo'),
+            default => $query->orderBy('tgl_mulai')->orderBy('created_at')->orderBy('id'),
+        };
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    public function ensureVisibleForKaryawan(PerintahProduksi $perintahProduksi): void
+    {
+        abort_unless(in_array($perintahProduksi->status_produksi, ['disetujui', 'dalam_produksi'], true), 403);
     }
 
     /**

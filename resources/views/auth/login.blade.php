@@ -15,9 +15,21 @@
         {{-- KIRI (GAMBAR & SLIDER) --}}
         <div class="hidden md:flex md:w-1/2 relative flex-col justify-between p-12 text-white rounded-xl overflow-hidden group">
             
+            @php
+                $loginSlides = [
+                    ['image' => asset('images/bg-login.jpg'), 'text' => 'Satu Dasbor untuk Semua Kendali Produksi.'],
+                    ['image' => asset('images/bg-login2.jpg'), 'text' => 'Pantau Aktivitas Produksi Secara Real-Time.'],
+                    ['image' => asset('images/bg-login3.jpg'), 'text' => 'Siklus Produksi Terintegrasi Penuh.'],
+                ];
+            @endphp
+
             {{-- LAYER 1: Wadah Track untuk Slide Gambar --}}
             <div class="absolute inset-0 z-0 overflow-hidden">
-                <div id="slider-track" class="flex h-full w-full transition-transform duration-700 ease-in-out">
+                <div
+                    id="slider-track"
+                    class="flex h-full w-full transition-transform duration-700 ease-in-out"
+                    data-login-slides='@json($loginSlides)'
+                >
                     </div>
             </div>
             
@@ -107,22 +119,6 @@
         </div>
     </div>
 
-    <script>
-        window.loginSlides = [
-            {
-                image: "{{ asset('images/bg-login.jpg') }}",
-                text: "Satu Dasbor untuk Semua Kendali Produksi."
-            },
-            {
-                image: "{{ asset('images/bg-login2.jpg') }}",
-                text: "Pantau Aktivitas Produksi Secara Real-Time."
-            },
-            {
-                image: "{{ asset('images/bg-login3.jpg') }}",
-                text: "Siklus Produksi Terintegrasi Penuh."
-            }
-        ];
-    </script>
 
     @vite([
         'resources/js/auth/login-slider.js',

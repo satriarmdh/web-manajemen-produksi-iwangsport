@@ -1,4 +1,4 @@
-<x-layouts.admin>
+﻿<x-layouts.admin>
     <x-slot:breadcrumb>
         <li class="flex items-center">
             <span class="text-gray-400 select-none">Manajemen Data</span>
@@ -32,7 +32,7 @@
             <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 relative">
                 <!-- TOMBOL & MENU FILTER -->
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('filterDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('status') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="filterDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('status') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                         Filter
                         @if(request('status'))
@@ -71,7 +71,7 @@
 
                 <!-- TOMBOL & MENU SORTING -->
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('sortDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="sortDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
                         Urutkan
                     </button>
@@ -256,188 +256,12 @@
     </div>
 
     {{-- ========================================= --}}
-    {{-- MODAL TAMBAH PELANGGAN --}}
-    {{-- ========================================= --}}
-    <div id="add-modal" class="slide-panel">
-        <div class="slide-panel-backdrop" data-panel-close></div>
-        <div class="slide-panel-body">
-            <div class="slide-panel-header">
-                <div class="slide-panel-header-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                </div>
-                <h2 class="slide-panel-header-title">Tambah Pelanggan</h2>
-                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-            </div>
-            <form action="{{ route('admin.pelanggan.store') }}" method="POST" id="addForm" class="slide-panel-content">
-                @csrf
-                <div class="space-y-4">
-                    <!-- Kode Pelanggan (Auto Generate Preview) -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Pelanggan</label>
-                        <input type="text" id="add_kode_pelanggan" readonly data-next-number="{{ $nextNumber }}" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-gray-50 text-gray-500 italic cursor-not-allowed">
-                        <p class="text-xs text-gray-400 mt-1">Otomatis digenerate oleh sistem.</p>
-                    </div>
+    @include('admin.pelanggan.partials._tambah-pelanggan')
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pelanggan <span class="text-red-500">*</span></label>
-                        <input type="text" name="nama_pelanggan" required placeholder="Contoh: PT Mitra Jaya Abadi" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                    </div>
+    @include('admin.pelanggan.partials._edit-pelanggan')
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">No. Telepon <span class="text-red-500">*</span></label>
-                            <input type="text" name="no_telp" required placeholder="08xxxxxxxxxx" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                            <input type="email" name="email" required placeholder="pelanggan@email.com" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                        </div>
-                    </div>
+    @include('admin.pelanggan.partials._detail-pelanggan')
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat <span class="text-red-500">*</span></label>
-                        <textarea name="alamat" required rows="3" placeholder="Alamat lengkap pelanggan" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan</label>
-                        <textarea name="keterangan" rows="2" placeholder="Keterangan tambahan (opsional)" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                    </div>
-                </div>
-            </form>
-            <div class="slide-panel-footer">
-                <button type="button" class="btn-panel-cancel" data-panel-close>Batal</button>
-                <button type="submit" form="addForm" class="btn-panel-submit">Simpan Data</button>
-            </div>
-        </div>
-    </div>
-
-    {{-- ========================================= --}}
-    {{-- MODAL EDIT PELANGGAN --}}
-    {{-- ========================================= --}}
-    <div id="edit-modal" class="slide-panel">
-        <div class="slide-panel-backdrop" data-panel-close></div>
-        <div class="slide-panel-body">
-            <div class="slide-panel-header">
-                <div class="slide-panel-header-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                </div>
-                <h2 class="slide-panel-header-title">Edit Pelanggan</h2>
-                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-            </div>
-            <form action="" method="POST" id="editForm" class="slide-panel-content">
-                @csrf
-                @method('PUT')
-                <div class="space-y-4">
-                    <input type="hidden" id="edit_kode">
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Kode Pelanggan</label>
-                        <input type="text" id="edit_kode_display" readonly class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-gray-50 text-gray-500 cursor-not-allowed">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pelanggan <span class="text-red-500">*</span></label>
-                        <input type="text" name="nama_pelanggan" id="edit_nama" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">No. Telepon <span class="text-red-500">*</span></label>
-                            <input type="text" name="no_telp" id="edit_no_telp" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                            <input type="email" name="email" id="edit_email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat <span class="text-red-500">*</span></label>
-                        <textarea name="alamat" id="edit_alamat" required rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan</label>
-                        <textarea name="keterangan" id="edit_keterangan" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                    </div>
-
-                    <!-- Checkbox is_aktif -->
-                    <div>
-                        <input type="hidden" name="is_aktif" value="0">
-                        <input type="checkbox" name="is_aktif" id="edit_is_aktif" value="1" class="hidden" onchange="updateCheckbox(this, 'edit_cb')">
-                        <div id="edit_cb_wrapper" onclick="document.getElementById('edit_is_aktif').click()" class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
-                            <div id="edit_cb_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                <svg id="edit_cb_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <span id="edit_cb_text" class="text-sm font-semibold text-gray-700">Aktif</span>
-                                <p class="text-xs text-gray-500">Pelanggan ini dapat digunakan dalam proses bisnis.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            <div class="slide-panel-footer">
-                <button type="button" class="btn-panel-cancel" data-panel-close>Batal</button>
-                <button type="submit" form="editForm" class="btn-panel-submit">Simpan Perubahan</button>
-            </div>
-        </div>
-    </div>
-
-    {{-- ========================================= --}}
-    {{-- MODAL DETAIL PELANGGAN --}}
-    {{-- ========================================= --}}
-    <div id="detail-modal" class="slide-panel">
-        <div class="slide-panel-backdrop" data-panel-close></div>
-        <div class="slide-panel-body">
-            <div class="slide-panel-header">
-                <div class="slide-panel-header-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                </div>
-                <h2 class="slide-panel-header-title">Detail Pelanggan</h2>
-                <button class="slide-panel-close" data-panel-close><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-            </div>
-            <div class="slide-panel-content">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Kode Pelanggan</label>
-                        <p id="detail_kode" class="text-sm text-gray-900 font-bold">-</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Nama Pelanggan</label>
-                        <p id="detail_nama" class="text-sm text-gray-900 font-bold">-</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">No. Telepon</label>
-                        <p id="detail_no_telp" class="text-sm text-gray-900 font-bold">-</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Email</label>
-                        <p id="detail_email" class="text-sm text-gray-900 font-bold">-</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Alamat</label>
-                        <p id="detail_alamat" class="text-sm text-gray-900">-</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Keterangan</label>
-                        <p id="detail_keterangan" class="text-sm text-gray-900">-</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Status</label>
-                        <div id="detail_status"></div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Dibuat</label>
-                        <p id="detail_created" class="text-sm text-gray-900">-</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- SweetAlert2 CDN untuk konfirmasi hapus -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -445,7 +269,13 @@
     @vite([
         'resources/css/global-modal.css',
         'resources/js/admin/custom-forms.js',
+        'resources/js/admin/filter-dropdown.js',
         'resources/js/admin/pelanggan/toggle-modal.js',
         'resources/js/admin/pelanggan/generate-kode.js'
     ])
 </x-layouts.admin>
+
+
+
+
+

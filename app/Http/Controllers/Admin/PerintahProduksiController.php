@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SelesaikanPerintahProduksiRequest;
 use App\Http\Requests\Admin\StorePerintahProduksiRequest;
 use App\Http\Requests\Admin\UpdatePerintahProduksiRequest;
 use App\Models\PerintahProduksi;
-use App\Models\Produk;
-use App\Models\BahanBaku;
-use App\Models\StandardBaselineProduksi;
 use App\Services\PerintahProduksiService;
 use Illuminate\Http\Request;
 
@@ -37,19 +35,7 @@ class PerintahProduksiController extends Controller
      */
     public function create()
     {
-        $produks = Produk::where('is_aktif', true)->get();
-        $bahanBakus = BahanBaku::where('is_aktif', true)
-            ->where('kategori', 'kain')
-            ->get();
-
-        $previewNomorWO = $this->service->generateNomorWO();
-
-        // Ambil standard baseline aktif dan format untuk lookup JS
-        $baselines = StandardBaselineProduksi::where('is_aktif', true)
-            ->with(['produk', 'bahanBaku'])
-            ->get();
-
-        return view('admin.perintah-produksi.create', compact('produks', 'bahanBakus', 'previewNomorWO', 'baselines'));
+        return view('admin.perintah-produksi.create', $this->service->getFormData());
     }
 
     /**
@@ -69,7 +55,7 @@ class PerintahProduksiController extends Controller
      */
     public function show(PerintahProduksi $perintahProduksi)
     {
-        $perintahProduksi->load(['details.produk', 'details.bahanBaku', 'user', 'approver']);
+        $perintahProduksi = $this->service->loadForDetail($perintahProduksi);
 
         return view('admin.perintah-produksi.show', compact('perintahProduksi'));
     }
@@ -79,21 +65,12 @@ class PerintahProduksiController extends Controller
      */
     public function edit(PerintahProduksi $perintahProduksi)
     {
-        if ($perintahProduksi->status_produksi !== 'pending') {
-            abort(403, 'Perintah produksi hanya bisa diedit saat status masih pending');
-        }
+        $this->service->ensurePending($perintahProduksi);
 
-        $produks = Produk::where('is_aktif', true)->get();
-        $bahanBakus = BahanBaku::where('is_aktif', true)
-            ->where('kategori', 'kain')
-            ->get();
-
-        // Ambil standard baseline aktif dan format untuk lookup JS
-        $baselines = StandardBaselineProduksi::where('is_aktif', true)
-            ->with(['produk', 'bahanBaku'])
-            ->get();
-
-        return view('admin.perintah-produksi.edit', compact('perintahProduksi', 'produks', 'bahanBakus', 'baselines'));
+        return view('admin.perintah-produksi.edit', array_merge(
+            ['perintahProduksi' => $perintahProduksi],
+            $this->service->getFormData(false)
+        ));
     }
 
     /**
@@ -127,17 +104,9 @@ class PerintahProduksiController extends Controller
     /**
      * Tandai perintah produksi selesai
      */
-    public function selesai(Request $request, PerintahProduksi $perintahProduksi)
+    public function selesai(SelesaikanPerintahProduksiRequest $request, PerintahProduksi $perintahProduksi)
     {
-        if ($perintahProduksi->status_produksi !== 'dalam_produksi') {
-            abort(403, 'Perintah produksi hanya bisa diselesaikan jika status dalam produksi');
-        }
-
-        $request->validate([
-            'tgl_selesai' => 'required|date',
-        ]);
-
-        $this->service->selesai($perintahProduksi, $request->tgl_selesai);
+        $this->service->selesai($perintahProduksi, $request->validated('tgl_selesai'));
 
         return redirect()
             ->route('admin.perintah-produksi.index')
@@ -149,7 +118,7 @@ class PerintahProduksiController extends Controller
      */
     public function cetakPdf(PerintahProduksi $perintahProduksi)
     {
-        $perintahProduksi->load(['details.produk', 'details.bahanBaku', 'user', 'approver']);
+        $perintahProduksi = $this->service->loadForDetail($perintahProduksi);
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.perintah-produksi.pdf', compact('perintahProduksi'))
             ->setPaper('a4', 'portrait');

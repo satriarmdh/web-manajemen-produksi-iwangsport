@@ -34,7 +34,7 @@
             <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 relative">
                 <!-- TOMBOL & MENU FILTER -->
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('filterDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('role') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="filterDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('role') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                         Filter
                         @if(request('role'))
@@ -74,7 +74,7 @@
 
                 <!-- TOMBOL & MENU SORTING -->
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('sortDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="sortDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
                         Urutkan
                     </button>
@@ -131,42 +131,6 @@
             </form>
         </div>
 
-        <script>
-            // Toggle dropdown filter/sorting (tutup dropdown lain saat buka yang baru)
-            function toggleFilterMenu(dropdownId) {
-                const allDropdowns = document.querySelectorAll('[id$="Dropdown"]');
-                allDropdowns.forEach(dd => {
-                    if (dd.id !== dropdownId) {
-                        dd.classList.add('hidden', 'opacity-0', 'scale-95', 'pointer-events-none');
-                        dd.classList.remove('opacity-100', 'scale-100');
-                    }
-                });
-
-                const dropdown = document.getElementById(dropdownId);
-                const isHidden = dropdown.classList.contains('hidden');
-
-                if (isHidden) {
-                    dropdown.classList.remove('hidden');
-                    requestAnimationFrame(() => {
-                        dropdown.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-                        dropdown.classList.add('opacity-100', 'scale-100');
-                    });
-                } else {
-                    dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-                    dropdown.classList.remove('opacity-100', 'scale-100');
-                    setTimeout(() => dropdown.classList.add('hidden'), 200);
-                }
-            }
-
-            // Tutup dropdown saat klik di luar
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('[id$="Dropdown"]') && !e.target.closest('[onclick*="toggleFilterMenu"]')) {
-                    document.querySelectorAll('[id$="Dropdown"]').forEach(dd => {
-                        dd.classList.add('hidden', 'opacity-0', 'scale-95', 'pointer-events-none');
-                    });
-                }
-            });
-        </script>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-gray-500 whitespace-nowrap">
@@ -270,4 +234,5 @@
             </div>
         @endif
     </div>
+    @vite('resources/js/owner/manajemen-pengguna/filter-dropdown.js')
 </x-layouts.owner>

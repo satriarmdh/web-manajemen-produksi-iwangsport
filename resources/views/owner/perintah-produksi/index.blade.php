@@ -154,7 +154,7 @@
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-gray-50 mt-auto">
                         <form action="{{ route('owner.perintah-produksi.approve', $wo) }}" method="POST" class="flex-1">
                             @csrf
-                            <button type="submit" onclick="return confirm('Setujui perintah produksi {{ $wo->nomor_wo }}?')"
+                            <button type="submit" data-confirm-action="Setujui perintah produksi {{ $wo->nomor_wo }}?"
                                 class="w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 transition-colors shadow-md shadow-green-600/20">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                 Setujui WO
@@ -183,4 +183,5 @@
             <p class="text-gray-500 text-sm mt-1">Semua perintah produksi sudah direview. Perintah produksi baru dari admin akan muncul di halaman ini.</p>
         </div>
     @endif
+    @vite('resources/js/admin/confirm-action.js')
 </x-layouts.owner>

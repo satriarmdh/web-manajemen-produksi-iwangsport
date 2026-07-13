@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof window.loginSlides === 'undefined') return;
-    
-    const originalSlides = window.loginSlides;
-
     const track = document.getElementById('slider-track');
+    if (!track?.dataset.loginSlides) return;
+
+    const originalSlides = JSON.parse(track.dataset.loginSlides);
+
     const sliderText = document.getElementById('slider-text');
     const dotsContainer = document.getElementById('slider-dots');
     

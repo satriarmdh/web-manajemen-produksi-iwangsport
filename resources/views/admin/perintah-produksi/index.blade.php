@@ -46,7 +46,7 @@
         <div class="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center gap-4 relative z-20">
             <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 relative">
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('filterDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('status') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="filterDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('status') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                         Filter
                         @if(request('status'))
@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('sortDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="sortDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
                         Urutkan
                     </button>
@@ -163,7 +163,7 @@
                             <a href="{{ route('admin.perintah-produksi.edit', $wo) }}" class="flex-1 text-center py-2 text-xs font-semibold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">Edit</a>
                             <form action="{{ route('admin.perintah-produksi.destroy', $wo) }}" method="POST" class="flex-1">
                                 @csrf @method('DELETE')
-                                <button type="submit" onclick="return confirm('Yakin hapus perintah produksi ini?')" class="w-full py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Hapus</button>
+                                <button type="submit" data-confirm-action="Yakin hapus perintah produksi ini?" class="w-full py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Hapus</button>
                             </form>
                         @endif
                     </div>
@@ -182,5 +182,9 @@
             <a href="{{ route('admin.perintah-produksi.create') }}" class="inline-flex items-center justify-center gap-2 mt-4 px-4 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-colors">Buat Perintah Produksi</a>
         </div>
     @endif
-    @vite('resources/js/admin/perintah-produksi/toggle-filter.js')
+    @vite([
+        'resources/js/admin/confirm-action.js',
+        'resources/js/admin/perintah-produksi/toggle-filter.js',
+        'resources/js/admin/filter-dropdown.js',
+    ])
 </x-layouts.admin>

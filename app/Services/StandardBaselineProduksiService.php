@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BahanBaku;
 use App\Models\StandardBaselineProduksi;
 use App\Models\Produk;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,6 +59,14 @@ class StandardBaselineProduksiService
         }
 
         return $query->paginate($perPage)->withQueryString();
+    }
+
+    public function getFormOptions(): array
+    {
+        return [
+            'produks' => Produk::orderBy('nama_produk')->get(),
+            'bahanBaku' => BahanBaku::where('kategori', 'kain')->orderBy('nama_bahan')->get(),
+        ];
     }
 
     /**

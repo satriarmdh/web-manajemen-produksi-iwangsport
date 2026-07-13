@@ -25,4 +25,12 @@ class AuthService
             default     => '/login',
         };
     }
+
+    public function updateLogoutMetadata(User $user): void
+    {
+        $user->forceFill([
+            'online_status' => false,
+            'last_seen' => now(),
+        ])->saveQuietly();
+    }
 }

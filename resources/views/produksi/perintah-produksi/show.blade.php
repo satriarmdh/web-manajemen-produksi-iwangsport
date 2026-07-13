@@ -1,4 +1,4 @@
-<x-layouts.produksi>
+﻿<x-layouts.produksi>
     <x-slot:header>
         Detail Pekerjaan
     </x-slot:header>
@@ -121,7 +121,7 @@
                         </div>
                         <div class="rounded-xl bg-white/80 border border-white p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Batas normal</p>
-                            <p class="text-sm font-bold text-green-700">≥ {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
+                            <p class="text-sm font-bold text-green-700">â‰¥ {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
                         </div>
                         <div class="rounded-xl bg-white/80 border border-white p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Progress</p>
@@ -244,20 +244,6 @@
             </div>
         @endforeach
     </div>
-
-    <script>
-        document.querySelectorAll('[data-finish-toggle]').forEach((toggle) => {
-            const detailId = toggle.dataset.finishToggle;
-            const inputs = document.querySelectorAll(`[data-finish-input="${detailId}"]`);
-
-            const syncFinishInputs = () => {
-                inputs.forEach((input) => {
-                    input.value = toggle.checked ? '1' : '0';
-                });
-            };
-
-            toggle.addEventListener('change', syncFinishInputs);
-            syncFinishInputs();
-        });
-    </script>
+    @vite('resources/js/produksi/perintah-produksi/show.js')
 </x-layouts.produksi>
+

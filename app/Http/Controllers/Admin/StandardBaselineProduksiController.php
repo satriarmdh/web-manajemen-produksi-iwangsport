@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreStandardBaselineProduksiRequest;
 use App\Http\Requests\Admin\UpdateStandardBaselineProduksiRequest;
-use App\Models\BahanBaku;
 use App\Models\StandardBaselineProduksi;
-use App\Models\Produk;
 use App\Services\StandardBaselineProduksiService;
 use Illuminate\Http\Request;
 
@@ -24,8 +22,7 @@ class StandardBaselineProduksiController extends Controller
     {
         $filters = $request->only(['search', 'status', 'sort']);
         $estimasi = $this->estimasiService->getEstimasi($filters);
-        $produks = Produk::orderBy('nama_produk')->get();
-        $bahanBaku = BahanBaku::where('kategori', 'kain')->orderBy('nama_bahan')->get();
+        ['produks' => $produks, 'bahanBaku' => $bahanBaku] = $this->estimasiService->getFormOptions();
 
         return view('admin.standard-baseline-produksi.index', compact('estimasi', 'produks', 'bahanBaku'));
     }

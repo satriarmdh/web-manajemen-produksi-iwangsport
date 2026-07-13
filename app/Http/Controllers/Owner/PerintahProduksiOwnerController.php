@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Owner\RejectPerintahProduksiRequest;
 use App\Models\PerintahProduksi;
 use App\Services\PerintahProduksiService;
 use Illuminate\Http\Request;
@@ -44,13 +45,9 @@ class PerintahProduksiOwnerController extends Controller
     /**
      * Reject perintah produksi
      */
-    public function reject(Request $request, PerintahProduksi $perintahProduksi)
+    public function reject(RejectPerintahProduksiRequest $request, PerintahProduksi $perintahProduksi)
     {
-        $request->validate([
-            'alasan_penolakan' => 'required|string|max:500',
-        ]);
-
-        $this->service->reject($perintahProduksi, $request->alasan_penolakan);
+        $this->service->reject($perintahProduksi, $request->validated('alasan_penolakan'));
 
         return redirect()
             ->route('owner.perintah-produksi.index')

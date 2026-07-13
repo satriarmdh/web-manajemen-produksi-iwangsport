@@ -71,7 +71,7 @@
                     <form action="{{ route('admin.perintah-produksi.selesai', $perintahProduksi) }}" method="POST" class="inline">
                         @csrf
                         <input type="hidden" name="tgl_selesai" value="{{ now()->format('Y-m-d') }}">
-                        <button type="submit" onclick="return confirm('Tandai perintah produksi ini sebagai selesai?')"
+                        <button type="submit" data-confirm-action="Tandai perintah produksi ini sebagai selesai?"
                             class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl transition-colors shadow-md shadow-green-600/20">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             Tandai Selesai
@@ -251,5 +251,6 @@
             @endforeach
         </div>
     </div>
+    @vite('resources/js/admin/confirm-action.js')
 </x-layouts.admin>
 

@@ -126,7 +126,7 @@ document.addEventListener('click', function(e) {
     }
 
     // Close filterDropdownMobile saat klik di luar
-    if (!e.target.closest('#filterDropdownMobile') && !e.target.closest('[onclick*="toggleFilterMenu"]')) {
+    if (!e.target.closest('#filterDropdownMobile') && !e.target.closest('[data-toggle-filter-menu]')) {
         const mobileDd = document.getElementById('filterDropdownMobile');
         if (mobileDd && !mobileDd.classList.contains('hidden')) {
             mobileDd.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
@@ -230,3 +230,54 @@ window.toggleDropdown = toggleDropdown;
 window.toggleFilterMenu = toggleFilterMenu;
 window.showDetail = showDetail;
 window.updateSatuanDisplay = updateSatuanDisplay;
+
+
+document.querySelectorAll('[data-stock-dropdown]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleDropdown(button.dataset.stockDropdown);
+    });
+});
+
+document.querySelectorAll('[data-open-panel]').forEach((button) => {
+    button.addEventListener('click', () => togglePanel(button.dataset.openPanel));
+});
+
+document.querySelectorAll('[data-close-panel]').forEach((button) => {
+    button.addEventListener('click', () => closePanel(button.dataset.closePanel));
+});
+
+document.querySelectorAll('[data-confirm-delete]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        Swal.fire({
+            title: 'Hapus Transaksi?',
+            text: 'Data yang dihapus tidak dapat dikembalikan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-xl font-sans',
+                confirmButton: 'px-5 py-2.5 text-sm font-semibold rounded-lg',
+                cancelButton: 'px-5 py-2.5 text-sm font-semibold rounded-lg'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+
+document.querySelectorAll('[data-show-detail]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const type = button.dataset.showDetail;
+        const data = JSON.parse(button.dataset.detailJson);
+        showDetail(type, data);
+    });
+});

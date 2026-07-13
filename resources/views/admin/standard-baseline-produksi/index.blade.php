@@ -32,7 +32,7 @@
             <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 relative">
                 <!-- TOMBOL & MENU FILTER -->
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('filterDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request()->hasAny(['kategori', 'status']) ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="filterDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request()->hasAny(['kategori', 'status']) ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                         Filter
                         @if(request()->has('status'))
@@ -71,7 +71,7 @@
 
                 <!-- TOMBOL & MENU SORTING -->
                 <div class="relative w-1/2 sm:w-auto">
-                    <button type="button" onclick="toggleFilterMenu('sortDropdown')" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-toggle-filter-menu="sortDropdown" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ request('sort') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
                         Urutkan
                     </button>
@@ -140,7 +140,7 @@
                         <th scope="col" class="px-6 py-4 font-semibold">Produk</th>
                         <th scope="col" class="px-6 py-4 font-semibold">Bahan Baku</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Pcs per Roll</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Toleransi (−)</th>
+                        <th scope="col" class="px-6 py-4 font-semibold text-center">Toleransi (âˆ’)</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Status</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Aksi</th>
                     </tr>
@@ -152,14 +152,14 @@
                                 <div class="flex items-center gap-3">
                                     <div>
                                         <div class="font-bold text-gray-900">{{ $item->produk->nama_produk }}</div>
-                                        <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $item->produk->kode_produk }} · {{ ucfirst($item->produk->ukuran) }} · {{ ucfirst($item->produk->warna) }}</div>
+                                        <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $item->produk->kode_produk }} Â· {{ ucfirst($item->produk->ukuran) }} Â· {{ ucfirst($item->produk->warna) }}</div>
                                     </div>
                                 </div>
                             </td>
 
                             <td class="px-6 py-4">
                                 <div class="font-medium text-gray-900">{{ $item->bahanBaku->nama_bahan }}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">{{ $item->bahanBaku->kode_bahan }} · {{ ucfirst($item->bahanBaku->warna) }} · {{ ucfirst($item->bahanBaku->kategori) }}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">{{ $item->bahanBaku->kode_bahan }} Â· {{ ucfirst($item->bahanBaku->warna) }} Â· {{ ucfirst($item->bahanBaku->kategori) }}</div>
                             </td>
 
                             <td class="px-6 py-4 text-center">
@@ -170,10 +170,10 @@
                             <td class="px-6 py-4 text-center">
                                 @if($item->toleransi_minus > 0)
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-600 border border-amber-100">
-                                        −{{ $item->toleransi_minus }} pcs
+                                        âˆ’{{ $item->toleransi_minus }} pcs
                                     </span>
                                 @else
-                                    <span class="text-xs text-gray-400">—</span>
+                                    <span class="text-xs text-gray-400">â€”</span>
                                 @endif
                             </td>
 
@@ -273,363 +273,21 @@
     </div>
 
     {{-- ========================================= --}}
-    {{-- MODAL TAMBAH BASELINE --}}
-    {{-- ========================================= --}}
-    <div id="add-modal" class="slide-panel">
-        <!-- Backdrop -->
-        <div class="slide-panel-backdrop" data-panel-close="add-modal"></div>
+    @include('admin.standard-baseline-produksi.partials._tambah-baseline')
 
-        <!-- Panel Body -->
-        <div class="slide-panel-body">
-            <!-- Header -->
-            <div class="slide-panel-header">
-                <div class="slide-panel-header-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <h3 class="slide-panel-header-title">Tambah Baseline Produksi</h3>
-                <button class="slide-panel-close" data-panel-close="add-modal">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
+    @include('admin.standard-baseline-produksi.partials._edit-baseline')
 
-            <!-- Content -->
-            <form action="{{ route('admin.standard-baseline-produksi.store') }}" method="POST" id="addForm" class="slide-panel-content">
-                @csrf
-                <div class="space-y-4">
-                            <!-- Pilih Produk -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Produk <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <input type="hidden" name="produk_id" id="add_produk_id" required>
-                                    <input type="text" id="add_produk_search" placeholder="Ketik untuk mencari produk..." autocomplete="off" class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg class="dropdown-arrow w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </div>
-                                    <div id="add_produk_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
-                                        <div class="p-2">
-                                            @foreach($produks as $produk)
-                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) — {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
-                                                    <div style="flex:1; min-width:0; overflow:hidden;">
-                                                        <div class="font-medium text-gray-900 truncate">{{ $produk->nama_produk }}</div>
-                                                        <div class="text-xs text-gray-500 truncate">{{ $produk->kode_produk }} • {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
-                                                    </div>
-                                                    <svg class="check-icon hidden" style="width:16px; height:16px; color:#0F034D; flex-shrink:0; margin-left:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                        <div id="add_produk_no_results" class="hidden p-4 text-center text-sm text-gray-500">Produk tidak ditemukan</div>
-                                    </div>
-                                </div>
-                            </div>
+    @include('admin.standard-baseline-produksi.partials._detail-baseline')
 
-                            <!-- Pilih Bahan Baku -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Bahan Baku <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <input type="hidden" name="bahan_baku_id" id="add_bahan_baku_id" required>
-                                    <input type="text" id="add_bahan_baku_search" placeholder="Ketik untuk mencari bahan baku..." autocomplete="off" class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg class="dropdown-arrow w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </div>
-                                    <div id="add_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
-                                        <div class="p-2">
-                                            @foreach($bahanBaku as $bahan)
-                                                <div class="dropdown-option hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm px-3 py-2" style="display:flex; align-items:center; justify-content:space-between;" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) — {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
-                                                    <div style="flex:1; min-width:0; overflow:hidden;">
-                                                        <div class="font-medium text-gray-900 truncate">{{ $bahan->nama_bahan }}</div>
-                                                        <div class="text-xs text-gray-500 truncate">{{ $bahan->kode_bahan }} • {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
-                                                    </div>
-                                                    <svg class="check-icon hidden" style="width:16px; height:16px; color:#0F034D; flex-shrink:0; margin-left:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                        <div id="add_bahan_baku_no_results" class="hidden p-4 text-center text-sm text-gray-500">Bahan baku tidak ditemukan</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Error Message Warna -->
-                            <div id="add_warna_error" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <p class="text-sm text-red-600"></p>
-                            </div>
-                            
-                            <!-- Grid: Pcs per Roll & Toleransi -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pcs per Roll <span class="text-red-500">*</span></label>
-                                    <input type="number" name="pcs_per_roll" required min="1" placeholder="Contoh: 138" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                    <p class="text-xs text-gray-500 mt-1">Estimasi pcs yang dihasilkan 1 roll.</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Toleransi Minus</label>
-                                    <input type="number" name="toleransi_minus" min="0" value="0" placeholder="Contoh: 5" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                    <p class="text-xs text-gray-500 mt-1">Batas bawah yang masih wajar.</p>
-                                </div>
-                            </div>
-
-                            <!-- Keterangan -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan</label>
-                                <textarea name="keterangan" rows="2" placeholder="Catatan tambahan (opsional)" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                            </div>
-
-                        </div>
-
-                </form>
-
-            <!-- Footer -->
-            <div class="slide-panel-footer">
-                <button type="button" onclick="closePanel('add-modal')" class="btn-panel-cancel">Batal</button>
-                <button type="submit" form="addForm" class="btn-panel-submit">Simpan Baseline</button>
-            </div>
-        </div>
-    </div>
-
-    {{-- ========================================= --}}
-    {{-- MODAL EDIT BASELINE --}}
-    {{-- ========================================= --}}
-    <div id="edit-modal" class="slide-panel">
-        <!-- Backdrop -->
-        <div class="slide-panel-backdrop" data-panel-close="edit-modal"></div>
-
-        <!-- Panel Body -->
-        <div class="slide-panel-body">
-            <!-- Header -->
-            <div class="slide-panel-header">
-                <div class="slide-panel-header-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                </div>
-                <h3 class="slide-panel-header-title">Edit Baseline Produksi</h3>
-                <button class="slide-panel-close" data-panel-close="edit-modal">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Content -->
-            <form action="" method="POST" id="editForm" class="slide-panel-content">
-                @csrf
-                @method('PUT')
-                <div class="space-y-4">
-
-                            <!-- Pilih Produk -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Produk <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <input type="hidden" name="produk_id" id="edit_produk_id" required>
-                                    <input type="text" id="edit_produk_search" placeholder="Ketik untuk mencari produk..." autocomplete="off" class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg class="dropdown-arrow w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </div>
-                                    <div id="edit_produk_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
-                                        <div class="p-2">
-                                            @foreach($produks as $produk)
-                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $produk->id }}" data-text="{{ $produk->nama_produk }} ({{ $produk->kode_produk }}) — {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}" data-warna="{{ $produk->warna }}">
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="font-medium text-gray-900">{{ $produk->nama_produk }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $produk->kode_produk }} • {{ ucfirst($produk->ukuran) }}, {{ ucfirst($produk->warna) }}</div>
-                                                    </div>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                        <div id="edit_produk_no_results" class="hidden p-4 text-center text-sm text-gray-500">Produk tidak ditemukan</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Pilih Bahan Baku -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Bahan Baku <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <input type="hidden" name="bahan_baku_id" id="edit_bahan_baku_id" required>
-                                    <input type="text" id="edit_bahan_baku_search" placeholder="Ketik untuk mencari bahan baku..." autocomplete="off" class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg class="dropdown-arrow w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </div>
-                                    <div id="edit_bahan_baku_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
-                                        <div class="p-2">
-                                            @foreach($bahanBaku as $bahan)
-                                                <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $bahan->id }}" data-text="{{ $bahan->nama_bahan }} ({{ $bahan->kode_bahan }}) — {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}" data-warna="{{ $bahan->warna }}" data-kategori="{{ $bahan->kategori }}">
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="font-medium text-gray-900">{{ $bahan->nama_bahan }}</div>
-                                                        <div class="text-xs text-gray-500">{{ $bahan->kode_bahan }} • {{ ucfirst($bahan->warna) }}, {{ ucfirst($bahan->kategori) }}</div>
-                                                    </div>
-                                                    <svg class="check-icon w-4 h-4 text-[#0F034D] hidden flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                        <div id="edit_bahan_baku_no_results" class="hidden p-4 text-center text-sm text-gray-500">Bahan baku tidak ditemukan</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Error Message Warna -->
-                            <div id="edit_warna_error" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <p class="text-sm text-red-600"></p>
-                            </div>
-                            
-                            <!-- Grid: Pcs per Roll & Toleransi -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pcs per Roll <span class="text-red-500">*</span></label>
-                                    <input type="number" name="pcs_per_roll" id="edit_pcs_per_roll" required min="1" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Toleransi Minus</label>
-                                    <input type="number" name="toleransi_minus" id="edit_toleransi_minus" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
-                                </div>
-                            </div>
-
-                            <!-- Keterangan -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan</label>
-                                <textarea name="keterangan" id="edit_keterangan" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm"></textarea>
-                            </div>
-
-                            <!-- Toggle Aktif -->
-                            <div>
-                                <input type="hidden" name="is_aktif" value="0">
-                                <input type="checkbox" name="is_aktif" id="edit_is_aktif" value="1" class="hidden" onchange="updateCheckbox(this, 'edit_cb')">
-                                <div id="edit_cb_wrapper" onclick="document.getElementById('edit_is_aktif').click()" class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
-                                    <div id="edit_cb_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                        <svg id="edit_cb_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <span id="edit_cb_text" class="text-sm font-semibold text-gray-700">Aktif</span>
-                                        <p class="text-xs text-gray-500">Baseline ini akan digunakan dalam perhitungan produksi.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                </form>
-
-            <!-- Footer -->
-            <div class="slide-panel-footer">
-                <button type="button" onclick="closePanel('edit-modal')" class="btn-panel-cancel">Batal</button>
-                <button type="submit" form="editForm" class="btn-panel-submit">Simpan Perubahan</button>
-            </div>
-        </div>
-    </div>
-
-    {{-- ========================================= --}}
-    {{-- MODAL DETAIL BASELINE --}}
-    {{-- ========================================= --}}
-    <div id="detail-modal" class="slide-panel">
-        <!-- Backdrop -->
-        <div class="slide-panel-backdrop" data-panel-close="detail-modal"></div>
-
-        <!-- Panel Body -->
-        <div class="slide-panel-body">
-            <!-- Header -->
-            <div class="slide-panel-header">
-                <div class="slide-panel-header-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <h3 class="slide-panel-header-title">Detail Baseline Produksi</h3>
-                <button class="slide-panel-close" data-panel-close="detail-modal">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Content -->
-            <div class="slide-panel-content">
-                <div class="space-y-5">
-                        {{-- Produk --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Produk</label>
-                            <p id="detail_produk" class="text-sm font-bold text-gray-900">-</p>
-                            <div class="inline-flex items-center gap-1.5 text-xs text-gray-400 mt-0.5">
-                                <span id="detail_produk_sub">-</span>
-                                <span id="detail_produk_dot" class="inline-block w-2.5 h-2.5 rounded-full shrink-0"></span>
-                            </div>
-                        </div>
-
-                        {{-- Bahan Baku --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Bahan Baku</label>
-                            <p id="detail_bahan" class="text-sm font-bold text-gray-900">-</p>
-                            <div class="inline-flex items-center gap-1.5 text-xs text-gray-400 mt-0.5">
-                                <span id="detail_bahan_sub">-</span>
-                                <span id="detail_bahan_dot" class="inline-block w-2.5 h-2.5 rounded-full shrink-0"></span>
-                            </div>
-                        </div>
-
-                        {{-- Estimasi Grid --}}
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="bg-[#0F034D]/5 rounded-xl p-3 text-center">
-                                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Pcs per Roll</p>
-                                <p id="detail_pcs" class="text-xl font-bold text-[#0F034D]">-</p>
-                            </div>
-                            <div class="bg-amber-50 rounded-xl p-3 text-center">
-                                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Toleransi (−)</p>
-                                <p id="detail_toleransi" class="text-xl font-bold text-amber-600">-</p>
-                            </div>
-                            <div class="bg-blue-50 rounded-xl p-3 text-center">
-                                <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Range</p>
-                                <p id="detail_range" class="text-lg font-bold text-blue-700">-</p>
-                            </div>
-                        </div>
-
-                        {{-- Keterangan --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Keterangan</label>
-                            <p id="detail_keterangan" class="text-sm text-gray-700">-</p>
-                        </div>
-
-                        {{-- Status --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Status</label>
-                            <div id="detail_status"></div>
-                        </div>
-
-                        {{-- Tanggal Dibuat --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Dibuat</label>
-                            <p id="detail_created" class="text-sm text-gray-700">-</p>
-                        </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <!-- <div class="slide-panel-footer">
-                <button type="button" onclick="closePanel('detail-modal')" class="btn-panel-cancel">Tutup</button>
-            </div> -->
-        </div>
-    </div>
 
     @vite([
         'resources/css/global-modal.css',
+        'resources/js/admin/filter-dropdown.js',
         'resources/js/admin/standard-baseline-produksi/toggle-modal.js'
     ])
 </x-layouts.admin>
+
+
+
+
+
