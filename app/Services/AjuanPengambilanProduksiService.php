@@ -266,7 +266,12 @@ class AjuanPengambilanProduksiService
             $stokSumber->save();
 
             $stokTujuan->qty_hold = (int) $stokTujuan->qty_hold + (int) $ajuan->qty_ajuan;
-            $stokTujuan->status_barang = 'Ready';
+            if ($qtyPindah > 0 && (bool) $stokTujuan->is_selesai) {
+                $stokTujuan->is_selesai = false;
+                $stokTujuan->status_validasi = 'normal';
+                $stokTujuan->alasan = null;
+            }
+            $stokTujuan->status_barang = 'Proses';
             $stokTujuan->save();
 
             $ajuan->update([

@@ -168,7 +168,7 @@ class AjuanPengambilanProduksiTest extends TestCase
             'id_karyawan' => $this->jahit->id,
             'peran' => 'jahit',
             'qty_hold' => 250,
-            'status_barang' => 'Ready',
+            'status_barang' => 'Proses',
         ]);
 
         $this->assertDatabaseHas('mutasi_produksi', [
