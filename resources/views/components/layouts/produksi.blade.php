@@ -47,13 +47,13 @@
                 'label' => 'Ajuan Saya',
                 'route' => route('produksi.ajuan-pengambilan.index'),
                 'active' => $isAjuanSaya,
-                'icon' => 'M12 5v14m-7-7h14 M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z',
+                'icon' => 'm22 2-7 20-4-9-9-4Z M22 2 11 13',
             ],
             [
                 'label' => 'Ajuan Masuk',
                 'route' => route('produksi.ajuan-pengambilan.masuk'),
                 'active' => $isAjuanMasuk,
-                'icon' => 'M8 7h8m-8 4h8m-8 4h5 M12 3v10m0 0 4-4m-4 4-4-4 M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5z',
+                'icon' => 'M22 12h-6l-2 3h-4l-2-3H2 M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z',
                 'badge' => $jumlahPerintahAjuanMasuk,
             ],
         ];
@@ -65,7 +65,7 @@
                 <img src="{{ asset('images/logo-primary.png') }}" alt="Logo" class="w-9 h-9 rounded-full object-cover">
                 <div>
                     <p class="text-lg font-bold tracking-tight">Iwangsport</p>
-                    <p class="text-xs text-gray-500">Panel Produksi</p>
+                    <p class="text-xs text-gray-500">Dashboard Produksi</p>
                 </div>
             </div>
             <nav class="flex-1 p-4 space-y-2">

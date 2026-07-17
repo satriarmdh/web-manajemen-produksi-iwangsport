@@ -109,45 +109,15 @@
 
             @php 
                 $isPerintah = request()->routeIs('admin.perintah-produksi.*'); 
-                $isLacak = request()->routeIs('admin.pelacakan-produksi.*'); 
-                $isLog = request()->routeIs('admin.log-serah-terima.*'); 
-                $isProduksiGroup = $isPerintah || $isLacak || $isLog;
+                $isProduksiGroup = $isPerintah;
             @endphp
             <div>
-                <button onclick="toggleMenu('menu-produksi', 'icon-produksi')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isProduksiGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
+                <a href="{{ route('admin.perintah-produksi.index') }}" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isProduksiGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5 shrink-0 transition-colors {{ $isProduksiGroup ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                        <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isProduksiGroup ? 'font-bold' : '' }}">Produksi</span>
+                        <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isProduksiGroup ? 'font-bold' : '' }}">Perintah Produksi</span>
                     </div>
-                    <svg id="icon-produksi" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isProduksiGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div id="menu-produksi" class="overflow-hidden transition-all duration-300 {{ $isProduksiGroup ? 'max-h-96' : 'max-h-0' }}">
-                    <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
-                        <li>
-                            <a href="{{ route('admin.perintah-produksi.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPerintah ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ ($isLacak || $isLog) ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isPerintah ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPerintah ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
-                                Perintah Produksi
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isLacak ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isLog ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isLacak ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isLacak ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
-                                Pelacakan Produksi
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isLog ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isLog ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isLog ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                Log Serah Terima
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                </a>
             </div>
 
             @php 
@@ -304,7 +274,7 @@
         window.flashMessages = {
             success: "{{ session('success') }}",
             error: "{{ session('error') }}",
-            warning: "{{ $errors->any() ? 'Ada data yang tidak valid, silakan periksa form Anda.' : '' }}"
+            warning: {!! $errors->any() ? json_encode(implode('<br>', $errors->all())) : '""' !!}
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

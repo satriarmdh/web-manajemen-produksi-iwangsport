@@ -28,11 +28,27 @@ class InputHasilPekerjaanService
             ->findOrFail($data['detail_perintah_produksi_id']);
 
         $qtySelesai = (int) $data['qty_selesai'];
+        $qtyReject = (int) ($data['qty_reject'] ?? 0);
         $totalSetelahInput = ((int) $detail->qty_pcs_potong) + $qtySelesai;
+
+        if ($qtyReject > 0) {
+            \App\Models\ProdukCacat::create([
+                'id_perintah' => $detail->perintah_produksi_id,
+                'id_detail_perintah' => $detail->id,
+                'id_karyawan' => $user->id,
+                'id_produk' => $detail->produk_id,
+                'tahapan' => 'potong',
+                'qty_reject' => $qtyReject,
+                'keterangan' => $data['keterangan_cacat'] ?? '',
+                'tgl_lapor' => now(),
+            ]);
+        }
+
         $totalReject = (int) (StokVirtual::where('id_detail_perintah', $detail->id)
             ->where('id_karyawan', $user->id)
             ->where('peran', $user->role)
-            ->value('total_reject') ?? 0);
+            ->value('total_reject') ?? 0) + $qtyReject;
+
         $batasBawah = $detail->estimasi_pcs - $detail->toleransi_minus;
         $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false);
         $statusValidasi = $ditandaiSelesai && ($totalSetelahInput + $totalReject) < $batasBawah ? 'flag' : 'normal';
@@ -60,6 +76,7 @@ class InputHasilPekerjaanService
                 'id_produk' => $detail->produk_id,
                 'qty_hold' => 0,
                 'total_selesai' => 0,
+                'total_dikeluarkan' => 0,
                 'total_reject' => 0,
                 'status_barang' => 'Proses',
                 'is_selesai' => false,
@@ -68,6 +85,7 @@ class InputHasilPekerjaanService
 
         $stokVirtual->qty_hold = ((int) $stokVirtual->qty_hold) + $qtySelesai;
         $stokVirtual->total_selesai = ((int) $stokVirtual->total_selesai) + $qtySelesai;
+        $stokVirtual->total_reject = ((int) $stokVirtual->total_reject) + $qtyReject;
         $stokVirtual->status_barang = 'Ready';
         $stokVirtual->is_selesai = $ditandaiSelesai || (bool) $stokVirtual->is_selesai;
         $stokVirtual->save();
@@ -77,13 +95,28 @@ class InputHasilPekerjaanService
     {
         $stokVirtual = StokVirtual::lockForUpdate()->findOrFail($data['stok_virtual_id']);
         $qtySelesai = (int) $data['qty_selesai'];
+        $qtyReject = (int) ($data['qty_reject'] ?? 0);
+
+        if ($qtyReject > 0) {
+            \App\Models\ProdukCacat::create([
+                'id_perintah' => $stokVirtual->id_perintah,
+                'id_detail_perintah' => $stokVirtual->id_detail_perintah,
+                'id_karyawan' => $user->id,
+                'id_produk' => $stokVirtual->id_produk,
+                'tahapan' => $user->role,
+                'qty_reject' => $qtyReject,
+                'keterangan' => $data['keterangan_cacat'] ?? '',
+                'tgl_lapor' => now(),
+            ]);
+        }
 
         $target = (int) $stokVirtual->qty_hold + (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject;
-        $progressSetelahInput = (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject + $qtySelesai;
+        $progressSetelahInput = (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject + $qtySelesai + $qtyReject;
         $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false);
 
-        $stokVirtual->qty_hold = max(0, ((int) $stokVirtual->qty_hold) - $qtySelesai);
+        $stokVirtual->qty_hold = max(0, ((int) $stokVirtual->qty_hold) - $qtySelesai - $qtyReject);
         $stokVirtual->total_selesai = ((int) $stokVirtual->total_selesai) + $qtySelesai;
+        $stokVirtual->total_reject = ((int) $stokVirtual->total_reject) + $qtyReject;
         $stokVirtual->status_barang = 'Ready';
         $stokVirtual->is_selesai = $ditandaiSelesai || (bool) $stokVirtual->is_selesai;
         if ($ditandaiSelesai) {

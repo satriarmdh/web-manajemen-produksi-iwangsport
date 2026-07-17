@@ -1,4 +1,4 @@
-﻿<x-layouts.produksi>
+<x-layouts.produksi>
     <x-slot:header>
         Detail Pekerjaan
     </x-slot:header>
@@ -71,11 +71,17 @@
                 }
                 $hasilBaik = (int) ($stokVirtualSaya?->total_selesai ?? 0);
                 $totalReject = (int) ($stokVirtualSaya?->total_reject ?? 0);
+                $totalDikeluarkan = (int) ($stokVirtualSaya?->total_dikeluarkan ?? 0);
                 $sudahDiinput = $hasilBaik + $totalReject;
                 $sisaEstimasi = max(0, $targetInput - $sudahDiinput);
                 $progressPersen = $targetInput > 0 ? min(100, round(($sudahDiinput / $targetInput) * 100)) : 0;
                 $inputSelesai = (bool) ($stokVirtualSaya?->is_selesai ?? false) || ($targetInput > 0 && $sudahDiinput >= $targetInput);
                 $perluPengajuan = $role !== 'potong' && (! $stokVirtualSaya || $targetInput <= 0);
+                $stokReady = $stokVirtualSaya
+                    ? ($stokVirtualSaya->peran === 'potong'
+                        ? (int) $stokVirtualSaya->qty_hold
+                        : max(0, (int) $stokVirtualSaya->total_selesai - (int) $stokVirtualSaya->total_dikeluarkan))
+                    : 0;
             @endphp
 
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
@@ -121,27 +127,27 @@
                         </div>
                         <div class="rounded-xl bg-white/80 border border-white p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Batas normal</p>
-                            <p class="text-sm font-bold text-green-700">â‰¥ {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
+                            <p class="text-sm font-bold text-green-700">&ge; {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
                         </div>
                         <div class="rounded-xl bg-white/80 border border-white p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Progress</p>
                             <p class="text-sm font-bold text-[#0F034D]">{{ $progressPersen }}%</p>
                         </div>
                     </div>
+                    @if($stokReady > 0 || $totalDikeluarkan > 0)
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div class="rounded-xl bg-green-50/80 border border-green-100 p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-green-600/70 font-semibold">Stok ready</p>
+                            <p class="text-sm font-bold text-green-700">{{ number_format($stokReady, 0, ',', '.') }} pcs</p>
+                        </div>
+                        <div class="rounded-xl bg-orange-50/80 border border-orange-100 p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-orange-600/70 font-semibold">Sudah diserahkan</p>
+                            <p class="text-sm font-bold text-orange-600">{{ number_format($totalDikeluarkan, 0, ',', '.') }} pcs</p>
+                        </div>
+                    </div>
+                    @endif
                     </div>
 
-                    @if(! $inputSelesai)
-                        <label class="group mb-4 flex items-start gap-4 rounded-2xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
-                            <input type="checkbox" value="1" class="sr-only peer" data-finish-toggle="{{ $detail->id }}">
-                            <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
-                            </span>
-                            <span>
-                                <span class="block text-sm font-bold text-[#0F034D]">Tandai produk ini selesai</span>
-                                <span class="block text-xs text-gray-500 mt-1 leading-relaxed">Centang sekali jika hasil produk ini sudah final. Pilihan ini berlaku saat menyimpan hasil pekerjaan maupun barang cacat.</span>
-                            </span>
-                        </label>
-                    @endif
                 @endif
 
                 @if($role === 'potong')
@@ -159,15 +165,35 @@
                         <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3">
                             @csrf
                             <input type="hidden" name="detail_perintah_produksi_id" value="{{ $detail->id }}">
-                            <input type="hidden" name="tandai_selesai" value="0" data-finish-input="{{ $detail->id }}">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai</label>
-                                <input type="number" name="qty_selesai" min="1" max="{{ $sisaEstimasi }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, $sisaEstimasi) }}">
+                                <input type="number" name="qty_selesai" min="0" max="{{ $sisaEstimasi }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, $sisaEstimasi) }}">
                             </div> 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Dibawah Toleransi</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Dibawah Batas Normal</label>
                                 <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi totalnya kurang dari batas normal"></textarea>
                             </div>
+
+                            <div class="pt-2 border-t border-gray-100">
+                                <label class="block text-sm font-semibold text-red-700 mb-1">Jumlah Barang Cacat <span class="text-xs font-normal text-red-500/70">(Opsional)</span></label>
+                                <input type="number" name="qty_reject" min="1" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Isi jika ada produk reject">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-red-700 mb-1">Keterangan Cacat</label>
+                                <textarea name="keterangan_cacat" rows="2" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
+                            </div>
+
+                            <label class="group mt-2 mb-4 flex items-start gap-4 rounded-xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
+                                <input type="checkbox" name="tandai_selesai" value="1" class="sr-only peer">
+                                <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+                                </span>
+                                <span>
+                                    <span class="block text-sm font-bold text-[#0F034D]">Tandai produk ini selesai</span>
+                                    <span class="block text-xs text-gray-500 mt-1 leading-relaxed">Centang sekali jika seluruh pekerjaan untuk produk ini sudah diselesaikan.</span>
+                                </span>
+                            </label>
+
                             <button type="submit" class="w-full py-3 rounded-xl bg-[#0F034D] text-white text-sm font-semibold shadow-md shadow-[#0F034D]/20 hover:bg-[#24116f] transition-colors">Simpan Hasil Pekerjaan</button>
                         </form>
                     @endif
@@ -180,7 +206,10 @@
                             <div>
                                 <p class="text-sm font-bold text-amber-800">Ajukan pengambilan dulu</p>
                                 <p class="mt-1 text-xs leading-relaxed text-amber-700">Produk ini belum memiliki barang yang disetujui untuk tahap {{ ucfirst($role) }}. Ajukan pengambilan barang terlebih dahulu agar bisa input hasil.</p>
-                                <a href="{{ route('produksi.ajuan-pengambilan.index') }}" class="mt-3 inline-flex text-xs font-bold text-[#0F034D] hover:underline">Buka Ajuan Saya</a>
+                                <a href="{{ route('produksi.ajuan-pengambilan.index') }}" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#0F034D] hover:underline">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
+                                    Klik disini untuk membuat ajuan
+                                </a>
                             </div>
                         </div>
                     @elseif($inputSelesai)
@@ -190,56 +219,45 @@
                             </div>
                             <div>
                                 <p class="text-sm font-bold text-green-800">Hasil {{ ucfirst($role) }} {{ $detail->produk->nama_produk ?? 'produk ini' }} - {{ ucfirst($detail->produk->warna ?? '-') }} selesai diinputkan</p>
-                                <p class="text-xs text-green-700 mt-0.5">Ready untuk tahap berikutnya: {{ number_format($stokVirtualSaya->qty_hold, 0, ',', '.') }} pcs.</p>
+                                <p class="text-xs text-green-700 mt-0.5">Ready untuk tahap berikutnya: {{ number_format($stokReady, 0, ',', '.') }} pcs.</p>
                             </div>
                         </div>
                     @else
                         <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3">
                             @csrf
                             <input type="hidden" name="stok_virtual_id" value="{{ $stokVirtualSaya->id }}">
-                            <input type="hidden" name="tandai_selesai" value="0" data-finish-input="{{ $detail->id }}">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai</label>
-                                <input type="number" name="qty_selesai" min="1" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, (int) $stokVirtualSaya->qty_hold) }}">
+                                <input type="number" name="qty_selesai" min="0" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, (int) $stokVirtualSaya->qty_hold) }}">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Kurang Dari Target</label>
                                 <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi total hasil masih kurang dari target barang diterima"></textarea>
                             </div>
+
+                            <div class="pt-2 border-t border-gray-100">
+                                <label class="block text-sm font-semibold text-red-700 mb-1">Jumlah Barang Cacat <span class="text-xs font-normal text-red-500/70">(Opsional)</span></label>
+                                <input type="number" name="qty_reject" min="1" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Isi jika ada produk reject">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-red-700 mb-1">Keterangan Cacat</label>
+                                <textarea name="keterangan_cacat" rows="2" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
+                            </div>
+
+                            <label class="group mt-2 mb-4 flex items-start gap-4 rounded-xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
+                                <input type="checkbox" name="tandai_selesai" value="1" class="sr-only peer">
+                                <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+                                </span>
+                                <span>
+                                    <span class="block text-sm font-bold text-[#0F034D]">Tandai produk ini selesai</span>
+                                    <span class="block text-xs text-gray-500 mt-1 leading-relaxed">Centang sekali jika seluruh pekerjaan untuk produk ini sudah diselesaikan.</span>
+                                </span>
+                            </label>
+
                             <button type="submit" class="w-full py-3 rounded-xl bg-[#0F034D] text-white text-sm font-semibold shadow-md shadow-[#0F034D]/20 hover:bg-[#24116f] transition-colors">Simpan Hasil Pekerjaan</button>
                         </form>
                     @endif
-                @endif
-
-                @if(! $inputSelesai && ($role === 'potong' || ($stokVirtualSaya && $targetInput > 0)))
-                    <details class="mt-3 group rounded-2xl border border-red-100 bg-red-50/60 overflow-hidden">
-                        <summary class="list-none cursor-pointer px-4 py-3 flex items-center justify-between gap-3">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-bold text-red-700">Catat Barang Cacat</p>
-                                    <p class="text-xs text-red-600/70 truncate">Laporkan produk reject/cacat untuk produk ini.</p>
-                                </div>
-                            </div>
-                            <svg class="w-4 h-4 text-red-500 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-                        </summary>
-                        <form action="{{ route('produksi.produk-cacat.store') }}" method="POST" class="px-4 pb-4 space-y-3">
-                            @csrf
-                            <input type="hidden" name="detail_perintah_produksi_id" value="{{ $detail->id }}">
-                            <input type="hidden" name="tandai_selesai" value="0" data-finish-input="{{ $detail->id }}">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Barang Cacat</label>
-                                <input type="number" name="qty_reject" min="1" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-white text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: 30">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan Cacat</label>
-                                <textarea name="keterangan" rows="2" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-white text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
-                            </div>
-                            <button type="submit" class="w-full py-3 rounded-xl bg-red-600 text-white text-sm font-bold shadow-md shadow-red-600/20 hover:bg-red-700 transition-colors">Simpan barang cacat</button>
-                        </form>
-                    </details>
                 @endif
             </div>
         @endforeach

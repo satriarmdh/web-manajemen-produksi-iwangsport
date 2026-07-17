@@ -40,6 +40,14 @@ class SupplierController extends Controller
     }
 
     /**
+     * Display supplier detail (JSON)
+     */
+    public function show(Supplier $supplier)
+    {
+        return response()->json($this->supplierService->loadForDetail($supplier));
+    }
+
+    /**
      * Update the specified supplier
      */
     public function update(UpdateSupplierRequest $request, Supplier $supplier)

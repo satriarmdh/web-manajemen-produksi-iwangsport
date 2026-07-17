@@ -258,6 +258,88 @@ class AjuanPengambilanProduksiTest extends TestCase
             ->assertSee('Riwayat Ajuan Saya');
     }
 
+    public function test_akses_halaman_ajuan_sesuai_role()
+    {
+        // Admin forbidden
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)
+            ->get('/produksi/ajuan-saya')
+            ->assertStatus(403);
+
+        // Karyawan allowed
+        $this->actingAs($this->jahit)
+            ->get('/produksi/ajuan-saya')
+            ->assertOk();
+    }
+
+    public function test_filter_dan_search_pada_halaman_ajuan()
+    {
+        $detail = $this->buatDetailProduksiDisetujui();
+        // Give product a unique name that does not conflict with static texts like "Produk A-Z"
+        $detail->produk->update(['nama_produk' => 'KaosPolosKeren']);
+        $this->seedStokVirtual($detail, $this->potong, 'potong', 495);
+
+        // Search match
+        $this->actingAs($this->jahit)
+            ->get('/produksi/ajuan-saya?search=KaosPolosKeren')
+            ->assertSee('KaosPolosKeren');
+
+        // Search no match
+        $this->actingAs($this->jahit)
+            ->get('/produksi/ajuan-saya?search=NONEXISTENT')
+            ->assertDontSee('KaosPolosKeren');
+    }
+
+    public function test_reject_ajuan_wajib_catatan_respon()
+    {
+        $detail = $this->buatDetailProduksiDisetujui();
+        $this->seedStokVirtual($detail, $this->potong, 'potong', 495);
+        $ajuanId = $this->seedAjuan($detail, $this->potong, $this->jahit, 'potong', 'jahit', 250);
+
+        // Reject without reason
+        $this->actingAs($this->potong)
+            ->post("/produksi/ajuan-pengambilan/{$ajuanId}/reject", [
+                'catatan_respon' => '',
+            ])
+            ->assertSessionHasErrors(['catatan_respon']);
+    }
+
+    public function test_tidak_dapat_approve_atau_reject_ajuan_yang_sudah_direspons()
+    {
+        $detail = $this->buatDetailProduksiDisetujui();
+        $this->seedStokVirtual($detail, $this->potong, 'potong', 495);
+        $ajuanId = $this->seedAjuan($detail, $this->potong, $this->jahit, 'potong', 'jahit', 250);
+
+        // Approve first time
+        $this->actingAs($this->potong)
+            ->post("/produksi/ajuan-pengambilan/{$ajuanId}/approve")
+            ->assertRedirect('/produksi/ajuan-masuk');
+
+        // Approve second time
+        $this->actingAs($this->potong)
+            ->post("/produksi/ajuan-pengambilan/{$ajuanId}/approve")
+            ->assertStatus(403);
+
+        // Reject after approved
+        $this->actingAs($this->potong)
+            ->post("/produksi/ajuan-pengambilan/{$ajuanId}/reject", [
+                'catatan_respon' => 'Reject after approve',
+            ])
+            ->assertStatus(403);
+    }
+
+    public function test_stale_virtual_stock_prevent_approval()
+    {
+        $detail = $this->buatDetailProduksiDisetujui();
+        $this->seedStokVirtual($detail, $this->potong, 'potong', 200); // Only 200 ready
+        $ajuanId = $this->seedAjuan($detail, $this->potong, $this->jahit, 'potong', 'jahit', 250); // Requesting 250
+
+        // Approve with insufficient virtual stock
+        $this->actingAs($this->potong)
+            ->post("/produksi/ajuan-pengambilan/{$ajuanId}/approve")
+            ->assertStatus(422);
+    }
+
     private function buatDetailProduksiDisetujui(): DetailPerintahProduksi
     {
         $wo = PerintahProduksi::factory()->disetujui()->create();
@@ -282,6 +364,7 @@ class AjuanPengambilanProduksiTest extends TestCase
             'peran' => $peran,
             'qty_hold' => $qtyHold,
             'total_selesai' => $qtyHold,
+            'total_dikeluarkan' => 0,
             'total_reject' => 0,
             'status_barang' => 'Ready',
             'is_selesai' => true,

@@ -18,19 +18,23 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
         <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
             <p class="text-xs text-gray-500">Pekerjaan Aktif</p>
-            <p class="text-2xl font-bold mt-1">0</p>
+            <p class="text-2xl font-bold mt-1 text-[#0F034D]">{{ $pekerjaanAktif }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Perintah produksi yang harus dikerjakan</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
             <p class="text-xs text-gray-500">Menunggu Input</p>
-            <p class="text-2xl font-bold mt-1">0</p>
+            <p class="text-2xl font-bold mt-1 text-amber-600">{{ $menungguInput }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Perintah produksi menunggu input anda</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
             <p class="text-xs text-gray-500">Ajuan Masuk</p>
-            <p class="text-2xl font-bold mt-1">0</p>
+            <p class="text-2xl font-bold mt-1 text-blue-700">{{ $ajuanMasuk }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Ajuan menunggu persetujuan Anda</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-            <p class="text-xs text-gray-500">Riwayat Hari Ini</p>
-            <p class="text-2xl font-bold mt-1">0</p>
+            <p class="text-xs text-gray-500">Selesai Hari Ini</p>
+            <p class="text-2xl font-bold mt-1 text-green-600">{{ $selesaiHariIni }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Produk yang sudah ditandai selesai</p>
         </div>
     </div>
 
@@ -49,7 +53,7 @@
                 <div class="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0F034D] text-white text-xs font-bold shadow-md shadow-[#0F034D]/20">1</div>
                 <div class="min-w-0">
                     <p class="text-sm font-semibold text-[#0F034D]">Lihat pekerjaan</p>
-                    <p class="text-xs text-gray-500 leading-relaxed mt-0.5">Cek WO yang sudah disetujui owner dan siap diproses sesuai peran Anda.</p>
+                    <p class="text-xs text-gray-500 leading-relaxed mt-0.5">Cek Perintah Produksi yang sudah disetujui owner dan siap diproses sesuai peran Anda.</p>
                     <a href="{{ route('produksi.perintah-produksi.index') }}" class="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-[#0F034D] hover:text-[#24116f] transition-colors">
                         Klik di sini untuk melihat pekerjaan
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>

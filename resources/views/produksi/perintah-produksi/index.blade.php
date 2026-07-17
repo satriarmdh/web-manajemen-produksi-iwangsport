@@ -1,4 +1,4 @@
-﻿<x-layouts.produksi>
+<x-layouts.produksi>
     <x-slot:header>
         Pekerjaan Saya
     </x-slot:header>
@@ -160,7 +160,7 @@
                 </div>
             @endforeach
         </div>
-        <div class="mt-5">{{ $perintahProduksi->links('pagination::tailwind') }}</div>
+        <div class="mt-5"><x-pagination.custom-global-pagination :paginator="$perintahProduksi" /></div>
     @else
         <div class="bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
             <div class="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">

@@ -40,6 +40,7 @@ class StoreStokMasukRequest extends FormRequest
             'quantity.integer'        => 'Jumlah harus berupa angka.',
             'quantity.min'            => 'Jumlah minimal 1.',
             'supplier_id.exists'      => 'Supplier tidak ditemukan.',
+            'keterangan.string'       => 'Keterangan harus berupa teks.',
             'keterangan.max'          => 'Keterangan maksimal 500 karakter.',
             'bukti_pembelian.file'    => 'Bukti pembelian harus berupa file.',
             'bukti_pembelian.mimes'   => 'Format bukti pembelian: JPG, PNG, atau PDF.',

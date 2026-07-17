@@ -50,4 +50,9 @@ class PerintahProduksi extends Model
     {
         return $this->hasMany(RiwayatPenggunaanKain::class);
     }
+
+    public function stokVirtual(): HasMany
+    {
+        return $this->hasMany(StokVirtual::class, 'id_perintah');
+    }
 }

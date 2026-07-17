@@ -20,4 +20,12 @@ class SelesaikanPerintahProduksiRequest extends FormRequest
             'tgl_selesai' => ['required', 'date'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'tgl_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'tgl_selesai.date' => 'Format tanggal selesai tidak valid.',
+        ];
+    }
 }

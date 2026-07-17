@@ -44,6 +44,22 @@ class UserSeeder extends Seeder
                 'jenis_kelamin' => 'perempuan',
             ],
             [
+                'name' => 'agus',
+                'email' => 'agus@gmail.com',
+                'alamat' => 'Jl. Rungkut, Surabaya',
+                'no_hp' => '081234567894',
+                'role' => 'jahit',
+                'jenis_kelamin' => 'perempuan',
+            ],
+            [
+                'name' => 'reza',
+                'email' => 'reza@gmail.com',
+                'alamat' => 'Jl. Rungkut, Surabaya',
+                'no_hp' => '081234567894',
+                'role' => 'finishing',
+                'jenis_kelamin' => 'perempuan',
+            ],
+            [
                 'name' => 'finishing',
                 'email' => 'finishing@gmail.com',
                 'alamat' => 'Jl. Rungkut, Surabaya',

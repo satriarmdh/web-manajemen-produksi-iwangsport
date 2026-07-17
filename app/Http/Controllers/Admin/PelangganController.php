@@ -32,7 +32,7 @@ class PelangganController extends Controller
      */
     public function show(Pelanggan $pelanggan)
     {
-        return response()->json($pelanggan);
+        return response()->json($this->pelangganService->loadForDetail($pelanggan));
     }
 
     /**

@@ -29,21 +29,26 @@ class UpdateProdukRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'kode_produk.string'    => 'Kode produk harus berupa teks.',
             'kode_produk.unique'    => 'Kode produk ini sudah digunakan oleh produk lain.',
             'nama_produk.required'  => 'Nama produk wajib diisi.',
+            'nama_produk.string'    => 'Nama produk harus berupa teks.',
             'nama_produk.max'       => 'Nama produk maksimal 255 karakter.',
             'ukuran.required'       => 'Ukuran wajib dipilih.',
             'ukuran.in'             => 'Ukuran hanya boleh dipilih: normal atau jumbo.',
             'warna.required'        => 'Warna wajib diisi.',
+            'warna.string'          => 'Warna harus berupa teks.',
             'warna.max'             => 'Warna maksimal 100 karakter.',
             'harga_satuan.required' => 'Harga satuan wajib diisi.',
             'harga_satuan.integer'  => 'Harga satuan harus berupa angka.',
             'harga_satuan.min'      => 'Harga satuan tidak boleh kurang dari 0.',
             'satuan.required'       => 'Satuan wajib diisi.',
+            'satuan.string'          => 'Satuan harus berupa teks.',
             'satuan.max'            => 'Satuan maksimal 50 karakter.',
             'stok.required'         => 'Stok wajib diisi.',
             'stok.integer'          => 'Stok harus berupa angka.',
             'stok.min'              => 'Stok tidak boleh kurang dari 0.',
+            'is_aktif.boolean'      => 'Status aktif tidak valid.',
         ];
     }
 }

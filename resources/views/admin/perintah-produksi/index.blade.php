@@ -171,7 +171,7 @@
             @endforeach
         </div>
 
-        <div class="mt-6">{{ $perintahProduksi->links('pagination::tailwind') }}</div>
+        <div class="mt-6"><x-pagination.custom-global-pagination :paginator="$perintahProduksi" /></div>
     @else
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
             <div class="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">

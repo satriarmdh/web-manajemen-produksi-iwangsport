@@ -111,6 +111,14 @@ class SupplierService
     }
 
     /**
+     * Load supplier detail relations
+     */
+    public function loadForDetail(Supplier $supplier): Supplier
+    {
+        return $supplier;
+    }
+
+    /**
      * Delete supplier (soft delete)
      */
     public function delete(Supplier $supplier): bool

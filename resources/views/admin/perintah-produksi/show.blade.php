@@ -164,62 +164,73 @@
                 @endphp
 
                 <div class="p-6">
-                    <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex flex-wrap items-center gap-3 mb-3">
-                                @php
-                                    $warnaProduk = strtolower($detail->produk->warna ?? '-');
-                                    $warnaDotMap = [
-                                        'hitam' => '#111827',
-                                        'navy' => '#061952',
-                                        'abu-abu' => '#9CA3AF',
-                                        'abu' => '#9CA3AF',
-                                        'putih' => '#FFFFFF',
-                                    ];
-                                    $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
-                                    $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
-                                @endphp
-                                <h4 class="inline-flex items-center gap-2 text-base font-bold text-[#0F034D] min-w-0">
-                                    <span class="truncate">{{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}</span>
-                                    <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}" title="Warna {{ ucfirst($detail->produk->warna ?? '-') }}"></span>
-                                </h4>
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $validasiColors[$detail->status_validasi_potong] ?? 'bg-gray-50 text-gray-600 border-gray-100' }}">
-                                    Validasi: {{ $validasiLabel[$detail->status_validasi_potong] ?? ucfirst($detail->status_validasi_potong) }}
-                                </span>
-                            </div>
+                    <!-- Product Identity Header (global) -->
+                    <div class="flex flex-wrap items-center gap-3 mb-5">
+                        @php
+                            $warnaProduk = strtolower($detail->produk->warna ?? '-');
+                            $warnaDotMap = [
+                                'hitam' => '#111827',
+                                'navy' => '#061952',
+                                'abu-abu' => '#9CA3AF',
+                                'abu' => '#9CA3AF',
+                                'putih' => '#FFFFFF',
+                            ];
+                            $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
+                            $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+                        @endphp
+                        <h4 class="inline-flex items-center gap-2 text-base font-bold text-[#0F034D] min-w-0">
+                            <span class="truncate">{{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}</span>
+                            <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}" title="Warna {{ ucfirst($detail->produk->warna ?? '-') }}"></span>
+                        </h4>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $validasiColors[$detail->status_validasi_potong] ?? 'bg-gray-50 text-gray-600 border-gray-100' }}">
+                            Validasi: {{ $validasiLabel[$detail->status_validasi_potong] ?? ucfirst($detail->status_validasi_potong) }}
+                        </span>
+                    </div>
 
-                            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                                <div class="rounded-xl bg-gray-50 p-3">
-                                    <p class="text-[11px] text-gray-400 mb-1">Bahan Baku</p>
-                                    <p class="text-xs font-semibold text-[#0F034D] truncate">{{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
-                                </div>
-                                <div class="rounded-xl bg-gray-50 p-3">
-                                    <p class="text-[11px] text-gray-400 mb-1">Qty Roll</p>
-                                    <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->qty_roll_pakai, 0, ',', '.') }}</p>
-                                </div>
-                                <div class="rounded-xl bg-gray-50 p-3">
-                                    <p class="text-[11px] text-gray-400 mb-1">Estimasi</p>
-                                    <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->estimasi_pcs, 0, ',', '.') }}</p>
-                                </div>
-                                <div class="rounded-xl bg-gray-50 p-3">
-                                    <p class="text-[11px] text-gray-400 mb-1">Toleransi -</p>
-                                    <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->toleransi_minus, 0, ',', '.') }}</p>
-                                </div>
-                                <div class="rounded-xl bg-gray-50 p-3">
-                                    <p class="text-[11px] text-gray-400 mb-1">Hasil Potong</p>
-                                    <p class="text-sm font-bold text-[#0F034D]">{{ $detail->qty_pcs_potong ? number_format($detail->qty_pcs_potong, 0, ',', '.') : '-' }}</p>
-                                </div>
-                            </div>
+                    <!-- Main Tabs -->
+                    <div class="flex border-b border-gray-100 pb-3 mb-5 gap-2">
+                        <button type="button" data-main-tab-trigger="produk-{{ $detail->id }}" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#0F034D] text-white hover:bg-[#24116f] transition-all shadow-sm">Detail Produk</button>
+                        <button type="button" data-main-tab-trigger="tahapan-{{ $detail->id }}" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-50 text-gray-500 hover:bg-gray-100 transition-all">Tahapan Produksi & Aliran Barang</button>
+                    </div>
 
-                            @if($detail->alasan)
-                                <div class="mt-3 rounded-xl bg-red-50 border border-red-100 p-3">
-                                    <p class="text-xs text-red-500 mb-1">Catatan / Alasan Flag</p>
-                                    <p class="text-sm text-red-700 font-medium">{{ $detail->alasan }}</p>
-                                </div>
-                            @endif
+                    <!-- Main Tab Content 1: Detail Produk -->
+                    <div data-main-tab-content="produk-{{ $detail->id }}">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            <div class="rounded-xl bg-gray-50 p-3">
+                                <p class="text-[11px] text-gray-400 mb-1">Bahan Baku</p>
+                                <p class="text-xs font-semibold text-[#0F034D] truncate">{{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-50 p-3">
+                                <p class="text-[11px] text-gray-400 mb-1">Qty Roll</p>
+                                <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->qty_roll_pakai, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-50 p-3">
+                                <p class="text-[11px] text-gray-400 mb-1">Estimasi</p>
+                                <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->estimasi_pcs, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-50 p-3">
+                                <p class="text-[11px] text-gray-400 mb-1">Toleransi -</p>
+                                <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->toleransi_minus, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-50 p-3">
+                                <p class="text-[11px] text-gray-400 mb-1">Hasil Potong</p>
+                                <p class="text-sm font-bold text-[#0F034D]">{{ $detail->qty_pcs_potong ? number_format($detail->qty_pcs_potong, 0, ',', '.') : '-' }}</p>
+                            </div>
                         </div>
 
-                        <div class="w-full xl:w-[420px]">
+                        @if($detail->alasan)
+                            <div class="mt-3 rounded-xl bg-red-50 border border-red-100 p-3">
+                                <p class="text-xs text-red-500 mb-1">Catatan / Alasan Flag</p>
+                                <p class="text-sm text-red-700 font-medium">{{ $detail->alasan }}</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Main Tab Content 2: Tahapan Produksi & Aliran Barang -->
+                    <div data-main-tab-content="tahapan-{{ $detail->id }}" class="hidden">
+                        <!-- Alur Produksi -->
+                        <div class="mb-6">
+                            <p class="text-xs font-bold text-[#0F034D] mb-4">Alur Produksi</p>
                             <div class="relative flex items-start justify-between gap-2">
                                 @foreach($steps as $index => $step)
                                     <div class="flex-1 relative text-center">
@@ -239,11 +250,96 @@
                                     </div>
                                 @endforeach
                             </div>
+                        </div>
 
-                            <div class="mt-4 rounded-xl bg-amber-50 border border-amber-100 p-3">
-                                <p class="text-xs text-amber-700 leading-relaxed">
-                                    Tahapan Jahit, Finishing, dan Ready sementara ditampilkan sebagai kerangka progress. Nantinya bisa dihubungkan ke tabel <span class="font-semibold">stok_virtual</span> dan <span class="font-semibold">mutasi produksi</span> untuk menampilkan posisi barang per karyawan secara real-time.
-                                </p>
+                        <!-- Detail Distribusi -->
+                        <div class="w-full">
+                            <div class="border border-gray-100 rounded-xl p-3 bg-white shadow-sm">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-2">
+                                    <span class="text-xs font-bold text-[#0F034D]">Detail Distribusi</span>
+                                    <div class="flex gap-1.5">
+                                        <button type="button" data-tab-trigger="posisi-{{ $detail->id }}" class="px-2 py-1 rounded-md text-[10px] font-bold bg-[#0F034D] text-white hover:bg-[#24116f] transition-all shadow-sm">Stok Aktif</button>
+                                        <button type="button" data-tab-trigger="log-{{ $detail->id }}" class="px-2 py-1 rounded-md text-[10px] font-bold bg-gray-50 text-gray-500 hover:bg-gray-100 transition-all">Log Serah Terima</button>
+                                    </div>
+                                </div>
+
+                                <!-- Tab 1: Posisi Barang Aktif (Stok Virtual) -->
+                                <div data-tab-content="posisi-{{ $detail->id }}" class="space-y-1.5">
+                                    @php
+                                        $stokVirtualAll = $perintahProduksi->stokVirtual->where('id_detail_perintah', $detail->id);
+                                        $displayStok = collect();
+
+                                        foreach ($stokVirtualAll as $stok) {
+                                            // 1. Ready Stock
+                                            if ($stok->peran === 'potong') {
+                                                if ($stok->qty_hold > 0) {
+                                                    $displayStok->push([
+                                                        'karyawan_name' => $stok->karyawan->name ?? '-',
+                                                        'peran' => $stok->peran,
+                                                        'qty' => $stok->qty_hold,
+                                                        'status' => 'Ready',
+                                                    ]);
+                                                }
+                                            } else {
+                                                $readyQty = max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
+                                                if ($readyQty > 0) {
+                                                    $displayStok->push([
+                                                        'karyawan_name' => $stok->karyawan->name ?? '-',
+                                                        'peran' => $stok->peran,
+                                                        'qty' => $readyQty,
+                                                        'status' => 'Ready',
+                                                    ]);
+                                                }
+                                                // 2. Dalam Pengerjaan / Selisih
+                                                if ($stok->qty_hold > 0) {
+                                                    $statusLabel = $stok->is_selesai ? 'Selisih (Selesai)' : 'Dalam Pengerjaan';
+                                                    $displayStok->push([
+                                                        'karyawan_name' => $stok->karyawan->name ?? '-',
+                                                        'peran' => $stok->peran,
+                                                        'qty' => $stok->qty_hold,
+                                                        'status' => $statusLabel,
+                                                    ]);
+                                                }
+                                            }
+                                        }
+                                    @endphp
+                                    @forelse($displayStok as $item)
+                                        <div class="flex items-center justify-between p-2 rounded-lg bg-gray-50 text-[11px] leading-tight">
+                                            <div class="min-w-0">
+                                                <span class="font-bold text-gray-800 block truncate">{{ $item['karyawan_name'] }}</span>
+                                                <span class="text-gray-400 text-[10px]">Role: {{ ucfirst($item['peran']) }}</span>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <span class="font-bold text-indigo-700 block">{{ number_format($item['qty']) }} pcs</span>
+                                                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded-full {{ $item['status'] === 'Ready' ? 'bg-green-50 text-green-700' : ($item['status'] === 'Dalam Pengerjaan' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700') }}">
+                                                    {{ $item['status'] }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="text-[11px] text-gray-400 py-1.5 text-center">Belum ada barang aktif di tangan karyawan.</p>
+                                    @endforelse
+                                </div>
+
+                                <!-- Tab 2: Log Serah Terima -->
+                                <div data-tab-content="log-{{ $detail->id }}" class="hidden space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                                    @forelse($detail->mutasiProduksi->sortByDesc('created_at') as $mutasi)
+                                        <div class="p-2 rounded-lg bg-gray-50 border border-gray-100 text-[11px] leading-snug">
+                                            <div class="flex items-center justify-between gap-2 mb-1">
+                                                <span class="font-bold text-[#0F034D]">+{{ number_format($mutasi->qty_pindah) }} pcs</span>
+                                                <span class="text-[9px] text-gray-400 font-medium">
+                                                    {{ $mutasi->tgl_transaksi ? $mutasi->tgl_transaksi->format('d M H:i') : $mutasi->created_at->format('d M H:i') }}
+                                                </span>
+                                            </div>
+                                            <p class="text-gray-500">
+                                                Dari <span class="font-semibold text-gray-700">{{ $mutasi->dariKaryawan->name ?? 'Sistem' }}</span> ({{ ucfirst($mutasi->dari_tahapan ?? 'awal') }})
+                                                ke <span class="font-semibold text-gray-700">{{ $mutasi->keKaryawan->name ?? '-' }}</span> ({{ ucfirst($mutasi->ke_tahapan) }})
+                                            </p>
+                                        </div>
+                                    @empty
+                                        <p class="text-[11px] text-gray-400 py-1.5 text-center">Belum ada aktivitas serah terima.</p>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -251,6 +347,85 @@
             @endforeach
         </div>
     </div>
+
+    <script>
+        // Main tabs switcher (Detail Produk vs Tahapan Produksi)
+        document.querySelectorAll('[data-main-tab-trigger]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetKey = btn.dataset.mainTabTrigger;
+                const isProduk = targetKey.startsWith('produk-');
+                const id = targetKey.replace('produk-', '').replace('tahapan-', '');
+
+                const produkBtn = document.querySelector(`[data-main-tab-trigger="produk-${id}"]`);
+                const tahapanBtn = document.querySelector(`[data-main-tab-trigger="tahapan-${id}"]`);
+                const produkContent = document.querySelector(`[data-main-tab-content="produk-${id}"]`);
+                const tahapanContent = document.querySelector(`[data-main-tab-content="tahapan-${id}"]`);
+
+                if (isProduk) {
+                    produkBtn.classList.replace('bg-gray-50', 'bg-[#0F034D]');
+                    produkBtn.classList.replace('text-gray-500', 'text-white');
+                    produkBtn.classList.replace('hover:bg-gray-100', 'hover:bg-[#24116f]');
+                    produkBtn.classList.add('shadow-sm');
+                    tahapanBtn.classList.replace('bg-[#0F034D]', 'bg-gray-50');
+                    tahapanBtn.classList.replace('text-white', 'text-gray-500');
+                    tahapanBtn.classList.replace('hover:bg-[#24116f]', 'hover:bg-gray-100');
+                    tahapanBtn.classList.remove('shadow-sm');
+
+                    produkContent.classList.remove('hidden');
+                    tahapanContent.classList.add('hidden');
+                } else {
+                    tahapanBtn.classList.replace('bg-gray-50', 'bg-[#0F034D]');
+                    tahapanBtn.classList.replace('text-gray-500', 'text-white');
+                    tahapanBtn.classList.replace('hover:bg-gray-100', 'hover:bg-[#24116f]');
+                    tahapanBtn.classList.add('shadow-sm');
+                    produkBtn.classList.replace('bg-[#0F034D]', 'bg-gray-50');
+                    produkBtn.classList.replace('text-white', 'text-gray-500');
+                    produkBtn.classList.replace('hover:bg-[#24116f]', 'hover:bg-gray-100');
+                    produkBtn.classList.remove('shadow-sm');
+
+                    tahapanContent.classList.remove('hidden');
+                    produkContent.classList.add('hidden');
+                }
+            });
+        });
+
+        // Sub-tabs switcher (Stok Aktif vs Log Serah Terima)
+        document.querySelectorAll('[data-tab-trigger]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetKey = btn.dataset.tabTrigger;
+                const isPosisi = targetKey.startsWith('posisi-');
+                const id = targetKey.replace('posisi-', '').replace('log-', '');
+
+                const posisiBtn = document.querySelector(`[data-tab-trigger="posisi-${id}"]`);
+                const logBtn = document.querySelector(`[data-tab-trigger="log-${id}"]`);
+                const posisiContent = document.querySelector(`[data-tab-content="posisi-${id}"]`);
+                const logContent = document.querySelector(`[data-tab-content="log-${id}"]`);
+
+                if (isPosisi) {
+                    posisiBtn.classList.replace('bg-gray-50', 'bg-[#0F034D]');
+                    posisiBtn.classList.replace('text-gray-500', 'text-white');
+                    posisiBtn.classList.replace('hover:bg-gray-100', 'hover:bg-[#24116f]');
+                    logBtn.classList.replace('bg-[#0F034D]', 'bg-gray-50');
+                    logBtn.classList.replace('text-white', 'text-gray-500');
+                    logBtn.classList.replace('hover:bg-[#24116f]', 'hover:bg-gray-100');
+
+                    posisiContent.classList.remove('hidden');
+                    logContent.classList.add('hidden');
+                } else {
+                    logBtn.classList.replace('bg-gray-50', 'bg-[#0F034D]');
+                    logBtn.classList.replace('text-gray-500', 'text-white');
+                    logBtn.classList.replace('hover:bg-gray-100', 'hover:bg-[#24116f]');
+                    posisiBtn.classList.replace('bg-[#0F034D]', 'bg-gray-50');
+                    posisiBtn.classList.replace('text-white', 'text-gray-500');
+                    posisiBtn.classList.replace('hover:bg-[#24116f]', 'hover:bg-gray-100');
+
+                    logContent.classList.remove('hidden');
+                    posisiContent.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+
     @vite('resources/js/admin/confirm-action.js')
 </x-layouts.admin>
 

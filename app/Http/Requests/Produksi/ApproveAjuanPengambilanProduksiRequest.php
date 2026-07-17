@@ -5,7 +5,7 @@ namespace App\Http\Requests\Produksi;
 use App\Models\AjuanPengambilanProduksi;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RespondAjuanPengambilanProduksiRequest extends FormRequest
+class ApproveAjuanPengambilanProduksiRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -20,17 +20,6 @@ class RespondAjuanPengambilanProduksiRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'catatan_respon' => ['required', 'string', 'max:1000'],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'catatan_respon.required' => 'Alasan penolakan wajib diisi.',
-            'catatan_respon.string' => 'Alasan penolakan harus berupa teks.',
-            'catatan_respon.max' => 'Alasan penolakan maksimal 1000 karakter.',
-        ];
+        return [];
     }
 }

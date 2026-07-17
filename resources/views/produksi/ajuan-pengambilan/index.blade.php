@@ -12,16 +12,6 @@
             @endforeach
         </div>
     @endif
-
-    @php
-        $barangReadyPerWo = $barangReady->groupBy('id_perintah');
-        $totalProdukReady = $barangReady->count();
-        $totalQtyReady = $barangReady->sum('qty_hold');
-        $totalPerintahReady = $barangReadyPerWo->count();
-        $totalAjuanSaya = $ajuanSaya->count();
-        $totalAjuanSayaPending = $ajuanSaya->where('status', 'pending')->groupBy('id_perintah')->count();
-    @endphp
-
     <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -156,7 +146,7 @@
             @php
                 $fifoIndex = $loop->iteration;
                 $perintah = $stokDalamWo->first()->perintahProduksi;
-                $totalReady = $stokDalamWo->sum('qty_hold');
+                $totalReady = $stokDalamWo->sum(fn($s) => $s->peran === 'potong' ? $s->qty_hold : max(0, $s->total_selesai - $s->total_dikeluarkan));
                 $totalProduk = $stokDalamWo->count();
             @endphp
             <details class="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -218,11 +208,11 @@
                                             <p class="font-semibold text-gray-700">{{ $stok->karyawan->name ?? '-' }} - {{ ucfirst($stok->peran) }}</p>
                                         </td>
                                         <td class="px-4 py-3 align-top text-right whitespace-nowrap">
-                                            <span class="inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{{ number_format($stok->qty_hold, 0, ',', '.') }} pcs</span>
+                                            <span class="inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{{ number_format($stok->peran === 'potong' ? $stok->qty_hold : max(0, $stok->total_selesai - $stok->total_dikeluarkan), 0, ',', '.') }} pcs</span>
                                         </td>
                                         <td class="px-4 py-3 align-top">
                                             <input type="hidden" name="items[{{ $stok->id }}][stok_virtual_id]" value="{{ $stok->id }}">
-                                            <input type="number" name="items[{{ $stok->id }}][qty_ajuan]" min="1" max="{{ $stok->qty_hold }}" class="w-36 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Qty">
+                                            <input type="number" name="items[{{ $stok->id }}][qty_ajuan]" min="1" max="{{ $stok->peran === 'potong' ? $stok->qty_hold : max(0, $stok->total_selesai - $stok->total_dikeluarkan) }}" class="w-36 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Qty">
                                         </td>
                                     </tr>
                                 @endforeach
@@ -235,7 +225,7 @@
                             <input type="text" name="catatan_pengaju" maxlength="1000" class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Catatan opsional untuk produk terpilih, contoh: ambil untuk dijahit hari ini">
                             <button type="submit" class="rounded-xl bg-[#0F034D] px-5 py-3 text-sm font-bold text-white hover:bg-[#24116f] transition-colors">Ajukan</button>
                         </div>
-                        <p class="mt-2 text-xs text-gray-400">Isi qty pada produk yang ingin diajukan. Produk dengan qty kosong tidak akan diajukan.</p>
+                        <p class="mt-2 text-xs text-gray-400">*Isi qty pada produk yang ingin diajukan. Produk dengan qty kosong tidak akan diajukan.</p>
                     </div>
                 </form>
             </details>
@@ -289,80 +279,5 @@
             @endforelse
         </div>
     </section>
-
-    <script>
-        const ajuanTabButtons = document.querySelectorAll('[data-ajuan-tab-button]');
-        const ajuanTabPanels = document.querySelectorAll('[data-ajuan-tab-panel]');
-
-        ajuanTabButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                const target = button.dataset.ajuanTabButton;
-
-                ajuanTabButtons.forEach((item) => {
-                    const active = item.dataset.ajuanTabButton === target;
-                    item.classList.toggle('bg-[#0F034D]', active);
-                    item.classList.toggle('text-white', active);
-                    item.classList.toggle('shadow-md', active);
-                    item.classList.toggle('shadow-[#0F034D]/20', active);
-                    item.classList.toggle('text-gray-500', !active);
-                    item.classList.toggle('hover:bg-gray-50', !active);
-                });
-
-                ajuanTabPanels.forEach((panel) => {
-                    panel.classList.toggle('hidden', panel.dataset.ajuanTabPanel !== target);
-                });
-            });
-        });
-
-        const ajuanSearch = document.getElementById('ajuan-search');
-        const filterAjuanForm = document.getElementById('filter-ajuan-form');
-        let ajuanSearchTimer;
-
-        ajuanSearch?.addEventListener('input', () => {
-            clearTimeout(ajuanSearchTimer);
-            ajuanSearchTimer = setTimeout(() => filterAjuanForm?.submit(), 450);
-        });
-
-        document.getElementById('ajuan-date-filter')?.addEventListener('change', () => {
-            filterAjuanForm?.submit();
-        });
-
-        const closeCustomDropdowns = (except = null) => {
-            document.querySelectorAll('[data-custom-dropdown-menu]').forEach((menu) => {
-                if (menu.dataset.customDropdownMenu === except) return;
-                menu.classList.add('hidden');
-            });
-
-            document.querySelectorAll('[data-custom-dropdown-arrow]').forEach((arrow) => {
-                if (arrow.dataset.customDropdownArrow === except) return;
-                arrow.classList.remove('rotate-180');
-            });
-        };
-
-        document.querySelectorAll('[data-custom-dropdown-button]').forEach((button) => {
-            button.addEventListener('click', (event) => {
-                event.stopPropagation();
-                const key = button.dataset.customDropdownButton;
-                const menu = document.querySelector(`[data-custom-dropdown-menu="${key}"]`);
-                const arrow = document.querySelector(`[data-custom-dropdown-arrow="${key}"]`);
-
-                closeCustomDropdowns(key);
-                menu?.classList.toggle('hidden');
-                arrow?.classList.toggle('rotate-180');
-            });
-        });
-
-        document.querySelectorAll('[data-custom-dropdown-option]').forEach((option) => {
-            option.addEventListener('click', () => {
-                const key = option.dataset.customDropdownOption;
-                const input = document.querySelector(`[data-custom-dropdown-input="${key}"]`);
-                if (!input) return;
-
-                input.value = option.dataset.value ?? '';
-                filterAjuanForm?.submit();
-            });
-        });
-
-        document.addEventListener('click', () => closeCustomDropdowns());
-    </script>
+    @vite('resources/js/produksi/ajuan-pengambilan/index.js')
 </x-layouts.produksi>

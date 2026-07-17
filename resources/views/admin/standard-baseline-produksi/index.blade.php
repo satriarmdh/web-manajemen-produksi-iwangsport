@@ -151,15 +151,27 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div>
-                                        <div class="font-bold text-gray-900">{{ $item->produk->nama_produk }}</div>
-                                        <div class="text-xs font-medium text-gray-400 mt-0.5">{{ $item->produk->kode_produk }}  -  {{ ucfirst($item->produk->ukuran) }}  -  {{ ucfirst($item->produk->warna) }}</div>
+                                        <div class="font-bold text-gray-900">{{ $item->produk?->nama_produk ?? 'Produk Terhapus' }}</div>
+                                        <div class="text-xs font-medium text-gray-400 mt-0.5">
+                                            @if($item->produk)
+                                                {{ $item->produk->kode_produk }}  -  {{ ucfirst($item->produk->ukuran) }}  -  {{ ucfirst($item->produk->warna) }}
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </td>
 
                             <td class="px-6 py-4">
-                                <div class="font-medium text-gray-900">{{ $item->bahanBaku->nama_bahan }}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">{{ $item->bahanBaku->kode_bahan }}  -  {{ ucfirst($item->bahanBaku->warna) }}  -  {{ ucfirst($item->bahanBaku->kategori) }}</div>
+                                <div class="font-medium text-gray-900">{{ $item->bahanBaku?->nama_bahan ?? 'Bahan Baku Terhapus' }}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">
+                                    @if($item->bahanBaku)
+                                        {{ $item->bahanBaku->kode_bahan }}  -  {{ ucfirst($item->bahanBaku->warna) }}  -  {{ ucfirst($item->bahanBaku->kategori) }}
+                                    @else
+                                        -
+                                    @endif
+                                </div>
                             </td>
 
                             <td class="px-6 py-4 text-center">

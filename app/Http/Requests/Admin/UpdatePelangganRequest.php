@@ -29,16 +29,22 @@ class UpdatePelangganRequest extends FormRequest
     {
         return [
             'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
-            'nama_pelanggan.max' => 'Nama pelanggan maksimal 255 karakter.',
-            'no_telp.required' => 'Nomor telepon wajib diisi.',
-            'no_telp.regex' => 'Format nomor telepon tidak valid.',
-            'no_telp.max' => 'Nomor telepon maksimal 20 karakter.',
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
-            'alamat.required' => 'Alamat wajib diisi.',
-            'alamat.max' => 'Alamat maksimal 500 karakter.',
-            'keterangan.max' => 'Keterangan maksimal 500 karakter.',
+            'nama_pelanggan.string'   => 'Nama pelanggan harus berupa teks.',
+            'nama_pelanggan.max'      => 'Nama pelanggan maksimal 255 karakter.',
+            'no_telp.required'        => 'Nomor telepon wajib diisi.',
+            'no_telp.string'          => 'Nomor telepon harus berupa teks.',
+            'no_telp.regex'           => 'Format nomor telepon tidak valid.',
+            'no_telp.max'             => 'Nomor telepon maksimal 20 karakter.',
+            'email.required'          => 'Email wajib diisi.',
+            'email.email'             => 'Format email tidak valid.',
+            'email.max'               => 'Email maksimal 255 karakter.',
+            'email.unique'            => 'Email sudah terdaftar.',
+            'alamat.required'         => 'Alamat wajib diisi.',
+            'alamat.string'           => 'Alamat harus berupa teks.',
+            'alamat.max'              => 'Alamat maksimal 500 karakter.',
+            'keterangan.string'       => 'Keterangan harus berupa teks.',
+            'keterangan.max'          => 'Keterangan maksimal 500 karakter.',
+            'is_aktif.boolean'        => 'Status aktif tidak valid.',
         ];
     }
 }

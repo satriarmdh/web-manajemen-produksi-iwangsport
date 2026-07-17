@@ -44,4 +44,9 @@ class DetailPerintahProduksi extends Model
     {
         return $this->belongsTo(BahanBaku::class);
     }
+
+    public function mutasiProduksi(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(MutasiProduksi::class, 'id_detail_perintah');
+    }
 }

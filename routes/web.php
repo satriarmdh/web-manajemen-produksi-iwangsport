@@ -68,7 +68,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('pelanggan', PelangganController::class)->except(['create', 'edit']);
 
     // Rute pengelolaan Standard Baseline Produksi
-    Route::resource('standard-baseline-produksi', StandardBaselineProduksiController::class)->except(['create', 'show', 'edit']);
+    Route::resource('standard-baseline-produksi', StandardBaselineProduksiController::class)->except(['create', 'edit']);
 
     // Rute Pergerakan Stok Bahan Baku
     Route::get('pergerakan-stok', [PergerakanStokController::class, 'index'])->name('pergerakan-stok.index');
@@ -90,9 +90,7 @@ Route::middleware(['auth', 'role:potong,jahit,finishing'])->prefix('produksi')->
     Route::get('/perintah-produksi', [PerintahProduksiKaryawanController::class, 'index'])->name('perintah-produksi.index');
     Route::get('/perintah-produksi/{perintahProduksi}', [PerintahProduksiKaryawanController::class, 'show'])->name('perintah-produksi.show');
 
-    Route::get('/input-hasil', function () {
-        return view('produksi.dashboard');
-    })->name('input-hasil.index');
+    Route::get('/input-hasil', [DashboardProduksiController::class, 'index'])->name('input-hasil.index');
     
     Route::post('/input-hasil', [InputHasilPekerjaanController::class, 'store'])->name('input-hasil.store');
     Route::post('/produk-cacat', [ProdukCacatController::class, 'store'])->name('produk-cacat.store');

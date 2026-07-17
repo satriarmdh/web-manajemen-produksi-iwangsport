@@ -6,15 +6,172 @@ use App\Models\AjuanPengambilanProduksi;
 use App\Models\MutasiProduksi;
 use App\Models\StokVirtual;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AjuanPengambilanProduksiService
 {
+    public function getIndexData(User $user, array $filters): array
+    {
+        $sourceRole = match ($user->role) {
+            'jahit' => 'potong',
+            'finishing' => 'jahit',
+            default => null,
+        };
+
+        $barangReady = $sourceRole
+            ? $this->getBarangReady($sourceRole, $filters)
+            : collect();
+
+        $sumberOptions = $sourceRole
+            ? StokVirtual::with('karyawan')
+                ->where('peran', $sourceRole)
+                ->when($sourceRole === 'potong',
+                    fn($q) => $q->where('qty_hold', '>', 0),
+                    fn($q) => $q->whereRaw('total_selesai - total_dikeluarkan > 0'),
+                )
+                ->get()
+                ->pluck('karyawan')
+                ->filter()
+                ->unique('id')
+                ->values()
+            : collect();
+
+        $ajuanSaya = AjuanPengambilanProduksi::with(['produk', 'perintahProduksi', 'dariKaryawan', 'keKaryawan'])
+            ->where('ke_karyawan_id', $user->id)
+            ->latest()
+            ->get();
+
+        return [
+            'barangReady' => $barangReady,
+            'barangReadyPerWo' => $barangReady->groupBy('id_perintah'),
+            'ajuanSaya' => $ajuanSaya,
+            'search' => $filters['search'],
+            'filterSumber' => $filters['sumber'],
+            'filterTanggal' => $filters['tanggal'],
+            'sort' => $filters['sort'],
+            'sumberOptions' => $sumberOptions,
+            'fifoWarnings' => $sourceRole ? $this->buildFifoWarnings($barangReady, $sourceRole) : collect(),
+            'totalProdukReady' => $barangReady->count(),
+            'totalQtyReady' => $barangReady->sum(fn($stok) => $stok->peran === 'potong' ? (int) $stok->qty_hold : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan)),
+            'totalPerintahReady' => $barangReady->groupBy('id_perintah')->count(),
+            'totalAjuanSayaPending' => $ajuanSaya->where('status', 'pending')->groupBy('id_perintah')->count(),
+        ];
+    }
+
+    public function getIncoming(User $user): Collection
+    {
+        return AjuanPengambilanProduksi::with(['produk', 'perintahProduksi', 'dariKaryawan', 'keKaryawan'])
+            ->where('dari_karyawan_id', $user->id)
+            ->where('status', 'pending')
+            ->get()
+            ->sortBy(fn ($ajuan) => sprintf(
+                '%s-%010d-%010d',
+                $ajuan->perintahProduksi?->tgl_mulai?->format('Y-m-d') ?? '9999-12-31',
+                $ajuan->perintahProduksi?->created_at?->timestamp ?? 0,
+                $ajuan->perintahProduksi?->id ?? 0
+            ))
+            ->values();
+    }
+
+    private function getBarangReady(string $sourceRole, array $filters): Collection
+    {
+        $query = StokVirtual::with(['produk', 'karyawan', 'perintahProduksi'])
+            ->where('peran', $sourceRole);
+
+        if ($sourceRole === 'potong') {
+            $query->where('qty_hold', '>', 0);
+        } else {
+            $query->whereRaw('total_selesai - total_dikeluarkan > 0');
+        }
+
+        if ($filters['sumber'] !== '') {
+            $query->where('id_karyawan', $filters['sumber']);
+        }
+
+        if ($filters['tanggal'] !== '') {
+            $query->whereHas('perintahProduksi', fn ($q) => $q->whereDate('tgl_mulai', $filters['tanggal']));
+        }
+
+        if ($filters['search'] !== '') {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('produk', fn ($produk) => $produk
+                    ->where('nama_produk', 'like', "%{$search}%")
+                    ->orWhere('warna', 'like', "%{$search}%"))
+                    ->orWhereHas('perintahProduksi', fn ($perintah) => $perintah
+                        ->where('nomor_wo', 'like', "%{$search}%"));
+            });
+        }
+
+        $collection = $query->get();
+
+        $sortByQty = function ($stok) {
+            return $stok->peran === 'potong'
+                ? (int) $stok->qty_hold
+                : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
+        };
+
+        return match ($filters['sort']) {
+            'qty_terbesar' => $collection->sortByDesc($sortByQty)->values(),
+            'qty_terkecil' => $collection->sortBy($sortByQty)->values(),
+            'produk_az' => $collection->sortBy(fn ($stok) => $stok->produk->nama_produk ?? '')->values(),
+            'wo_az' => $collection->sortBy(fn ($stok) => $stok->perintahProduksi->nomor_wo ?? '')->values(),
+            default => $collection->sortBy(fn ($stok) => sprintf(
+                '%s-%010d-%010d',
+                $stok->perintahProduksi?->tgl_mulai?->format('Y-m-d') ?? '9999-12-31',
+                $stok->perintahProduksi?->created_at?->timestamp ?? 0,
+                $stok->perintahProduksi?->id ?? 0
+            ))->values(),
+        };
+    }
+
+    private function buildFifoWarnings(Collection $barangReady, string $sourceRole): Collection
+    {
+        $allReadyQuery = StokVirtual::with(['produk', 'perintahProduksi'])
+            ->where('peran', $sourceRole);
+
+        if ($sourceRole === 'potong') {
+            $allReadyQuery->where('qty_hold', '>', 0);
+        } else {
+            $allReadyQuery->whereRaw('total_selesai - total_dikeluarkan > 0');
+        }
+
+        $allReady = $allReadyQuery->get();
+
+        return $barangReady->mapWithKeys(function ($stok) use ($allReady) {
+            $tanggalMulai = $stok->perintahProduksi?->tgl_mulai;
+            if (! $tanggalMulai) {
+                return [$stok->id => null];
+            }
+
+            $older = $allReady
+                ->filter(function ($candidate) use ($stok, $tanggalMulai) {
+                    if ((int) $candidate->id === (int) $stok->id || (int) $candidate->id_produk !== (int) $stok->id_produk) {
+                        return false;
+                    }
+
+                    $candidateDate = $candidate->perintahProduksi?->tgl_mulai;
+
+                    return $candidateDate && $candidateDate->lt($tanggalMulai);
+                })
+                ->sortBy(fn ($candidate) => sprintf(
+                    '%s-%010d',
+                    $candidate->perintahProduksi?->tgl_mulai?->format('Y-m-d') ?? '9999-12-31',
+                    $candidate->perintahProduksi?->id ?? 0
+                ))
+                ->first();
+
+            return [$stok->id => $older];
+        });
+    }
+
     public function store(array $data, User $user): AjuanPengambilanProduksi
     {
         return DB::transaction(function () use ($data, $user) {
             $stokSumber = StokVirtual::lockForUpdate()->findOrFail($data['stok_virtual_id']);
             $qtyAjuan = (int) $data['qty_ajuan'];
+            $this->ensureValidSource($stokSumber, $user, $qtyAjuan);
 
             return AjuanPengambilanProduksi::create([
                 'id_perintah' => $stokSumber->id_perintah,
@@ -38,6 +195,7 @@ class AjuanPengambilanProduksiService
             foreach ($items as $item) {
                 $stokSumber = StokVirtual::lockForUpdate()->findOrFail($item['stok_virtual_id']);
                 $qtyAjuan = (int) $item['qty_ajuan'];
+                $this->ensureValidSource($stokSumber, $user, $qtyAjuan);
 
                 AjuanPengambilanProduksi::create([
                     'id_perintah' => $stokSumber->id_perintah,
@@ -72,7 +230,8 @@ class AjuanPengambilanProduksiService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ((int) $stokSumber->qty_hold < (int) $ajuan->qty_ajuan) {
+            $readyStock = $stokSumber->peran === 'potong' ? (int) $stokSumber->qty_hold : (int) $stokSumber->total_selesai;
+            if ($readyStock < (int) $ajuan->qty_ajuan) {
                 abort(422, 'Stok ready sumber tidak mencukupi.');
             }
 
@@ -88,13 +247,22 @@ class AjuanPengambilanProduksiService
                     'id_produk' => $ajuan->id_produk,
                     'qty_hold' => 0,
                     'total_selesai' => 0,
+                    'total_dikeluarkan' => 0,
                     'total_reject' => 0,
                     'status_barang' => 'Proses',
                     'is_selesai' => false,
                 ]);
             }
 
-            $stokSumber->qty_hold = (int) $stokSumber->qty_hold - (int) $ajuan->qty_ajuan;
+            $qtyPindah = (int) $ajuan->qty_ajuan;
+            if ($stokSumber->peran === 'potong') {
+                $stokSumber->qty_hold = max(0, (int) $stokSumber->qty_hold - $qtyPindah);
+            } else {
+                if ((int) $stokSumber->qty_hold >= (int) $stokSumber->total_selesai) {
+                    $stokSumber->qty_hold = max(0, (int) $stokSumber->qty_hold - $qtyPindah);
+                }
+            }
+            $stokSumber->total_dikeluarkan = (int) $stokSumber->total_dikeluarkan + $qtyPindah;
             $stokSumber->save();
 
             $stokTujuan->qty_hold = (int) $stokTujuan->qty_hold + (int) $ajuan->qty_ajuan;
@@ -137,6 +305,26 @@ class AjuanPengambilanProduksiService
                 'tgl_respon' => now(),
             ]);
         });
+    }
+
+    private function ensureValidSource(StokVirtual $stok, User $user, int $qty): void
+    {
+        $expectedRole = match ($user->role) {
+            'jahit' => 'potong',
+            'finishing' => 'jahit',
+            default => null,
+        };
+
+        if ($expectedRole === null || $stok->peran !== $expectedRole) {
+            abort(403);
+        }
+
+        $readyStock = $stok->peran === 'potong'
+            ? (int) $stok->qty_hold
+            : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
+        if ($qty < 1 || $qty > $readyStock) {
+            abort(422, 'Jumlah pengambilan tidak valid atau melebihi stok ready sumber.');
+        }
     }
 
     private function ensureCanRespond(AjuanPengambilanProduksi $ajuan, User $user): void

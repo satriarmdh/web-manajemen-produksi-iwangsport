@@ -38,7 +38,9 @@ class UpdateStandardBaselineProduksiRequest extends FormRequest
             'pcs_per_roll.min' => 'Jumlah pcs per roll minimal 1.',
             'toleransi_minus.integer' => 'Toleransi minus harus berupa angka.',
             'toleransi_minus.min' => 'Toleransi minus tidak boleh negatif.',
+            'keterangan.string' => 'Keterangan harus berupa teks.',
             'keterangan.max' => 'Keterangan maksimal 500 karakter.',
+            'is_aktif.boolean' => 'Status aktif tidak valid.',
         ];
     }
 
@@ -49,8 +51,20 @@ class UpdateStandardBaselineProduksiRequest extends FormRequest
                 $produk = Produk::find($this->produk_id);
                 $bahanBaku = BahanBaku::find($this->bahan_baku_id);
 
-                if ($produk && $bahanBaku && $produk->warna !== $bahanBaku->warna) {
-                    $validator->errors()->add('bahan_baku_id', 'Warna bahan baku (' . $bahanBaku->warna . ') tidak cocok dengan warna produk (' . $produk->warna . ').');
+                if ($produk && $bahanBaku) {
+                    $warnaProduk = strtolower(trim($produk->warna));
+                    $warnaBahan = strtolower(trim($bahanBaku->warna));
+
+                    if ($warnaProduk === 'abu') {
+                        $warnaProduk = 'abu-abu';
+                    }
+                    if ($warnaBahan === 'abu') {
+                        $warnaBahan = 'abu-abu';
+                    }
+
+                    if ($warnaProduk !== $warnaBahan) {
+                        $validator->errors()->add('bahan_baku_id', 'Warna bahan baku (' . $bahanBaku->warna . ') tidak cocok dengan warna produk (' . $produk->warna . ').');
+                    }
                 }
             }
         });

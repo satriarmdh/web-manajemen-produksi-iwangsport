@@ -20,7 +20,7 @@ class BahanBakuFactory extends Factory
         return [
             'kode_bahan' => 'BB-' . $this->faker->unique()->numerify('####'),
             'nama_bahan' => $this->faker->words(3, true),
-            'warna' => $this->faker->randomElement(['hitam', 'navy', 'abu']),
+            'warna' => $this->faker->randomElement(['hitam', 'navy', 'abu-abu']),
             'kategori' => $this->faker->randomElement(['kain', 'benang', 'aksesoris']),
             'satuan' => $this->faker->randomElement(['roll', 'pcs', 'kg']),
             'stok' => $this->faker->numberBetween(0, 100),

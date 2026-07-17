@@ -1,4 +1,4 @@
-﻿<x-layouts.admin>
+<x-layouts.admin>
     <x-slot:breadcrumb>
         <li class="flex items-center">
             <span class="text-gray-400 select-none">Inventory & Stok</span>
@@ -276,7 +276,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <button data-show-detail="masuk" data-detail-json=\'{{ json_encode([
+                                        <button data-show-detail="masuk" data-detail-json='{{ json_encode([
                                             'tanggal' => $item->created_at->format('d M Y H:i'),
                                             'bahan_baku' => $item->bahanBaku?->nama_bahan,
                                             'kode_bahan' => $item->bahanBaku?->kode_bahan,
@@ -286,7 +286,7 @@
                                             'admin' => $item->user?->name,
                                             'catatan' => $item->catatan,
                                             'bukti' => $item->bukti_pembelian ? asset('storage/' . $item->bukti_pembelian) : null,
-                                        ]) }}\' class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
+                                        ]) }}' class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </button>
                                         <form method="POST" action="{{ route('admin.pemasukan-bahan.destroy', $item) }}" data-confirm-delete>
@@ -350,7 +350,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <button data-show-detail="keluar" data-detail-json=\'{{ json_encode([
+                                        <button data-show-detail="keluar" data-detail-json='{{ json_encode([
                                             'tanggal' => $item->created_at->format('d M Y H:i'),
                                             'bahan_baku' => $item->bahanBaku?->nama_bahan,
                                             'kode_bahan' => $item->bahanBaku?->kode_bahan,
@@ -360,7 +360,7 @@
                                             'admin' => $item->user?->name,
                                             'keterangan' => $item->keterangan,
                                             'bukti' => $item->bukti_pengeluaran ? asset('storage/' . $item->bukti_pengeluaran) : null,
-                                        ]) }}\' class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
+                                        ]) }}' class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </button>
                                         <form method="POST" action="{{ route('admin.pengeluaran-bahan.destroy', $item) }}" data-confirm-delete>

@@ -17,6 +17,7 @@ class StokVirtual extends Model
         'peran',
         'qty_hold',
         'total_selesai',
+        'total_dikeluarkan',
         'total_reject',
         'status_barang',
         'is_selesai',

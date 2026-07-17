@@ -32,7 +32,7 @@ class StandardBaselineProduksi extends Model
      */
     public function produk()
     {
-        return $this->belongsTo(Produk::class, 'produk_id');
+        return $this->belongsTo(Produk::class, 'produk_id')->withTrashed();
     }
 
     /**
@@ -40,7 +40,7 @@ class StandardBaselineProduksi extends Model
      */
     public function bahanBaku()
     {
-        return $this->belongsTo(BahanBaku::class, 'bahan_baku_id');
+        return $this->belongsTo(BahanBaku::class, 'bahan_baku_id')->withTrashed();
     }
 
     /**

@@ -26,7 +26,7 @@ class ProdukFactory extends Factory
                 'Celana Sport',
             ]),
             'ukuran' => $this->faker->randomElement(['normal', 'jumbo']),
-            'warna' => $this->faker->randomElement(['hitam', 'biru', 'abu', 'navy']),
+            'warna' => $this->faker->randomElement(['hitam', 'biru', 'abu-abu', 'navy']),
             'harga_satuan' => $this->faker->numberBetween(25000, 150000),
             'satuan' => 'pcs',
             'stok' => $this->faker->numberBetween(0, 200),

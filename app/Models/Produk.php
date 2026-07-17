@@ -36,4 +36,11 @@ class Produk extends Model
     {
         return $this->hasMany(StandardBaselineProduksi::class, 'produk_id');
     }
+
+    protected static function booted()
+    {
+        static::deleted(function ($produk) {
+            $produk->standardBaselineProduksi()->delete();
+        });
+    }
 }

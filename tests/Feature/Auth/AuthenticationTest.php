@@ -46,9 +46,9 @@ class AuthenticationTest extends TestCase
         return [
             'Admin ke Dashboard'    => ['admin', '/admin/dashboard'],
             'Owner ke Dashboard'    => ['owner', '/owner/dashboard'],
-            'Potong ke Produksi'    => ['potong', '/produksi/potong'],
-            'Jahit ke Produksi'     => ['jahit', '/produksi/jahit'],
-            'Finishing ke Produksi' => ['finishing', '/produksi/finishing'],
+            'Potong ke Produksi'    => ['potong', '/produksi/dashboard'],
+            'Jahit ke Produksi'     => ['jahit', '/produksi/dashboard'],
+            'Finishing ke Produksi' => ['finishing', '/produksi/dashboard'],
         ];
     }
 

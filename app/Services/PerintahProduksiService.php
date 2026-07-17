@@ -66,7 +66,20 @@ class PerintahProduksiService
 
     public function loadForDetail(PerintahProduksi $perintahProduksi): PerintahProduksi
     {
-        return $perintahProduksi->load(['details.produk', 'details.bahanBaku', 'user', 'approver']);
+        $perintahProduksi->load([
+            'details.produk',
+            'details.bahanBaku',
+            'details.mutasiProduksi.dariKaryawan',
+            'details.mutasiProduksi.keKaryawan',
+            'user',
+            'approver'
+        ]);
+
+        $perintahProduksi->stokVirtual = \App\Models\StokVirtual::with('karyawan')
+            ->where('id_perintah', $perintahProduksi->id)
+            ->get();
+
+        return $perintahProduksi;
     }
 
     public function ensurePending(PerintahProduksi $perintahProduksi): void
@@ -74,9 +87,14 @@ class PerintahProduksiService
         abort_unless($perintahProduksi->status_produksi === 'pending', 403, 'Perintah produksi hanya bisa diproses saat status pending');
     }
 
-    public function getForKaryawan(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    public function getForKaryawan(array $filters = [], int $perPage = 4): LengthAwarePaginator
     {
-        $query = PerintahProduksi::with(['user', 'details.produk', 'details.bahanBaku'])
+        $userId = auth()->id();
+
+        $query = PerintahProduksi::with([
+            'user', 'details.produk', 'details.bahanBaku',
+            'stokVirtual' => fn($q) => $q->where('id_karyawan', $userId),
+        ])
             ->whereIn('status_produksi', ['disetujui', 'dalam_produksi']);
 
         if (!empty($filters['search'])) {
@@ -99,6 +117,18 @@ class PerintahProduksiService
 
         if (!empty($filters['tanggal'])) {
             $query->whereDate('tgl_mulai', $filters['tanggal']);
+        }
+
+        // FIFO: WO where all karyawan's stok_virtual is_selesai → sink to bottom.
+        // If NO stok_virtual row exists yet (e.g. potong belum input), treat as
+        // incomplete (0 = stays on top) so new WOs float up for action.
+        $completedExpr = match ($filters['sort'] ?? 'mulai_terlama') {
+            'mulai_terbaru', 'wo_asc' => null,
+            default => 'CASE WHEN NOT EXISTS(SELECT 1 FROM stok_virtual sv WHERE sv.id_perintah = perintah_produksi.id AND sv.id_karyawan = ' . (int) $userId . ') OR EXISTS(SELECT 1 FROM stok_virtual sv WHERE sv.id_perintah = perintah_produksi.id AND sv.id_karyawan = ' . (int) $userId . ' AND sv.is_selesai = 0) THEN 0 ELSE 1 END',
+        };
+
+        if ($completedExpr !== null) {
+            $query->orderByRaw($completedExpr);
         }
 
         match ($filters['sort'] ?? 'mulai_terlama') {

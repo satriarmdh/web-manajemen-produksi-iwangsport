@@ -59,11 +59,18 @@ class StoreAjuanPengambilanProduksiRequest extends FormRequest
                     continue;
                 }
 
-                if ($stok->peran !== $expectedSource || $stok->qty_hold <= 0) {
+                if ($stok->peran !== $expectedSource) {
                     abort(403);
                 }
 
-                if ((int) $item['qty_ajuan'] > (int) $stok->qty_hold) {
+                $readyStock = $stok->peran === 'potong'
+                    ? (int) $stok->qty_hold
+                    : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
+                if ($readyStock <= 0) {
+                    abort(403);
+                }
+
+                if ((int) $item['qty_ajuan'] > $readyStock) {
                     $errorKey = $this->filled('stok_virtual_id') ? 'qty_ajuan' : "items.{$index}.qty_ajuan";
                     $validator->errors()->add($errorKey, 'Jumlah pengambilan tidak boleh melebihi stok ready sumber.');
                 }

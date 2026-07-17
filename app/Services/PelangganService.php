@@ -90,10 +90,10 @@ class PelangganService
     }
 
     /**
-     * Get pelanggan by ID
+     * Load pelanggan detail relations
      */
-    public function find(int $id): Pelanggan
+    public function loadForDetail(Pelanggan $pelanggan): Pelanggan
     {
-        return Pelanggan::findOrFail($id);
+        return $pelanggan;
     }
 }

@@ -40,6 +40,14 @@ class StandardBaselineProduksiController extends Controller
     }
 
     /**
+     * Display standard baseline produksi detail (JSON)
+     */
+    public function show(StandardBaselineProduksi $standard_baseline_produksi)
+    {
+        return response()->json($this->estimasiService->loadForDetail($standard_baseline_produksi));
+    }
+
+    /**
      * Update the specified standard baseline produksi
      */
     public function update(UpdateStandardBaselineProduksiRequest $request, StandardBaselineProduksi $standard_baseline_produksi)

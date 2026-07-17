@@ -20,4 +20,13 @@ class RejectPerintahProduksiRequest extends FormRequest
             'alasan_penolakan' => ['required', 'string', 'max:500'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'alasan_penolakan.required' => 'Alasan penolakan wajib diisi.',
+            'alasan_penolakan.string' => 'Alasan penolakan harus berupa teks.',
+            'alasan_penolakan.max' => 'Alasan penolakan maksimal 500 karakter.',
+        ];
+    }
 }

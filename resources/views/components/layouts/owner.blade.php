@@ -63,7 +63,7 @@
                                 <span class="absolute -left-4 -top-2 -bottom-2 z-20 border-l-2 transition-colors {{ $isPantau ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isWorkOrder ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
-                                Persetujuan Work Order
+                                Persetujuan Perintah Produksi
                             </a>
                         </li>
                         
@@ -226,7 +226,7 @@
         window.flashMessages = {
             success: "{{ session('success') }}",
             error: "{{ session('error') }}",
-            warning: "{{ $errors->any() ? 'Ada data yang tidak valid, silakan periksa form Anda.' : '' }}"
+            warning: {!! $errors->any() ? json_encode(implode('<br>', $errors->all())) : '""' !!}
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

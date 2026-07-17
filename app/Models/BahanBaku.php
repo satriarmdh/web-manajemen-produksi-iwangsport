@@ -33,4 +33,11 @@ class BahanBaku extends Model
     {
         return $this->hasMany(StandardBaselineProduksi::class, 'bahan_baku_id');
     }
+
+    protected static function booted()
+    {
+        static::deleted(function ($bahanBaku) {
+            $bahanBaku->standardBaselineProduksi()->delete();
+        });
+    }
 }

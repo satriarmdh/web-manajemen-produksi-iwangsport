@@ -91,6 +91,14 @@ class StandardBaselineProduksiService
     }
 
     /**
+     * Load standard baseline produksi detail relations
+     */
+    public function loadForDetail(StandardBaselineProduksi $estimasi): StandardBaselineProduksi
+    {
+        return $estimasi->load(['produk', 'bahanBaku']);
+    }
+
+    /**
      * Delete standard baseline produksi
      */
     public function delete(StandardBaselineProduksi $estimasi): bool
