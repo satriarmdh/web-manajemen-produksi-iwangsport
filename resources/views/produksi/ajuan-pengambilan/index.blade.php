@@ -146,7 +146,7 @@
             @php
                 $fifoIndex = $loop->iteration;
                 $perintah = $stokDalamWo->first()->perintahProduksi;
-                $totalReady = $stokDalamWo->sum(fn($s) => $s->peran === 'potong' ? $s->qty_hold : max(0, $s->total_selesai - $s->total_dikeluarkan));
+                $totalReady = $stokDalamWo->sum(fn($s) => max(0, (int) $s->total_selesai - (int) $s->total_dikeluarkan));
                 $totalProduk = $stokDalamWo->count();
             @endphp
             <details class="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -208,11 +208,11 @@
                                             <p class="font-semibold text-gray-700">{{ $stok->karyawan->name ?? '-' }} - {{ ucfirst($stok->peran) }}</p>
                                         </td>
                                         <td class="px-4 py-3 align-top text-right whitespace-nowrap">
-                                            <span class="inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{{ number_format($stok->peran === 'potong' ? $stok->qty_hold : max(0, $stok->total_selesai - $stok->total_dikeluarkan), 0, ',', '.') }} pcs</span>
+                                            <span class="inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{{ number_format(max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan), 0, ',', '.') }} pcs</span>
                                         </td>
                                         <td class="px-4 py-3 align-top">
                                             <input type="hidden" name="items[{{ $stok->id }}][stok_virtual_id]" value="{{ $stok->id }}">
-                                            <input type="number" name="items[{{ $stok->id }}][qty_ajuan]" min="1" max="{{ $stok->peran === 'potong' ? $stok->qty_hold : max(0, $stok->total_selesai - $stok->total_dikeluarkan) }}" class="w-36 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Qty">
+                                            <input type="number" name="items[{{ $stok->id }}][qty_ajuan]" min="1" max="{{ max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan) }}" class="w-36 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Qty">
                                         </td>
                                     </tr>
                                 @endforeach

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\PemasukanBahanController;
 use App\Http\Controllers\Admin\PengeluaranBahanController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\PerintahProduksiController;
+use App\Http\Controllers\Admin\PenerimaanHasilProduksiController;
 use App\Http\Controllers\Owner\PerintahProduksiOwnerController;
 use App\Http\Controllers\Produksi\DashboardProduksiController;
 use App\Http\Controllers\Produksi\PerintahProduksiKaryawanController;
@@ -83,6 +84,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('perintah-produksi', PerintahProduksiController::class);
     Route::post('perintah-produksi/{perintahProduksi}/selesai', [PerintahProduksiController::class, 'selesai'])->name('perintah-produksi.selesai');
     Route::get('perintah-produksi/{perintahProduksi}/cetak-pdf', [PerintahProduksiController::class, 'cetakPdf'])->name('perintah-produksi.cetak-pdf');
+
+    // Rute Penerimaan Hasil Produksi
+    Route::post('penerimaan-hasil-produksi', [PenerimaanHasilProduksiController::class, 'store'])->name('penerimaan-hasil-produksi.store');
+    Route::get('penerimaan-hasil-produksi/{detail}/history', [PenerimaanHasilProduksiController::class, 'history'])->name('penerimaan-hasil-produksi.history');
+    Route::post('penerimaan-hasil-produksi/{penerimaan}/reversal', [PenerimaanHasilProduksiController::class, 'reversal'])->name('penerimaan-hasil-produksi.reversal');
+    Route::get('penerimaan-hasil-produksi/{detail}/available-karyawan', [PenerimaanHasilProduksiController::class, 'availableKaryawan'])->name('penerimaan-hasil-produksi.available-karyawan');
 });
 
 Route::middleware(['auth', 'role:potong,jahit,finishing'])->prefix('produksi')->name('produksi.')->group(function () {

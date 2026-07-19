@@ -63,9 +63,8 @@ class StoreAjuanPengambilanProduksiRequest extends FormRequest
                     abort(403);
                 }
 
-                $readyStock = $stok->peran === 'potong'
-                    ? (int) $stok->qty_hold
-                    : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
+                // Opsi A: ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap)
+                $readyStock = max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
                 if ($readyStock <= 0) {
                     abort(403);
                 }

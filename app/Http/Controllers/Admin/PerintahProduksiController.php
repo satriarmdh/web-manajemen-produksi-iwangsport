@@ -24,7 +24,7 @@ class PerintahProduksiController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['search', 'status', 'sort']);
+        $filters = $request->only(['search', 'status', 'sort', 'tanggal_mulai']);
         $perintahProduksi = $this->service->getAllPaginated($filters, 10);
 
         return view('admin.perintah-produksi.index', compact('perintahProduksi'));

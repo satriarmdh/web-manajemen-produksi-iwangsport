@@ -85,6 +85,8 @@ class StoreInputHasilPekerjaanRequest extends FormRequest
                 $validator->errors()->add('keterangan_cacat', 'Keterangan cacat wajib diisi jika jumlah barang cacat diisi.');
             }
 
+            // Opsi A: hanya jahit/finishing yang punya WIP input (qty_hold). Potong tidak ditrack via stok_virtual
+            // (bahan baku dicatat di riwayat_penggunaan_kain), sehingga qty_hold selalu 0 untuk potong.
             if ($this->user()?->role === 'potong' && $this->filled('detail_perintah_produksi_id')) {
                 $detail = DetailPerintahProduksi::with('perintahProduksi')->find($this->input('detail_perintah_produksi_id'));
 

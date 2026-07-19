@@ -15,23 +15,21 @@
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <!-- Tab Navigation -->
-        <div class="border-b border-gray-200">
-            <nav class="flex -mb-px" aria-label="Tabs">
-                <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'masuk']) }}" 
-                   class="group flex items-center gap-2 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors {{ $tab === 'masuk' ? 'border-[#0F034D] text-[#0F034D]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                    <svg class="w-5 h-5 {{ $tab === 'masuk' ? 'text-green-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 19V5"/><path d="m5 12 7 7 7-7"/>
-                    </svg>
-                    Masuk
-                </a>
-                <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'keluar']) }}" 
-                   class="group flex items-center gap-2 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors {{ $tab === 'keluar' ? 'border-[#0F034D] text-[#0F034D]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                    <svg class="w-5 h-5 {{ $tab === 'keluar' ? 'text-red-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 5v14"/><path d="m19 12-7-7-7 7"/>
-                    </svg>
-                    Keluar
-                </a>
-            </nav>
+        <div class="px-6 pt-5 pb-3 border-b border-gray-100 flex gap-2">
+            <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'masuk']) }}" 
+               class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all {{ $tab === 'masuk' ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'bg-gray-50 text-gray-500 hover:bg-gray-100' }}">
+                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 19V5"/><path d="m5 12 7 7 7-7"/>
+                </svg>
+                Stok Masuk
+            </a>
+            <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'keluar']) }}" 
+               class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all {{ $tab === 'keluar' ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'bg-gray-50 text-gray-500 hover:bg-gray-100' }}">
+                <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14"/><path d="m19 12-7-7-7 7"/>
+                </svg>
+                Stok Keluar
+            </a>
         </div>
 
         @php

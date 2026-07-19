@@ -21,6 +21,18 @@ class InputHasilPekerjaanService
         });
     }
 
+    /**
+     * Input hasil potong.
+     *
+     * Opsi A semantics (konsisten untuk semua tahap):
+     * - qty_hold       = WIP input (barang dipegang yang BELUM dikerjakan).
+     *                    Untuk potong, bahan baku TIDAK ditrack via stok_virtual
+     *                    (pemakaian kain sudah dicatat di riwayat_penggunaan_kain),
+     *                    sehingga qty_hold selalu 0 untuk peran potong.
+     * - total_selesai  = barang sudah dikerjakan (output).
+     * - total_dikeluarkan = barang sudah diserahkan ke tahap berikutnya.
+     * - ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap).
+     */
     private function storeHasilPotong(array $data, User $user): void
     {
         $detail = DetailPerintahProduksi::with('perintahProduksi')
@@ -74,7 +86,7 @@ class InputHasilPekerjaanService
             $stokVirtual->fill([
                 'id_perintah' => $detail->perintah_produksi_id,
                 'id_produk' => $detail->produk_id,
-                'qty_hold' => 0,
+                'qty_hold' => 0, // WIP input selalu 0 untuk potong (bahan baku ditrack terpisah)
                 'total_selesai' => 0,
                 'total_dikeluarkan' => 0,
                 'total_reject' => 0,
@@ -83,7 +95,7 @@ class InputHasilPekerjaanService
             ]);
         }
 
-        $stokVirtual->qty_hold = ((int) $stokVirtual->qty_hold) + $qtySelesai;
+        // total_selesai bertambah (output pekerjaan). qty_hold TIDAK berubah (tetap 0 untuk potong).
         $stokVirtual->total_selesai = ((int) $stokVirtual->total_selesai) + $qtySelesai;
         $stokVirtual->total_reject = ((int) $stokVirtual->total_reject) + $qtyReject;
         $stokVirtual->status_barang = 'Ready';

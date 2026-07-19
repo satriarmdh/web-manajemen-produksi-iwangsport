@@ -156,11 +156,14 @@ class AjuanPengambilanProduksiTest extends TestCase
             'status' => 'disetujui',
         ]);
 
+        // Opsi A: saat approve, qty_hold sumber TIDAK berubah (hanya total_dikeluarkan yang bertambah)
         $this->assertDatabaseHas('stok_virtual', [
             'id_detail_perintah' => $detail->id,
             'id_karyawan' => $this->potong->id,
             'peran' => 'potong',
-            'qty_hold' => 245,
+            'qty_hold' => 0, // Tetap 0 (WIP input, bukan ready stock)
+            'total_selesai' => 495,
+            'total_dikeluarkan' => 250, // Bertambah 250
         ]);
 
         $this->assertDatabaseHas('stok_virtual', [
@@ -201,7 +204,9 @@ class AjuanPengambilanProduksiTest extends TestCase
             'id_detail_perintah' => $detail->id,
             'id_karyawan' => $this->potong->id,
             'peran' => 'potong',
-            'qty_hold' => 495,
+            'qty_hold' => 0, // Opsi A: WIP input = 0
+            'total_selesai' => 495, // Ready stock tidak berubah karena ajuan ditolak
+            'total_dikeluarkan' => 0,
         ]);
 
         $this->assertDatabaseMissing('mutasi_produksi', [
@@ -219,11 +224,14 @@ class AjuanPengambilanProduksiTest extends TestCase
             ->post("/produksi/ajuan-pengambilan/{$ajuanId}/approve")
             ->assertRedirect('/produksi/ajuan-masuk');
 
+        // Opsi A: saat approve, qty_hold sumber TIDAK berubah (hanya total_dikeluarkan yang bertambah)
         $this->assertDatabaseHas('stok_virtual', [
             'id_detail_perintah' => $detail->id,
             'id_karyawan' => $this->jahit->id,
             'peran' => 'jahit',
-            'qty_hold' => 80,
+            'qty_hold' => 0, // Tetap 0 (WIP input, bukan ready stock)
+            'total_selesai' => 200,
+            'total_dikeluarkan' => 120, // Bertambah 120
         ]);
 
         $this->assertDatabaseHas('stok_virtual', [
@@ -355,6 +363,8 @@ class AjuanPengambilanProduksiTest extends TestCase
 
     private function seedStokVirtual(DetailPerintahProduksi $detail, User $karyawan, string $peran, int $qtyHold): void
     {
+        // Opsi A: qty_hold = WIP input (barang belum dikerjakan). Ready stock = total_selesai - total_dikeluarkan.
+        // Untuk seed ready stock, set qty_hold=0 dan total_selesai=$qtyHold (barang sudah selesai dikerjakan).
         DB::table('stok_virtual')->insert([
             'id' => 1,
             'id_perintah' => $detail->perintah_produksi_id,
@@ -362,8 +372,8 @@ class AjuanPengambilanProduksiTest extends TestCase
             'id_karyawan' => $karyawan->id,
             'id_produk' => $detail->produk_id,
             'peran' => $peran,
-            'qty_hold' => $qtyHold,
-            'total_selesai' => $qtyHold,
+            'qty_hold' => 0, // Opsi A: WIP input = 0 (barang sudah selesai dikerjakan)
+            'total_selesai' => $qtyHold, // Ready stock = $qtyHold
             'total_dikeluarkan' => 0,
             'total_reject' => 0,
             'status_barang' => 'Ready',

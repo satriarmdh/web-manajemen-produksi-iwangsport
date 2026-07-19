@@ -37,6 +37,11 @@ class PerintahProduksiService
             });
         }
 
+        // Filter berdasarkan tanggal mulai
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->whereDate('tgl_mulai', $filters['tanggal_mulai']);
+        }
+
         // Sorting
         $sort = $filters['sort'] ?? 'terbaru';
         $query->when($sort === 'terbaru', fn($q) => $q->latest())
@@ -394,7 +399,11 @@ class PerintahProduksiService
     }
 
     /**
-     * Tandai perintah produksi selesai (oleh admin)
+     * Tandai perintah produksi selesai (oleh admin).
+     *
+     * Completion Gate (Opsi A):
+     * 1. Block jika masih ada stok ready (total_selesai > total_dikeluarkan) yang belum diserahkan ke admin.
+     * 2. Hitung ulang status_penerimaan untuk semua detail (otomatis set selisih_kurang jika perlu).
      */
     public function selesai(PerintahProduksi $perintahProduksi, string $tglSelesai): PerintahProduksi
     {
@@ -402,11 +411,36 @@ class PerintahProduksiService
             throw new \Exception('Perintah produksi hanya bisa diselesaikan jika status dalam_produksi');
         }
 
-        $perintahProduksi->update([
-            'status_produksi' => 'selesai',
-            'tgl_selesai' => $tglSelesai,
-        ]);
+        return DB::transaction(function () use ($perintahProduksi, $tglSelesai) {
+            $perintahProduksi->loadMissing(['details']);
 
-        return $perintahProduksi;
+            // 1. Completion Gate: cek apakah masih ada stok ready yang belum diserahkan ke admin
+            foreach ($perintahProduksi->details as $detail) {
+                $unreceivedReady = \App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
+                    ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
+                    ->exists();
+
+                if ($unreceivedReady) {
+                    throw new \Exception(
+                        'Tidak dapat menyelesaikan WO. Masih ada barang ready di tangan karyawan finishing ' .
+                        'yang belum diserahkan ke admin untuk produk: ' .
+                        ($detail->produk->nama_produk ?? 'ID ' . $detail->id)
+                    );
+                }
+            }
+
+            // 2. Hitung ulang status_penerimaan untuk semua detail (otomatis set selisih_kurang/sesuai/selisih_lebih)
+            $penerimaanService = app(\App\Services\PenerimaanHasilProduksiService::class);
+            foreach ($perintahProduksi->details as $detail) {
+                $penerimaanService->calculateAndSetStatus($detail);
+            }
+
+            $perintahProduksi->update([
+                'status_produksi' => 'selesai',
+                'tgl_selesai' => $tglSelesai,
+            ]);
+
+            return $perintahProduksi;
+        });
     }
 }

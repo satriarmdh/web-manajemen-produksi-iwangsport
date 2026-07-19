@@ -21,6 +21,8 @@ class DetailPerintahProduksi extends Model
         'qty_pcs_potong',
         'status_validasi_potong',
         'alasan',
+        'total_qty_diterima',
+        'status_penerimaan',
     ];
 
     protected $casts = [
@@ -28,6 +30,7 @@ class DetailPerintahProduksi extends Model
         'estimasi_pcs' => 'integer',
         'toleransi_minus' => 'integer',
         'qty_pcs_potong' => 'integer',
+        'total_qty_diterima' => 'integer',
     ];
 
     public function perintahProduksi(): BelongsTo
@@ -48,5 +51,10 @@ class DetailPerintahProduksi extends Model
     public function mutasiProduksi(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(MutasiProduksi::class, 'id_detail_perintah');
+    }
+
+    public function penerimaanHasilProduksi(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PenerimaanHasilProduksi::class, 'perintah_produksi_detail_id');
     }
 }

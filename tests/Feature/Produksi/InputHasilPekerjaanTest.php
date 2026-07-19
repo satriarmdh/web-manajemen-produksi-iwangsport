@@ -105,8 +105,9 @@ class InputHasilPekerjaanTest extends TestCase
             'id_karyawan' => $this->potong->id,
             'id_produk' => $detail->produk_id,
             'peran' => 'potong',
-            'qty_hold' => 118,
+            'qty_hold' => 0, // Opsi A: qty_hold selalu 0 untuk potong (bahan baku ditrack terpisah)
             'total_selesai' => 118,
+            'total_dikeluarkan' => 0,
             'status_barang' => 'Ready',
         ]);
     }
@@ -131,8 +132,9 @@ class InputHasilPekerjaanTest extends TestCase
             'id_detail_perintah' => $detail->id,
             'id_karyawan' => $this->potong->id,
             'peran' => 'potong',
-            'qty_hold' => 120,
+            'qty_hold' => 0, // Opsi A: qty_hold selalu 0 untuk potong
             'total_selesai' => 120,
+            'total_dikeluarkan' => 0,
             'status_barang' => 'Ready',
         ]);
     }

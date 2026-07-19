@@ -9,12 +9,9 @@ use App\Services\PerintahProduksiService;
 
 class PotongController extends Controller
 {
-    protected PerintahProduksiService $service;
-
-    public function __construct(PerintahProduksiService $service)
-    {
-        $this->service = $service;
-    }
+    public function __construct(
+        private readonly PerintahProduksiService $service
+    ) {}
 
     /**
      * Input hasil potong untuk detail perintah produksi

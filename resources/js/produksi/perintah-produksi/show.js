@@ -1,1 +1,0 @@
-// Sync checkbox script removed. Checkbox is now natively inside the form.

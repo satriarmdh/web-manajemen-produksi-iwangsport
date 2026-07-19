@@ -26,10 +26,7 @@ class AjuanPengambilanProduksiService
         $sumberOptions = $sourceRole
             ? StokVirtual::with('karyawan')
                 ->where('peran', $sourceRole)
-                ->when($sourceRole === 'potong',
-                    fn($q) => $q->where('qty_hold', '>', 0),
-                    fn($q) => $q->whereRaw('total_selesai - total_dikeluarkan > 0'),
-                )
+                ->whereRaw('total_selesai - total_dikeluarkan > 0') // ready_to_transfer untuk SEMUA tahap (Opsi A)
                 ->get()
                 ->pluck('karyawan')
                 ->filter()
@@ -53,7 +50,7 @@ class AjuanPengambilanProduksiService
             'sumberOptions' => $sumberOptions,
             'fifoWarnings' => $sourceRole ? $this->buildFifoWarnings($barangReady, $sourceRole) : collect(),
             'totalProdukReady' => $barangReady->count(),
-            'totalQtyReady' => $barangReady->sum(fn($stok) => $stok->peran === 'potong' ? (int) $stok->qty_hold : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan)),
+            'totalQtyReady' => $barangReady->sum(fn($stok) => max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan)),
             'totalPerintahReady' => $barangReady->groupBy('id_perintah')->count(),
             'totalAjuanSayaPending' => $ajuanSaya->where('status', 'pending')->groupBy('id_perintah')->count(),
         ];
@@ -80,7 +77,7 @@ class AjuanPengambilanProduksiService
             ->where('peran', $sourceRole);
 
         if ($sourceRole === 'potong') {
-            $query->where('qty_hold', '>', 0);
+            $query->whereRaw('total_selesai - total_dikeluarkan > 0'); // Opsi A: unify untuk semua tahap
         } else {
             $query->whereRaw('total_selesai - total_dikeluarkan > 0');
         }
@@ -107,9 +104,7 @@ class AjuanPengambilanProduksiService
         $collection = $query->get();
 
         $sortByQty = function ($stok) {
-            return $stok->peran === 'potong'
-                ? (int) $stok->qty_hold
-                : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
+            return max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
         };
 
         return match ($filters['sort']) {
@@ -132,7 +127,7 @@ class AjuanPengambilanProduksiService
             ->where('peran', $sourceRole);
 
         if ($sourceRole === 'potong') {
-            $allReadyQuery->where('qty_hold', '>', 0);
+            $allReadyQuery->whereRaw('total_selesai - total_dikeluarkan > 0'); // Opsi A: unify
         } else {
             $allReadyQuery->whereRaw('total_selesai - total_dikeluarkan > 0');
         }
@@ -230,7 +225,8 @@ class AjuanPengambilanProduksiService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $readyStock = $stokSumber->peran === 'potong' ? (int) $stokSumber->qty_hold : (int) $stokSumber->total_selesai;
+            // Opsi A: ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap)
+            $readyStock = max(0, (int) $stokSumber->total_selesai - (int) $stokSumber->total_dikeluarkan);
             if ($readyStock < (int) $ajuan->qty_ajuan) {
                 abort(422, 'Stok ready sumber tidak mencukupi.');
             }
@@ -255,16 +251,12 @@ class AjuanPengambilanProduksiService
             }
 
             $qtyPindah = (int) $ajuan->qty_ajuan;
-            if ($stokSumber->peran === 'potong') {
-                $stokSumber->qty_hold = max(0, (int) $stokSumber->qty_hold - $qtyPindah);
-            } else {
-                if ((int) $stokSumber->qty_hold >= (int) $stokSumber->total_selesai) {
-                    $stokSumber->qty_hold = max(0, (int) $stokSumber->qty_hold - $qtyPindah);
-                }
-            }
+            // Opsi A: saat approve, qty_hold sumber TIDAK berubah (hanya total_dikeluarkan yang bertambah).
+            // qty_hold = WIP input (barang belum dikerjakan), yang dipindahkan adalah barang SELESAI.
             $stokSumber->total_dikeluarkan = (int) $stokSumber->total_dikeluarkan + $qtyPindah;
             $stokSumber->save();
 
+            // Opsi A: saat approve, qty_hold tujuan bertambah (menerima WIP input yang belum dikerjakan).
             $stokTujuan->qty_hold = (int) $stokTujuan->qty_hold + (int) $ajuan->qty_ajuan;
             if ($qtyPindah > 0 && (bool) $stokTujuan->is_selesai) {
                 $stokTujuan->is_selesai = false;
@@ -324,9 +316,8 @@ class AjuanPengambilanProduksiService
             abort(403);
         }
 
-        $readyStock = $stok->peran === 'potong'
-            ? (int) $stok->qty_hold
-            : max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
+        // Opsi A: ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap)
+        $readyStock = max(0, (int) $stok->total_selesai - (int) $stok->total_dikeluarkan);
         if ($qty < 1 || $qty > $readyStock) {
             abort(422, 'Jumlah pengambilan tidak valid atau melebihi stok ready sumber.');
         }
