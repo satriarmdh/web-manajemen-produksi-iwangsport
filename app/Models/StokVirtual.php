@@ -44,4 +44,17 @@ class StokVirtual extends Model
     {
         return $this->belongsTo(Produk::class, 'id_produk');
     }
+
+    /**
+     * Records produk cacat (reject) yang diinput karyawan ini
+     * untuk perintah + produk + peran yang sama.
+     * Diurutkan terbaru di atas.
+     */
+    public function produkCacat()
+    {
+        return $this->hasMany(ProdukCacat::class, 'id_karyawan', 'id_karyawan')
+            ->where('id_perintah', $this->id_perintah)
+            ->where('id_produk', $this->id_produk)
+            ->orderBy('tgl_lapor', 'desc');
+    }
 }

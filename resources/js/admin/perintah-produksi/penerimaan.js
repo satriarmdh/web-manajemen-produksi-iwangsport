@@ -173,14 +173,6 @@
         });
     });
 
-    // Global listener for photo preview buttons in the table
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('[data-view-photo]');
-        if (btn) {
-            const photoUrl = btn.dataset.viewPhoto;
-            showPhotoPreview(photoUrl);
-        }
-    });
 
     // ========== MODAL HELPER FUNCTIONS ==========
     function showModal(modal, content = null) {

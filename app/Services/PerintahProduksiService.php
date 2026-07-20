@@ -80,7 +80,7 @@ class PerintahProduksiService
             'approver'
         ]);
 
-        $perintahProduksi->stokVirtual = \App\Models\StokVirtual::with('karyawan')
+        $perintahProduksi->stokVirtual = \App\Models\StokVirtual::with(['karyawan', 'produkCacat'])
             ->where('id_perintah', $perintahProduksi->id)
             ->get();
 
