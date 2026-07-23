@@ -37,14 +37,13 @@
             $kategoriName = $tab === 'masuk' ? 'kategori_masuk' : 'kategori_keluar';
             $tanggalMulaiName = $tab === 'masuk' ? 'tanggal_mulai_masuk' : 'tanggal_mulai_keluar';
             $tanggalAkhirName = $tab === 'masuk' ? 'tanggal_akhir_masuk' : 'tanggal_akhir_keluar';
-            $supplierName = 'supplier_masuk';
             $searchPlaceholder = $tab === 'masuk' ? 'Cari bahan baku atau supplier...' : 'Cari bahan baku atau penerima...';
         @endphp
 
         <!-- Toolbar: Search + Filter + Tambah -->
         <div class="px-6 py-4 border-b border-gray-100 relative z-20">
             <div class="flex flex-wrap items-center gap-2">
-                @php $hasActiveFilter = request($kategoriName) || ($tab === 'masuk' && request($supplierName)) || request($tanggalMulaiName) || request($tanggalAkhirName); @endphp
+                @php $hasActiveFilter = request($kategoriName) || request($tanggalMulaiName) || request($tanggalAkhirName); @endphp
                 <div class="relative md:hidden">
                     <button type="button" data-toggle-filter-menu="filterDropdownMobile" class="flex items-center gap-2 px-3 py-2.5 bg-white border {{ $hasActiveFilter ? 'border-[#0F034D] text-[#0F034D]' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -72,39 +71,15 @@
                                             ? ['kain','benang','kancing','resleting','aksesoris'] 
                                             : ['benang','kancing','resleting','aksesoris'];
                                     @endphp
-                                    <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)] + ($tab === 'masuk' ? [$supplierName => request($supplierName)] : [])) }}" 
+                                    <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
                                        class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request($kategoriName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
                                     @foreach($kategoriList as $kat)
-                                        <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $kategoriName => $kat, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)] + ($tab === 'masuk' ? [$supplierName => request($supplierName)] : [])) }}" 
+                                        <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $kategoriName => $kat, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
                                            class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucfirst($kat) }}</a>
                                     @endforeach
                                 </div>
                             </div>
                         </div>
-
-                        @if($tab === 'masuk')
-                        <div class="border-t border-gray-100"></div>
-                        <!-- Nested: Supplier -->
-                        <div class="relative group">
-                            <button type="button" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#0F034D] transition-colors">
-                                <span class="flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                    Supplier
-                                </span>
-                                <svg class="nested-arrow w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
-                            </button>
-                            <div class="hidden mt-1 px-2 pb-1 nested-submenu">
-                                <div class="bg-gray-50 rounded-lg border border-gray-100 p-2 space-y-0.5 max-h-48 overflow-y-auto">
-                                    <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'masuk', $searchName => request($searchName), $kategoriName => request($kategoriName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                                       class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request($supplierName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Supplier</a>
-                                    @foreach($suppliers as $s)
-                                        <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'masuk', $supplierName => $s->id, $searchName => request($searchName), $kategoriName => request($kategoriName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                                           class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request($supplierName) == $s->id ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ $s->nama_supplier }}</a>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                        @endif
 
                         <div class="border-t border-gray-100"></div>
                         <!-- Nested: Tanggal -->
@@ -113,7 +88,6 @@
                                 <input type="hidden" name="tab" value="{{ $tab }}">
                                 @if(request($searchName)) <input type="hidden" name="{{ $searchName }}" value="{{ request($searchName) }}"> @endif
                                 @if(request($kategoriName)) <input type="hidden" name="{{ $kategoriName }}" value="{{ request($kategoriName) }}"> @endif
-                                @if($tab === 'masuk' && request($supplierName)) <input type="hidden" name="{{ $supplierName }}" value="{{ request($supplierName) }}"> @endif
                                 <div class="flex items-center gap-2 mb-2">
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                     <span class="text-sm font-medium text-gray-700">Rentang Tanggal</span>
@@ -129,8 +103,8 @@
                                     </div>
                                 </div>
                                 <div class="flex gap-2 pt-2">
+                                    <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $kategoriName => request($kategoriName)]) }}" class="flex-1 px-3 py-1.5 text-center bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">Reset</a>
                                     <button type="submit" class="flex-1 px-3 py-1.5 bg-[#0F034D] text-white text-xs font-medium rounded-lg hover:bg-[#0a0235] transition-colors">Terapkan</button>
-                                    <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $kategoriName => request($kategoriName)] + ($tab === 'masuk' ? [$supplierName => request($supplierName)] : [])) }}" class="flex-1 px-3 py-1.5 text-center bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">Reset</a>
                                 </div>
                             </form>
                         </div>
@@ -148,7 +122,6 @@
                 <form method="GET" action="{{ route('admin.pergerakan-stok.index') }}" class="flex">
                     <input type="hidden" name="tab" value="{{ $tab }}">
                     @if(request($kategoriName)) <input type="hidden" name="{{ $kategoriName }}" value="{{ request($kategoriName) }}"> @endif
-                    @if($tab === 'masuk' && request($supplierName)) <input type="hidden" name="{{ $supplierName }}" value="{{ request($supplierName) }}"> @endif
                     @if(request($tanggalMulaiName)) <input type="hidden" name="{{ $tanggalMulaiName }}" value="{{ request($tanggalMulaiName) }}"> @endif
                     @if(request($tanggalAkhirName)) <input type="hidden" name="{{ $tanggalAkhirName }}" value="{{ request($tanggalAkhirName) }}"> @endif
                     <div class="relative">
@@ -171,38 +144,14 @@
                                 ? ['kain','benang','kancing','resleting','aksesoris'] 
                                 : ['benang','kancing','resleting','aksesoris'];
                         @endphp
-                        <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)] + ($tab === 'masuk' ? [$supplierName => request($supplierName)] : [])) }}" 
+                        <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
                            class="block px-4 py-2 text-sm transition-colors {{ !request($kategoriName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
                         @foreach($kategoriList as $kat)
-                            <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $kategoriName => $kat, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)] + ($tab === 'masuk' ? [$supplierName => request($supplierName)] : [])) }}" 
+                            <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $kategoriName => $kat, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
                                class="block px-4 py-2 text-sm transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucfirst($kat) }}</a>
                         @endforeach
                     </div>
                 </div>
-
-                @if($tab === 'masuk')
-                <!-- Filter: Supplier (hanya tab masuk, desktop only) -->
-                <div class="relative hidden md:block" data-dropdown="supplier">
-                    <button type="button" data-stock-dropdown="supplier" class="flex items-center gap-2 px-4 py-2.5 bg-white border {{ request($supplierName) ? 'border-[#0F034D] text-[#0F034D]' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        @if(request($supplierName))
-                            @php $supplierName_display = $suppliers->firstWhere('id', request($supplierName)); @endphp
-                            {{ \Illuminate\Support\Str::limit($supplierName_display?->nama_supplier ?? 'Supplier', 7) }}
-                        @else
-                            Supplier
-                        @endif
-                        <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
-                    </button>
-                    <div id="dropdown-supplier" class="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2 max-h-64 overflow-y-auto">
-                        <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'masuk', $searchName => request($searchName), $kategoriName => request($kategoriName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                           class="block px-4 py-2 text-sm transition-colors {{ !request($supplierName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Supplier</a>
-                        @foreach($suppliers as $s)
-                            <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'masuk', $supplierName => $s->id, $searchName => request($searchName), $kategoriName => request($kategoriName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                               class="block px-4 py-2 text-sm transition-colors {{ request($supplierName) == $s->id ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ $s->nama_supplier }}</a>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
 
                 <!-- Filter: Tanggal (desktop only) -->
                 <div class="relative hidden md:block" data-dropdown="tanggal">
@@ -224,7 +173,6 @@
                             <input type="hidden" name="tab" value="{{ $tab }}">
                             @if(request($searchName)) <input type="hidden" name="{{ $searchName }}" value="{{ request($searchName) }}"> @endif
                             @if(request($kategoriName)) <input type="hidden" name="{{ $kategoriName }}" value="{{ request($kategoriName) }}"> @endif
-                            @if($tab === 'masuk' && request($supplierName)) <input type="hidden" name="{{ $supplierName }}" value="{{ request($supplierName) }}"> @endif
                             <div class="space-y-3">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1.5">Tanggal Awal</label>
@@ -235,8 +183,8 @@
                                     <input type="date" name="{{ $tanggalAkhirName }}" value="{{ request($tanggalAkhirName) }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors">
                                 </div>
                                 <div class="flex gap-2 pt-1">
+                                    <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $kategoriName => request($kategoriName)]) }}" class="flex-1 px-3 py-1.5 text-center bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">Reset</a>
                                     <button type="submit" class="flex-1 px-3 py-1.5 bg-[#0F034D] text-white text-xs font-medium rounded-lg hover:bg-[#0a0235] transition-colors">Terapkan</button>
-                                    <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $kategoriName => request($kategoriName)] + ($tab === 'masuk' ? [$supplierName => request($supplierName)] : [])) }}" class="flex-1 px-3 py-1.5 text-center bg-gray-100 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors">Reset</a>
                                 </div>
                             </div>
                         </form>
