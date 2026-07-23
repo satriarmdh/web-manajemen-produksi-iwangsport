@@ -601,4 +601,44 @@ class PergerakanStokBahanBakuTest extends TestCase
         $bahan->refresh();
         $this->assertEquals(15, $bahan->stok);
     }
+
+    public function test_filter_rentang_tanggal_stok_masuk_dan_validasinya()
+    {
+        $bahan = BahanBaku::factory()->create();
+
+        // 1. Buat transaksi dengan tanggal kemarin
+        $masukKemarin = \App\Models\StokMasukBahanBaku::create([
+            'bahan_baku_id' => $bahan->id,
+            'jumlah' => 10,
+            'user_id' => $this->admin->id,
+        ]);
+        \DB::table('stok_masuk_bahan_baku')->where('id', $masukKemarin->id)->update([
+            'created_at' => now()->subDay()
+        ]);
+
+        // 2. Buat transaksi dengan tanggal hari ini
+        $masukHariIni = \App\Models\StokMasukBahanBaku::create([
+            'bahan_baku_id' => $bahan->id,
+            'jumlah' => 5,
+            'user_id' => $this->admin->id,
+        ]);
+
+        // Akses filter rentang tanggal hari ini saja
+        $response = $this->actingAs($this->admin)
+            ->get('/admin/pergerakan-stok?tab=masuk&tanggal_mulai_masuk=' . now()->format('Y-m-d') . '&tanggal_akhir_masuk=' . now()->format('Y-m-d'));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('stokMasuk', function ($paginator) use ($masukHariIni, $masukKemarin) {
+            $items = $paginator->items();
+            return collect($items)->contains('id', $masukHariIni->id) && !collect($items)->contains('id', $masukKemarin->id);
+        });
+
+        // Akses filter rentang tanggal tidak valid (tanggal akhir < tanggal awal)
+        $responseBermasalah = $this->actingAs($this->admin)
+            ->get('/admin/pergerakan-stok?tab=masuk&tanggal_mulai_masuk=' . now()->format('Y-m-d') . '&tanggal_akhir_masuk=' . now()->subDay()->format('Y-m-d'));
+
+        // Harus diredirect dengan error session
+        $responseBermasalah->assertRedirect();
+        $responseBermasalah->assertSessionHas('error', 'Tanggal akhir tidak boleh kurang dari tanggal awal.');
+    }
 }

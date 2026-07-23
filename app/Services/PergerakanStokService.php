@@ -47,8 +47,11 @@ class PergerakanStokService
         }
 
         // Filter tanggal
-        if (!empty($filters['tanggal'])) {
-            $query->whereDate('created_at', $filters['tanggal']);
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->whereDate('created_at', '>=', $filters['tanggal_mulai']);
+        }
+        if (!empty($filters['tanggal_akhir'])) {
+            $query->whereDate('created_at', '<=', $filters['tanggal_akhir']);
         }
 
         return $query->paginate($perPage, ['*'], 'page_masuk')->withQueryString();
@@ -79,8 +82,11 @@ class PergerakanStokService
         }
 
         // Filter tanggal
-        if (!empty($filters['tanggal'])) {
-            $query->whereDate('created_at', $filters['tanggal']);
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->whereDate('created_at', '>=', $filters['tanggal_mulai']);
+        }
+        if (!empty($filters['tanggal_akhir'])) {
+            $query->whereDate('created_at', '<=', $filters['tanggal_akhir']);
         }
 
         return $query->paginate($perPage, ['*'], 'page_keluar')->withQueryString();
