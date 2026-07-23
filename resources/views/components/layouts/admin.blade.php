@@ -120,68 +120,34 @@
                 </a>
             </div>
 
-            @php 
-                $isPergerakanBahan = request()->routeIs('admin.pergerakan-stok.*'); 
-                $isStokProduk = request()->routeIs('admin.stok-produk.*'); 
-                $isStokGroup = $isPergerakanBahan || $isStokProduk;
+            @php
+                $isPergerakanBahan = request()->routeIs('admin.pergerakan-stok.*');
+                $isPenjualan = request()->routeIs('admin.penjualan.*');
+                $isTransaksiStokGroup = $isPergerakanBahan || $isPenjualan;
             @endphp
             <div>
-                <button onclick="toggleMenu('menu-stok', 'icon-stok')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isStokGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
+                <button onclick="toggleMenu('menu-transaksi-stok', 'icon-transaksi-stok')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isTransaksiStokGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
                     <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5 shrink-0 transition-colors {{ $isStokGroup ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                        <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isStokGroup ? 'font-bold' : '' }}">Inventory & Stok</span>
+                        <svg class="w-5 h-5 shrink-0 transition-colors {{ $isTransaksiStokGroup ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"></path></svg>
+                        <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isTransaksiStokGroup ? 'font-bold' : '' }}">Transaksi Stok</span>
                     </div>
-                    <svg id="icon-stok" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isStokGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg id="icon-transaksi-stok" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isTransaksiStokGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="menu-stok" class="overflow-hidden transition-all duration-300 {{ $isStokGroup ? 'max-h-96' : 'max-h-0' }}">
+                <div id="menu-transaksi-stok" class="overflow-hidden transition-all duration-300 {{ $isTransaksiStokGroup ? 'max-h-96' : 'max-h-0' }}">
                     <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
                         <li>
                             <a href="{{ route('admin.pergerakan-stok.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPergerakanBahan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isStokProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isPenjualan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isPergerakanBahan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPergerakanBahan ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
                                 Pergerakan Stok Bahan Baku
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isStokProduk ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isStokProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isStokProduk ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                Stok Produk Jadi
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            @php 
-                $isPenjualan = request()->routeIs('admin.penjualan.*'); 
-                $isRiwayatJual = request()->routeIs('admin.riwayat-penjualan.*'); 
-                $isTransaksiGroup = $isPenjualan || $isRiwayatJual;
-            @endphp
-            <div>
-                <button onclick="toggleMenu('menu-transaksi', 'icon-transaksi')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isTransaksiGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5 shrink-0 transition-colors {{ $isTransaksiGroup ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isTransaksiGroup ? 'font-bold' : '' }}">Transaksi</span>
-                    </div>
-                    <svg id="icon-transaksi" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isTransaksiGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div id="menu-transaksi" class="overflow-hidden transition-all duration-300 {{ $isTransaksiGroup ? 'max-h-96' : 'max-h-0' }}">
-                    <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
-                        <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPenjualan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 -bottom-2 border-l-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
+                            <a href="{{ route('admin.penjualan.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isPenjualan ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPenjualan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isPenjualan ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isPenjualan ? 'border-[#0F034D]' : 'border-transparent' }}"></span>
-                                Penjualan
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isRiwayatJual ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
-                                <span class="absolute -left-4 -top-2 bottom-1/2 border-l-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                <span class="absolute -left-4 top-1/2 w-4 border-t-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                Riwayat Penjualan
+                                Penjualan Produk
                             </a>
                         </li>
                     </ul>

@@ -56,8 +56,10 @@ class ProdukCacatService
             $stokVirtual->total_reject = ((int) $stokVirtual->total_reject) + $qtyReject;
             $stokVirtual->is_selesai = $ditandaiSelesai || (bool) $stokVirtual->is_selesai;
             if ($ditandaiSelesai) {
-                $stokVirtual->status_validasi = $progressSetelahInput < $target ? 'flag' : 'normal';
-                $stokVirtual->alasan = $progressSetelahInput < $target ? $data['keterangan'] : null;
+                $statusValidasi = $progressSetelahInput < $target ? 'flag' : 'normal';
+                $stokVirtual->status_validasi = $statusValidasi;
+                $stokVirtual->alasan = $statusValidasi === 'flag' ? $data['keterangan'] : null;
+                $stokVirtual->selisih_dicatat_at = $statusValidasi === 'flag' ? now() : null;
             }
             $stokVirtual->save();
 

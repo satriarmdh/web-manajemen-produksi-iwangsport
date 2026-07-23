@@ -232,71 +232,106 @@
     {{-- Penerimaan Modal --}}
     @include('admin.perintah-produksi.partials._input-penerimaan-modal')
 
-    {{-- Stok Detail Modal (dipindah dari _distribusi lama) --}}
-    <div id="stokDetailModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-200">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-200" id="stokDetailModalContent">
-                <div class="flex items-center justify-between p-5 border-b border-gray-100">
-                    <div>
-                        <h3 class="text-lg font-bold text-[#0F034D]" id="modal-karyawan-name">-</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Detail Stok Virtual - <span id="modal-peran" class="font-semibold">-</span></p>
-                    </div>
-                    <button type="button" data-close-stok-modal class="w-9 h-9 rounded-xl hover:bg-gray-100 flex items-center justify-center transition-colors">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
+    {{-- Stok Detail Slide Panel --}}
+    <div id="stokDetailPanel" class="slide-panel">
+        <div class="slide-panel-backdrop" data-close-stok-modal></div>
+        <div class="slide-panel-body">
+            {{-- Header --}}
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
                 </div>
-                <div class="p-5 space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <h2 class="slide-panel-header-title" id="modal-karyawan-name">-</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Detail Stok Karyawan - <span id="modal-peran" class="font-semibold">-</span></p>
+                </div>
+                <button type="button" class="slide-panel-close" data-close-stok-modal>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Content --}}
+            <div class="slide-panel-content">
+                <div class="space-y-5">
+                    {{-- Stat Cards --}}
+                    <div class="grid grid-cols-3 gap-2.5">
                         <div class="bg-indigo-50 rounded-xl p-3 border border-indigo-100">
-                            <p class="text-xs text-indigo-600 mb-1">Dipegang (Proses)</p>
-                            <p class="text-xl font-bold text-indigo-700"><span id="modal-qty-hold">0</span> pcs</p>
+                            <p class="text-[11px] text-indigo-600 mb-1 font-medium">Dipegang</p>
+                            <p class="text-xl font-bold text-indigo-700"><span id="modal-qty-hold">0</span> <span class="text-xs">pcs</span></p>
                         </div>
-                        <div class="bg-green-50 rounded-xl p-3 border border-green-100">
-                            <p class="text-xs text-green-600 mb-1">Selesai Dikerjakan</p>
-                            <p class="text-xl font-bold text-green-700"><span id="modal-total-selesai">0</span> pcs</p>
+                        <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                            <p class="text-[11px] text-emerald-600 mb-1 font-medium">Hasil Selesai</p>
+                            <p class="text-xl font-bold text-emerald-700"><span id="modal-total-selesai">0</span> <span class="text-xs">pcs</span></p>
                         </div>
                         <div class="bg-blue-50 rounded-xl p-3 border border-blue-100">
-                            <p class="text-xs text-blue-600 mb-1">Sudah Diserahkan</p>
-                            <p class="text-xl font-bold text-blue-700"><span id="modal-total-dikeluarkan">0</span> pcs</p>
-                        </div>
-                        <div class="bg-amber-50 rounded-xl p-3 border border-amber-100">
-                            <p class="text-xs text-amber-600 mb-1">Cacat/Reject</p>
-                            <p class="text-xl font-bold text-amber-700"><span id="modal-total-reject">0</span> pcs</p>
+                            <p class="text-[11px] text-blue-600 mb-1 font-medium">Sudah Diserahkan</p>
+                            <p class="text-xl font-bold text-blue-700"><span id="modal-total-dikeluarkan">0</span> <span class="text-xs">pcs</span></p>
                         </div>
                     </div>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span class="text-gray-600">Status Barang:</span>
-                            <span id="modal-status-barang-badge" class="px-3 py-1 rounded-full text-xs font-semibold">-</span>
+
+                    {{-- Status Rows --}}
+                    <div class="bg-gray-50 rounded-xl border border-gray-100 divide-y divide-gray-100">
+                        <div class="flex justify-between items-center gap-3 px-4 py-2.5">
+                            <span class="text-xs font-bold text-gray-700">Status Barang</span>
+                            <span id="modal-status-barang-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0">-</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span class="text-gray-600">Barang Ready (Belum Diserahkan):</span>
-                            <span class="font-bold text-green-700"><span id="modal-ready-qty">0</span> pcs</span>
+                        <div class="flex justify-between items-center gap-3 px-4 py-2.5">
+                            <span class="text-xs font-bold text-gray-700">Barang Siap Diserahkan</span>
+                            <span class="text-xs font-bold text-emerald-700 shrink-0"><span id="modal-ready-qty">0</span> pcs</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span class="text-gray-600">Status Pengerjaan:</span>
-                            <span id="modal-status-pengerjaan" class="font-semibold text-gray-700">-</span>
+                        <div class="flex justify-between items-center gap-3 px-4 py-2.5">
+                            <span class="text-xs font-bold text-gray-700">Status Pengerjaan</span>
+                            <span id="modal-status-pengerjaan" class="text-xs font-semibold text-gray-700 shrink-0">-</span>
                         </div>
                     </div>
-                    <div id="modal-selisih-warning" class="hidden bg-red-50 border border-red-200 rounded-xl p-3">
-                        <div class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                            <div class="flex-1">
-                                <p class="font-semibold text-red-700 text-sm">Ada Selisih yang Perlu Dipertanggungjawabkan</p>
-                                <p class="text-xs text-red-600 mt-1">Karyawan sudah menandai pekerjaan selesai, tetapi masih ada stok yang dipegang (<span id="modal-qty-hold-warning">0</span> pcs). Perlu investigasi untuk memastikan tidak ada kehilangan barang.</p>
+
+                    {{-- Ringkasan catatan --}}
+                    <div id="recordsSummarySection" class="hidden">
+                        <h3 class="text-sm font-bold text-[#0F034D] mb-2">Ringkasan Catatan</h3>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
+                                <p class="text-[11px] text-amber-700 font-semibold">Total Cacat</p>
+                                <p class="text-lg font-bold text-amber-700 mt-1"><span id="summary-total-cacat">0</span> <span class="text-xs">pcs</span></p>
+                                <p class="text-[10px] text-amber-600 mt-0.5"><span id="summary-count-cacat">0</span> laporan</p>
+                            </div>
+                            <div class="bg-red-50 rounded-xl p-3 border border-red-200">
+                                <p class="text-[11px] text-red-700 font-semibold">Total Selisih</p>
+                                <p class="text-lg font-bold text-red-700 mt-1"><span id="summary-total-selisih">0</span> <span class="text-xs">pcs</span></p>
+                                <p class="text-[10px] text-red-600 mt-0.5"><span id="summary-count-selisih">0</span> laporan</p>
                             </div>
                         </div>
                     </div>
+
+                    {{-- Riwayat catatan --}}
+                    <div id="recordsListSection" class="hidden">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-sm font-bold text-[#0F034D]">Riwayat Catatan</h3>
+                            <span class="text-[10px] text-gray-400" id="records-count-label">0 catatan</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-lg mb-2.5" role="tablist" aria-label="Jenis riwayat catatan">
+                            <button type="button" id="records-tab-cacat" data-record-type="cacat" role="tab" aria-selected="true" class="px-2 py-1.5 text-[11px] font-semibold rounded-md bg-[#0F034D] text-white shadow-sm transition-colors">Barang Cacat</button>
+                            <button type="button" id="records-tab-selisih" data-record-type="selisih" role="tab" aria-selected="false" class="px-2 py-1.5 text-[11px] font-semibold rounded-md text-gray-500 hover:text-[#0F034D] transition-colors">Selisih</button>
+                        </div>
+                        <div id="records-list" class="space-y-1.5"></div>
+                        <div id="records-pagination" class="flex items-center justify-center gap-1.5 mt-3 hidden">
+                            <button type="button" id="records-prev" class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">‹ Sebelumnya</button>
+                            <span id="records-page-info" class="text-xs text-gray-500 px-2">1 / 1</span>
+                            <button type="button" id="records-next" class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Berikutnya ›</button>
+                        </div>
+                        <div id="records-empty" class="hidden text-center py-5">
+                            <p class="text-xs text-gray-500">Tidak ada catatan pada riwayat ini</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center justify-end gap-3 p-5 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                    <button type="button" data-close-stok-modal class="px-4 py-2 text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 font-medium rounded-xl transition-colors">
-                        Tutup
-                    </button>
-                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div class="slide-panel-footer">
+                <button type="button" class="btn-panel-cancel" data-close-stok-modal>Tutup</button>
             </div>
         </div>
     </div>

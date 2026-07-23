@@ -129,80 +129,198 @@ if (photoModal) {
     });
 }
 
-// Stok Detail Modal (Data-view-stok-detail)
+// Stok Detail Slide Panel (data-view-stok-detail)
+const stokPanel = document.getElementById('stokDetailPanel');
+let stokRecordsCurrentPage = 1;
+let currentStokKey = null;
+let currentStokRegistryId = null;
+let currentStokRecordType = 'cacat';
+const STOK_RECORDS_PER_PAGE = 5;
+
+function getStokRegistry(registryId = currentStokRegistryId) {
+    const el = registryId ? document.getElementById(registryId) : null;
+    if (!el) return {};
+    try {
+        return JSON.parse(el.textContent || '{}');
+    } catch (e) {
+        console.error('Failed parse stok registry:', e);
+        return {};
+    }
+}
+
+function getCurrentStokRecords() {
+    const entry = getStokRegistry()[currentStokKey] || { cacat: [], selisih: null };
+    if (currentStokRecordType === 'selisih') return entry.selisih ? [entry.selisih] : [];
+    return Array.isArray(entry.cacat) ? entry.cacat : [];
+}
+
+function escapeHtml(value) {
+    const node = document.createElement('div');
+    node.textContent = value ?? '';
+    return node.innerHTML;
+}
+
+function renderStokRecordCard(rec) {
+    const isCacat = rec.jenis === 'cacat';
+    const wrap = isCacat ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200';
+    const qtyColor = isCacat ? 'text-amber-700' : 'text-red-700';
+
+    return `
+        <article class="border rounded-lg px-3 py-2.5 ${wrap}">
+            <div class="flex items-center justify-between gap-3">
+                <span class="text-xs font-bold ${qtyColor}">${(rec.qty || 0).toLocaleString('id-ID')} pcs</span>
+                <time class="text-[10px] text-gray-500">${escapeHtml(rec.tgl)}</time>
+            </div>
+            <p class="text-xs text-gray-700 leading-relaxed mt-1.5">${escapeHtml(rec.keterangan)}</p>
+        </article>
+    `;
+}
+
+function renderStokRecordsPage(records, page) {
+    const list = document.getElementById('records-list');
+    const empty = document.getElementById('records-empty');
+    const pagination = document.getElementById('records-pagination');
+    const pageInfo = document.getElementById('records-page-info');
+    const prevBtn = document.getElementById('records-prev');
+    const nextBtn = document.getElementById('records-next');
+    const countLabel = document.getElementById('records-count-label');
+
+    if (!list) return;
+    const total = records.length;
+    countLabel.textContent = `${total} catatan`;
+
+    if (total === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        pagination.classList.add('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+
+    const totalPages = Math.ceil(total / STOK_RECORDS_PER_PAGE);
+    if (page > totalPages) page = totalPages;
+    if (page < 1) page = 1;
+    stokRecordsCurrentPage = page;
+
+    const start = (page - 1) * STOK_RECORDS_PER_PAGE;
+    const pageItems = records.slice(start, start + STOK_RECORDS_PER_PAGE);
+    list.innerHTML = pageItems.map(renderStokRecordCard).join('');
+
+    if (totalPages > 1) {
+        pagination.classList.remove('hidden');
+        pageInfo.textContent = `${page} / ${totalPages}`;
+        prevBtn.disabled = page === 1;
+        nextBtn.disabled = page === totalPages;
+    } else {
+        pagination.classList.add('hidden');
+    }
+}
+
+function openStokPanel(data) {
+    // Populate header + stats
+    document.getElementById('modal-karyawan-name').textContent = data.karyawanName;
+    document.getElementById('modal-peran').textContent = data.peran.toUpperCase();
+    document.getElementById('modal-qty-hold').textContent = parseInt(data.qtyHold || 0).toLocaleString('id-ID');
+    document.getElementById('modal-total-selesai').textContent = parseInt(data.totalSelesai || 0).toLocaleString('id-ID');
+    document.getElementById('modal-total-dikeluarkan').textContent = parseInt(data.totalDikeluarkan || 0).toLocaleString('id-ID');
+    document.getElementById('modal-ready-qty').textContent = parseInt(data.readyQty || 0).toLocaleString('id-ID');
+
+    // Status hasil dan pengerjaan memakai dua konsep berbeda:
+    // hasil yang menunggu serah terima vs pekerjaan yang ditandai selesai.
+    const statusBadge = document.getElementById('modal-status-barang-badge');
+    const readyQty = parseInt(data.readyQty || 0);
+    const isSelesai = data.isSelesai === '1';
+    if (statusBadge) {
+        if (readyQty > 0) {
+            statusBadge.textContent = 'Siap Diserahkan';
+            statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0 bg-emerald-100 text-emerald-700 border border-emerald-200';
+        } else if (isSelesai) {
+            statusBadge.textContent = 'Selesai';
+            statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0 bg-gray-100 text-gray-700 border border-gray-200';
+        } else {
+            statusBadge.textContent = 'Dalam Proses';
+            statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0 bg-amber-100 text-amber-700 border border-amber-200';
+        }
+    }
+
+    // Status pengerjaan
+    const pengerjaanEl = document.getElementById('modal-status-pengerjaan');
+    if (pengerjaanEl) {
+        pengerjaanEl.textContent = isSelesai ? 'Sudah Selesai' : 'Dalam Pengerjaan';
+        pengerjaanEl.className = isSelesai
+            ? 'text-xs font-semibold text-emerald-700 shrink-0'
+            : 'text-xs font-semibold text-gray-700 shrink-0';
+    }
+
+    currentStokKey = data.stokKey;
+    currentStokRegistryId = data.registryId;
+    currentStokRecordType = 'cacat';
+    const registry = getStokRegistry();
+    const entry = registry[currentStokKey] || { cacat: [], selisih: null };
+    const cacatRecords = Array.isArray(entry.cacat) ? entry.cacat : [];
+    const allRecords = entry.selisih ? [entry.selisih, ...cacatRecords] : [...cacatRecords];
+
+    // Summary section
+    const summarySection = document.getElementById('recordsSummarySection');
+    const listSection = document.getElementById('recordsListSection');
+    const totalCacat = cacatRecords.reduce((s, r) => s + (r.qty || 0), 0);
+    const totalSelisih = entry.selisih ? (entry.selisih.qty || 0) : 0;
+
+    if (allRecords.length > 0) {
+        summarySection.classList.remove('hidden');
+        listSection.classList.remove('hidden');
+        document.getElementById('summary-total-cacat').textContent = totalCacat.toLocaleString('id-ID');
+        document.getElementById('summary-count-cacat').textContent = cacatRecords.length;
+        document.getElementById('summary-total-selisih').textContent = totalSelisih.toLocaleString('id-ID');
+        document.getElementById('summary-count-selisih').textContent = entry.selisih ? 1 : 0;
+        setStokRecordTab('cacat');
+    } else {
+        summarySection.classList.add('hidden');
+        listSection.classList.remove('hidden');
+        setStokRecordTab('cacat');
+    }
+
+    // Show panel
+    stokPanel.classList.add('is-open');
+}
+
+function setStokRecordTab(type) {
+    currentStokRecordType = type;
+    document.querySelectorAll('[data-record-type]').forEach((tab) => {
+        const active = tab.dataset.recordType === type;
+        tab.setAttribute('aria-selected', String(active));
+        tab.className = active
+            ? 'px-2 py-1.5 text-[11px] font-semibold rounded-md bg-[#0F034D] text-white shadow-sm transition-colors'
+            : 'px-2 py-1.5 text-[11px] font-semibold rounded-md text-gray-500 hover:text-[#0F034D] transition-colors';
+    });
+    renderStokRecordsPage(getCurrentStokRecords(), 1);
+}
+
 document.addEventListener('click', function(e) {
+    const tab = e.target.closest('[data-record-type]');
+    if (tab) setStokRecordTab(tab.dataset.recordType);
+
     const btn = e.target.closest('[data-view-stok-detail]');
     if (btn) {
         const data = btn.dataset;
-        const modal = document.getElementById('stokDetailModal');
-        const modalContent = document.getElementById('stokDetailModalContent');
-        if (!modal || !modalContent) return;
-
-        // Populate modal
-        document.getElementById('modal-karyawan-name').textContent = data.karyawanName;
-        document.getElementById('modal-peran').textContent = data.peran.toUpperCase();
-        document.getElementById('modal-qty-hold').textContent = parseInt(data.qtyHold).toLocaleString('id-ID');
-        document.getElementById('modal-total-selesai').textContent = parseInt(data.totalSelesai).toLocaleString('id-ID');
-        document.getElementById('modal-total-dikeluarkan').textContent = parseInt(data.totalDikeluarkan).toLocaleString('id-ID');
-        document.getElementById('modal-total-reject').textContent = parseInt(data.totalReject).toLocaleString('id-ID');
-        document.getElementById('modal-ready-qty').textContent = parseInt(data.readyQty).toLocaleString('id-ID');
-
-        // Status barang badge
-        const statusBadge = document.getElementById('modal-status-barang-badge');
-        if (statusBadge) {
-            if (data.statusBarang === 'Ready') {
-                statusBadge.textContent = 'Ready';
-                statusBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200';
-            } else {
-                statusBadge.textContent = 'Dalam Proses';
-                statusBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200';
-            }
-        }
-
-        // Status pengerjaan
-        const pengerjaanEl = document.getElementById('modal-status-pengerjaan');
-        if (pengerjaanEl) {
-            pengerjaanEl.textContent = data.isSelesai === '1' ? 'Sudah Selesai' : 'Dalam Pengerjaan';
-        }
-
-        // Selisih warning (qty_hold > 0 && is_selesai = true)
-        const selisihWarning = document.getElementById('modal-selisih-warning');
-        if (selisihWarning) {
-            if (parseInt(data.qtyHold) > 0 && data.isSelesai === '1') {
-                selisihWarning.classList.remove('hidden');
-                const warnQty = document.getElementById('modal-qty-hold-warning');
-                if (warnQty) warnQty.textContent = parseInt(data.qtyHold).toLocaleString('id-ID');
-            } else {
-                selisihWarning.classList.add('hidden');
-            }
-        }
-
-        // Show modal
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            modal.classList.remove('opacity-0');
-            modalContent.classList.remove('scale-95');
-            modalContent.classList.add('scale-100');
-        });
+        if (!stokPanel) return;
+        openStokPanel(data);
     }
 });
 
-// Close stok detail modal
-const stokModal = document.getElementById('stokDetailModal');
-if (stokModal) {
-    const closeModal = () => {
-        stokModal.classList.add('opacity-0');
-        const modalContent = document.getElementById('stokDetailModalContent');
-        if (modalContent) {
-            modalContent.classList.remove('scale-100');
-            modalContent.classList.add('scale-95');
-        }
-        setTimeout(() => stokModal.classList.add('hidden'), 200);
-    };
+// Pagination handlers
+ document.getElementById('records-prev')?.addEventListener('click', () => {
+    if (stokRecordsCurrentPage > 1) renderStokRecordsPage(getCurrentStokRecords(), stokRecordsCurrentPage - 1);
+});
+document.getElementById('records-next')?.addEventListener('click', () => {
+    renderStokRecordsPage(getCurrentStokRecords(), stokRecordsCurrentPage + 1);
+});
 
-    stokModal.addEventListener('click', function(e) {
-        if (e.target === this || e.target.closest('[data-close-stok-modal]')) {
-            closeModal();
+// Close stok panel
+if (stokPanel) {
+    stokPanel.addEventListener('click', function(e) {
+        if (e.target.closest('[data-close-stok-modal]') || e.target.classList.contains('slide-panel-backdrop')) {
+            stokPanel.classList.remove('is-open');
         }
     });
 }

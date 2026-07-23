@@ -74,10 +74,7 @@
                     @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
                     @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
                     <span class="hidden sm:block text-xs font-medium text-gray-400 shrink-0">Tgl Mulai</span>
-                    <input type="{{ request('tanggal_mulai') ? 'date' : 'text' }}" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" 
-                        placeholder="Pilih Tgl Mulai"
-                        onfocus="(this.type='date')"
-                        onblur="if(!this.value) this.type='text'"
+                    <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}"
                         onchange="this.form.submit()"
                         class="w-full sm:w-auto px-4 py-2.5 bg-white border {{ request('tanggal_mulai') ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer [&::-webkit-clear-button]:hidden">
                 </form>

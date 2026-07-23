@@ -1,7 +1,7 @@
 <x-layouts.admin>
     <x-slot:breadcrumb>
         <li class="flex items-center">
-            <span class="text-gray-400 select-none">Inventory & Stok</span>
+            <span class="text-gray-400 select-none">Transaksi Stok</span>
         </li>
         <li class="flex items-center text-[#0F034D] font-semibold">
             <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>

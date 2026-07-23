@@ -9,6 +9,30 @@
     ];
     $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
     $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+    $statusDescriptions = [
+        'pending' => 'Belum ada hasil potong yang divalidasi.',
+        'normal' => 'Hasil potong memenuhi batas toleransi.',
+        'flag' => 'Hasil potong di bawah batas toleransi dan memiliki selisih tukang potong.',
+    ];
+    $statusColors = [
+        'pending' => 'bg-gray-50 text-gray-600 border-gray-200',
+        'normal' => 'bg-green-50 text-green-700 border-green-200',
+        'flag' => 'bg-red-50 text-red-700 border-red-200',
+    ];
+    $penerimaanDescriptions = [
+        'belum_diterima' => 'Belum ada hasil produksi yang diterima admin.',
+        'sebagian' => 'Sebagian hasil produksi sudah diterima admin.',
+        'sesuai' => 'Jumlah hasil diterima sesuai estimasi produksi.',
+        'selisih_kurang' => 'Jumlah hasil diterima lebih sedikit dari estimasi.',
+        'selisih_lebih' => 'Jumlah hasil diterima lebih banyak dari estimasi.',
+    ];
+    $penerimaanColors = [
+        'belum_diterima' => 'bg-gray-50 text-gray-600 border-gray-200',
+        'sebagian' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+        'sesuai' => 'bg-green-50 text-green-700 border-green-200',
+        'selisih_kurang' => 'bg-red-50 text-red-700 border-red-200',
+        'selisih_lebih' => 'bg-orange-50 text-orange-700 border-orange-200',
+    ];
 @endphp
 <div class="bg-white rounded-xl border border-gray-300 overflow-hidden max-h-[calc(100vh-8rem)] flex flex-col">
     {{-- Fixed Header --}}
@@ -18,7 +42,18 @@
     </div>
     {{-- Scrollable Content --}}
     <div class="p-4 space-y-4 overflow-y-auto min-h-0">
-    {{-- Row 1: Card 1 (Detail Produk) + Card 2 (Stepper) side by side --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="rounded-lg border px-3 py-2 {{ $statusColors[$detail->status_validasi_potong] ?? $statusColors['pending'] }}">
+                <p class="text-[10px] font-bold uppercase tracking-wide">Status Produksi: {{ ucfirst($detail->status_validasi_potong ?? 'pending') }}</p>
+                <p class="text-[11px] mt-0.5 leading-relaxed">{{ $statusDescriptions[$detail->status_validasi_potong] ?? $statusDescriptions['pending'] }}</p>
+            </div>
+            <div class="rounded-lg border px-3 py-2 {{ $penerimaanColors[$detail->status_penerimaan] ?? $penerimaanColors['belum_diterima'] }}">
+                <p class="text-[10px] font-bold uppercase tracking-wide">Status Penerimaan: {{ ucfirst(str_replace('_', ' ', $detail->status_penerimaan ?? 'belum_diterima')) }}</p>
+                <p class="text-[11px] mt-0.5 leading-relaxed">{{ $penerimaanDescriptions[$detail->status_penerimaan] ?? $penerimaanDescriptions['belum_diterima'] }}</p>
+            </div>
+        </div>
+
+        {{-- Row 1: Card 1 (Detail Produk) + Card 2 (Stepper) side by side --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="rounded-xl border border-gray-300 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-200">
@@ -54,10 +89,13 @@
                     </div>
                 </div>
 
-                @if($detail->alasan)
+                @if($detail->status_validasi_potong === 'flag')
+                    @php
+                        $selisihPotong = max(0, (int) $detail->estimasi_pcs - (int) $detail->qty_pcs_potong);
+                    @endphp
                     <div class="mt-3 rounded-xl bg-red-50 border border-red-100 p-3">
-                        <p class="text-xs text-red-500 mb-1">Catatan / Alasan Flag</p>
-                        <p class="text-sm text-red-700 font-medium">{{ $detail->alasan }}</p>
+                        <p class="text-xs text-red-500 mb-1">Flag Selisih Tukang Potong</p>
+                        <p class="text-sm text-red-700 font-medium">{{ number_format($selisihPotong, 0, ',', '.') }} pcs selisih</p>
                     </div>
                 @endif
             </div>

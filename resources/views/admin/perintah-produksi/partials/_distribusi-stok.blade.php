@@ -1,11 +1,55 @@
 @php
     $stokVirtualAll = $perintahProduksi->stokVirtual->where('id_detail_perintah', $detail->id);
 
-    // Aggregate stok info per karyawan
+    // Aggregate stok info per karyawan + registry records (cacat + selisih)
     $karyawanStok = collect();
+    $stokRecordsRegistry = [];
     foreach ($stokVirtualAll as $stok) {
+        $key = $stok->id_karyawan . '|' . $stok->peran;
+
+        // Records cacat milik karyawan current pada detail ini
+        $cacatRecords = [];
+        if ($stok->relationLoaded('produkCacat')) {
+            foreach ($stok->produkCacat->where('id_karyawan', $stok->id_karyawan) as $cacat) {
+                $cacatRecords[] = [
+                    'qty' => (int) $cacat->qty_reject,
+                    'keterangan' => $cacat->keterangan ?? '-',
+                    'tahapan' => ucfirst($cacat->tahapan ?? '-'),
+                    'tgl' => $cacat->tgl_lapor ? $cacat->tgl_lapor->format('d M Y, H:i') : '-',
+                    'jenis' => 'cacat',
+                ];
+            }
+        }
+
+        // Record selisih dari validasi stok. Tahap potong menyimpan validasinya di detail produk.
+        $selisihAlasan = $stok->alasan;
+        $isSelisih = $stok->status_validasi === 'flag';
+        $selisihQty = (int) $stok->qty_hold;
+        if ($stok->peran === 'potong' && $detail->status_validasi_potong === 'flag') {
+            $isSelisih = true;
+            $selisihAlasan = $detail->alasan;
+            $selisihQty = max(0, (int) $detail->estimasi_pcs - (int) $detail->qty_pcs_potong);
+        }
+
+        $selisihRecord = null;
+        if ($isSelisih && !empty($selisihAlasan)) {
+            $selisihRecord = [
+                'qty' => $selisihQty,
+                'keterangan' => $selisihAlasan,
+                'tahapan' => ucfirst($stok->peran),
+                'tgl' => $stok->selisih_dicatat_at ? $stok->selisih_dicatat_at->format('d M Y, H:i') : '-',
+                'jenis' => 'selisih',
+            ];
+        }
+
+        $stokRecordsRegistry[$key] = [
+            'cacat' => $cacatRecords,
+            'selisih' => $selisihRecord,
+        ];
+
         $karyawanStok->push([
             'karyawan_id' => $stok->id_karyawan,
+            'stok_key' => $key,
             'karyawan_name' => $stok->karyawan->name ?? '-',
             'peran' => $stok->peran,
             'qty_hold' => (int) $stok->qty_hold,
@@ -14,6 +58,8 @@
             'total_reject' => (int) $stok->total_reject,
             'is_selesai' => $stok->is_selesai,
             'status_barang' => $stok->status_barang,
+            'selisih_qty' => $selisihQty,
+            'selisih_flag' => $isSelisih,
         ]);
     }
 
@@ -21,6 +67,9 @@
     $diterima = $detail->total_qty_diterima;
     $sisa = $estimasi - $diterima;
 @endphp
+{{-- Registry JSON per detail produk untuk JS render paginated records di slide panel --}}
+<script type="application/json" id="stokRecordsRegistry-{{ $detail->id }}">{!! json_encode($stokRecordsRegistry, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE) !!}</script>
+
 <!-- Tab Content: Stok Karyawan -->
 <div class="space-y-2">
     @foreach($karyawanStok as $index => $item)
@@ -31,17 +80,18 @@
             $statusBadge = '';
             $statusClass = '';
             if ($item['status_barang'] === 'Proses') {
-                $statusBadge = 'Proses';
+                $statusBadge = 'Dalam Proses';
                 $statusClass = 'bg-amber-50 text-amber-700 border-amber-100';
             } elseif ($item['status_barang'] === 'Ready' && $readyToTransfer > 0) {
-                $statusBadge = 'Ready';
+                $statusBadge = 'Siap Diserahkan';
                 $statusClass = 'bg-emerald-50 text-emerald-700 border-emerald-100';
             } elseif ($item['status_barang'] === 'Ready' && $readyToTransfer == 0) {
                 $statusBadge = 'Selesai';
                 $statusClass = 'bg-gray-50 text-gray-600 border-gray-100';
             }
 
-            $hasSelisih = $item['is_selesai'] && $wipInput > 0;
+            $hasSelisih = $item['selisih_flag'];
+            $selisihQty = (int) $item['selisih_qty'];
         @endphp
         <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
             <div class="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
@@ -65,7 +115,7 @@
 
                     @if($hasSelisih)
                         <span class="text-[9px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-semibold shrink-0">
-                            {{ number_format($wipInput) }} selisih
+                            {{ number_format($selisihQty) }} selisih
                         </span>
                     @endif
                 </div>
@@ -73,6 +123,8 @@
 
             <button type="button"
                 data-view-stok-detail
+                data-registry-id="stokRecordsRegistry-{{ $detail->id }}"
+                data-stok-key="{{ $item['stok_key'] }}"
                 data-karyawan-name="{{ $item['karyawan_name'] }}"
                 data-peran="{{ $item['peran'] }}"
                 data-qty-hold="{{ $item['qty_hold'] }}"

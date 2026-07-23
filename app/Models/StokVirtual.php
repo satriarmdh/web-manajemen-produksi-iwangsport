@@ -23,6 +23,11 @@ class StokVirtual extends Model
         'is_selesai',
         'status_validasi',
         'alasan',
+        'selisih_dicatat_at',
+    ];
+
+    protected $casts = [
+        'selisih_dicatat_at' => 'datetime',
     ];
 
     public function perintahProduksi(): BelongsTo
@@ -46,15 +51,12 @@ class StokVirtual extends Model
     }
 
     /**
-     * Records produk cacat (reject) yang diinput karyawan ini
-     * untuk perintah + produk + peran yang sama.
-     * Diurutkan terbaru di atas.
+     * Records produk cacat untuk detail perintah ini.
+     * Filter per karyawan dilakukan saat data stok ditampilkan.
      */
     public function produkCacat()
     {
-        return $this->hasMany(ProdukCacat::class, 'id_karyawan', 'id_karyawan')
-            ->where('id_perintah', $this->id_perintah)
-            ->where('id_produk', $this->id_produk)
-            ->orderBy('tgl_lapor', 'desc');
+        return $this->hasMany(ProdukCacat::class, 'id_detail_perintah', 'id_detail_perintah')
+            ->orderByDesc('tgl_lapor');
     }
 }

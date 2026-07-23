@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class PerintahProduksiKaryawanController extends Controller
 {
     public function __construct(
-        private readonly PerintahProduksiService $service
+        protected PerintahProduksiService $service
     ) {}
 
     public function index(Request $request)
