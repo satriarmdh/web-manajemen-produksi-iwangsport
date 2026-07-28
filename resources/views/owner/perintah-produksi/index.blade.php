@@ -1,10 +1,11 @@
 <x-layouts.owner>
     <x-slot:breadcrumb>
-        <li class="flex items-center">
-            <span class="text-gray-400 select-none">Produksi & Persetujuan</span>
+        <li class="flex items-center gap-1.5 text-gray-400">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            <span class="select-none">Produksi &amp; Persetujuan</span>
         </li>
-        <li class="flex items-center text-[#0F034D] font-semibold">
-            <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <li class="flex items-center text-[#0F034D] font-semibold gap-1.5">
+            <svg class="w-3 h-3 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             Persetujuan Perintah Produksi
         </li>
     </x-slot:breadcrumb>
@@ -20,43 +21,74 @@
         $totalEstimasiHalaman = $perintahProduksi->getCollection()->sum(fn ($wo) => $wo->details->sum('estimasi_pcs'));
     @endphp
 
-    <div class="space-y-5 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div>
-                    <h3 class="text-lg font-bold text-[#0F034D]">Daftar Perintah Produksi Menunggu Persetujuan</h3>
-                    <p class="text-sm text-gray-500 mt-1 max-w-3xl">Review perintah produksi dari admin sebelum masuk siklus produksi. Pastikan produk, penggunaan roll, dan estimasi hasil sudah sesuai.</p>
-                </div>
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-50 border border-yellow-100 text-yellow-700 text-sm font-semibold shrink-0">
-                    <span class="relative flex h-2.5 w-2.5">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-60"></span>
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
-                    </span>
-                    {{ $totalPending }} WO Pending
-                </div>
+    <!-- Stat Cards Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        <!-- Card 1: WO Pending (Amber - butuh perhatian) -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">WO Pending</p>
+                <h3 class="text-2xl font-bold {{ $totalPending > 0 ? 'text-amber-600' : 'text-gray-950' }} mt-1 leading-none tabular-nums">{{ number_format($totalPending, 0, ',', '.') }} <span class="text-xs font-normal text-gray-400">perintah produksi</span></h3>
+                <span class="text-[11px] text-gray-400 mt-1.5 block font-medium">Menunggu persetujuan Anda</span>
+            </div>
+            <div class="w-11 h-11 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div class="bg-yellow-50 rounded-2xl border border-yellow-100 p-4 shadow-sm">
-                <p class="text-xs text-yellow-700/70 mb-1">WO Pending</p>
-                <p class="text-2xl font-bold text-yellow-800">{{ number_format($totalPending, 0, ',', '.') }}</p>
+        <!-- Card 2: Produk Ditinjau -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Produk Ditinjau</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ number_format($totalProdukHalaman, 0, ',', '.') }} <span class="text-xs font-normal text-gray-400">jenis</span></h3>
+                <span class="text-[11px] text-gray-400 mt-1.5 block font-medium">Di halaman ini</span>
             </div>
-            <div class="bg-[#0F034D]/5 rounded-2xl border border-[#0F034D]/10 p-4 shadow-sm">
-                <p class="text-xs text-[#0F034D]/60 mb-1">Produk Ditinjau</p>
-                <p class="text-2xl font-bold text-[#0F034D]">{{ number_format($totalProdukHalaman, 0, ',', '.') }}</p>
-            </div>
-            <div class="bg-[#0F034D]/5 rounded-2xl border border-[#0F034D]/10 p-4 shadow-sm">
-                <p class="text-xs text-[#0F034D]/60 mb-1">Total Roll Halaman Ini</p>
-                <p class="text-2xl font-bold text-[#0F034D]">{{ number_format($totalRollHalaman, 0, ',', '.') }}</p>
-            </div>
-            <div class="bg-[#0F034D]/5 rounded-2xl border border-[#0F034D]/10 p-4 shadow-sm">
-                <p class="text-xs text-[#0F034D]/60 mb-1">Estimasi PCS Halaman Ini</p>
-                <p class="text-2xl font-bold text-[#0F034D]">{{ number_format($totalEstimasiHalaman, 0, ',', '.') }}</p>
+            <div class="w-11 h-11 bg-gray-50 text-gray-500 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gray-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"/></svg>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col sm:flex-row items-center gap-4">
+        <!-- Card 3: Total Roll -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Total Roll</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ number_format($totalRollHalaman, 0, ',', '.') }} <span class="text-xs font-normal text-gray-400">roll</span></h3>
+                <span class="text-[11px] text-gray-400 mt-1.5 block font-medium">Dipakai di halaman ini</span>
+            </div>
+            <div class="w-11 h-11 bg-gray-50 text-gray-500 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gray-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+        </div>
+
+        <!-- Card 4: Estimasi PCS -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Estimasi PCS</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ number_format($totalEstimasiHalaman, 0, ',', '.') }} <span class="text-xs font-normal text-gray-400">pcs</span></h3>
+                <span class="text-[11px] text-gray-400 mt-1.5 block font-medium">Perkiraan hasil produksi</span>
+            </div>
+            <div class="w-11 h-11 bg-gray-50 text-gray-500 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gray-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m-6 4h.01M13 11h.01M9 15h.01M13 15h.01M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Combined Card: Judul + Deskripsi + Search + Sort -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h3 class="text-lg font-bold text-[#0F034D]">Daftar Perintah Produksi Menunggu Persetujuan</h3>
+                <p class="text-sm text-gray-500 mt-1 max-w-3xl">Review perintah produksi dari admin sebelum masuk siklus produksi. Pastikan produk, penggunaan roll, dan estimasi hasil sudah sesuai.</p>
+            </div>
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 text-sm font-semibold shrink-0">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-60"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                </span>
+                {{ $totalPending }} WO Pending
+            </div>
+        </div>
+
+        <div class="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center gap-4 rounded-b-2xl">
             @if(request()->hasAny(['search', 'sort']))
                 <a href="{{ route('owner.perintah-produksi.index') }}" title="Hapus Filter & Pencarian" class="hidden sm:flex items-center justify-center w-10 h-10 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-xl transition-colors shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -90,7 +122,7 @@
                         <div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <h3 class="font-bold text-[#0F034D] text-base">{{ $wo->nomor_wo }}</h3>
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-yellow-50 text-yellow-700 border-yellow-100">Pending Approval</span>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-amber-50 text-amber-700 border-amber-100">Pending Approval</span>
                             </div>
                             <p class="text-xs text-gray-400 mt-1">Dibuat {{ $wo->created_at->format('d M Y, H:i') }} oleh {{ $wo->user->name ?? '-' }}</p>
                         </div>
@@ -175,12 +207,16 @@
 
         <div class="mt-6"><x-pagination.custom-global-pagination :paginator="$perintahProduksi" /></div>
     @else
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-            <div class="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12">
+            <div class="flex flex-col items-center justify-center gap-3 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center">
+                    <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-500">Tidak ada perintah produksi menunggu persetujuan</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Semua perintah produksi sudah direview. Perintah baru dari admin akan muncul di sini.</p>
+                </div>
             </div>
-            <p class="text-[#0F034D] font-semibold text-sm">Tidak ada perintah produksi yang menunggu persetujuan</p>
-            <p class="text-gray-500 text-sm mt-1">Semua perintah produksi sudah direview. Perintah produksi baru dari admin akan muncul di halaman ini.</p>
         </div>
     @endif
     @vite('resources/js/admin/confirm-action.js')

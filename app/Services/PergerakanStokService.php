@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\BahanBaku;
 use App\Models\RiwayatStok;
-use App\Models\StokMasukBahanBaku;
-use App\Models\StokKeluarBahanBaku;
+use App\Models\PergerakanStokBahanBaku;
+use App\Models\DetailPergerakanStokBahanBaku;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -20,38 +20,37 @@ class PergerakanStokService
      */
     public function getStokMasukPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
-        $query = StokMasukBahanBaku::with(['bahanBaku', 'supplier', 'user'])->latest();
+        $query = PergerakanStokBahanBaku::with(['detailPergerakanStok.bahanBaku', 'supplier', 'user'])
+            ->where('jenis_pergerakan', 'masuk')
+            ->latest('tanggal')
+            ->latest('id');
 
         // Filter pencarian
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->whereHas('bahanBaku', function ($q2) use ($filters) {
-                    $q2->where('nama_bahan', 'like', "%{$filters['search']}%")
-                       ->orWhere('kode_bahan', 'like', "%{$filters['search']}%");
-                })->orWhereHas('supplier', function ($q2) use ($filters) {
-                    $q2->where('nama_supplier', 'like', "%{$filters['search']}%");
-                });
+                $q->where('nomor_transaksi', 'like', "%{$filters['search']}%")
+                  ->orWhereHas('detailPergerakanStok.bahanBaku', function ($q2) use ($filters) {
+                      $q2->where('nama_bahan', 'like', "%{$filters['search']}%")
+                         ->orWhere('kode_bahan', 'like', "%{$filters['search']}%");
+                  })->orWhereHas('supplier', function ($q2) use ($filters) {
+                      $q2->where('nama_supplier', 'like', "%{$filters['search']}%");
+                  });
             });
         }
 
         // Filter kategori bahan baku
         if (!empty($filters['kategori'])) {
-            $query->whereHas('bahanBaku', function ($q) use ($filters) {
+            $query->whereHas('detailPergerakanStok.bahanBaku', function ($q) use ($filters) {
                 $q->where('kategori', $filters['kategori']);
             });
         }
 
-        // Filter supplier
-        if (!empty($filters['supplier'])) {
-            $query->where('supplier_id', $filters['supplier']);
-        }
-
         // Filter tanggal
         if (!empty($filters['tanggal_mulai'])) {
-            $query->whereDate('created_at', '>=', $filters['tanggal_mulai']);
+            $query->whereDate('tanggal', '>=', $filters['tanggal_mulai']);
         }
         if (!empty($filters['tanggal_akhir'])) {
-            $query->whereDate('created_at', '<=', $filters['tanggal_akhir']);
+            $query->whereDate('tanggal', '<=', $filters['tanggal_akhir']);
         }
 
         return $query->paginate($perPage, ['*'], 'page_masuk')->withQueryString();
@@ -62,38 +61,42 @@ class PergerakanStokService
      */
     public function getStokKeluarPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
-        $query = StokKeluarBahanBaku::with(['bahanBaku', 'user'])->latest();
+        $query = PergerakanStokBahanBaku::with(['detailPergerakanStok.bahanBaku', 'user'])
+            ->where('jenis_pergerakan', 'keluar')
+            ->latest('tanggal')
+            ->latest('id');
 
         // Filter pencarian
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->whereHas('bahanBaku', function ($q2) use ($filters) {
-                    $q2->where('nama_bahan', 'like', "%{$filters['search']}%")
-                       ->orWhere('kode_bahan', 'like', "%{$filters['search']}%");
-                })->orWhere('penerima', 'like', "%{$filters['search']}%");
+                $q->where('nomor_transaksi', 'like', "%{$filters['search']}%")
+                  ->orWhereHas('detailPergerakanStok.bahanBaku', function ($q2) use ($filters) {
+                      $q2->where('nama_bahan', 'like', "%{$filters['search']}%")
+                         ->orWhere('kode_bahan', 'like', "%{$filters['search']}%");
+                  })->orWhere('penerima', 'like', "%{$filters['search']}%");
             });
         }
 
         // Filter kategori bahan baku
         if (!empty($filters['kategori'])) {
-            $query->whereHas('bahanBaku', function ($q) use ($filters) {
+            $query->whereHas('detailPergerakanStok.bahanBaku', function ($q) use ($filters) {
                 $q->where('kategori', $filters['kategori']);
             });
         }
 
         // Filter tanggal
         if (!empty($filters['tanggal_mulai'])) {
-            $query->whereDate('created_at', '>=', $filters['tanggal_mulai']);
+            $query->whereDate('tanggal', '>=', $filters['tanggal_mulai']);
         }
         if (!empty($filters['tanggal_akhir'])) {
-            $query->whereDate('created_at', '<=', $filters['tanggal_akhir']);
+            $query->whereDate('tanggal', '<=', $filters['tanggal_akhir']);
         }
 
         return $query->paginate($perPage, ['*'], 'page_keluar')->withQueryString();
     }
 
     /**
-     * Get data untuk form dan filter dropdown
+     * Get data untuk form
      */
     public function getFormData(): array
     {
@@ -109,85 +112,116 @@ class PergerakanStokService
     }
     
     /**
-     * Simpan transaksi stok MASUK + catat riwayat + update stok bahan baku.
+     * Simpan transaksi pergerakan stok bulk.
      */
-    public function storeStokMasuk(array $data, ?UploadedFile $buktiFile = null): StokMasukBahanBaku
+    public function store(array $data, ?UploadedFile $buktiFile = null): PergerakanStokBahanBaku
     {
         return DB::transaction(function () use ($data, $buktiFile) {
-            $bahanBaku = BahanBaku::findOrFail($data['bahan_baku_id']);
-            $stokSebelum = (int) $bahanBaku->stok;
-            $stokSesudah = $stokSebelum + $data['quantity'];
+            $jenis = $data['jenis_pergerakan'];
+            $nomorTransaksi = $this->generateNomorTransaksi($jenis);
 
-            // Upload bukti pembelian
-            $buktiPath = $buktiFile
-                ? $buktiFile->store('img/bukti-pembelian', 'public')
-                : null;
+            // Upload bukti
+            $buktiPath = null;
+            if ($buktiFile) {
+                $subFolder = $jenis === 'masuk' ? 'bukti-pembelian' : 'bukti-pengeluaran';
+                $buktiPath = $buktiFile->store("img/{$subFolder}", 'public');
+            }
 
-            // Simpan transaksi
-            $transaksi = StokMasukBahanBaku::create([
-                'bahan_baku_id'  => $data['bahan_baku_id'],
-                'jumlah'         => $data['quantity'],
-                'supplier_id'    => $data['supplier_id'] ?? null,
-                'bukti_pembelian' => $buktiPath,
-                'user_id'        => auth()->id(),
-                'catatan'        => $data['keterangan'] ?? null,
+            // Simpan header
+            $transaksi = PergerakanStokBahanBaku::create([
+                'nomor_transaksi' => $nomorTransaksi,
+                'jenis_pergerakan' => $jenis,
+                'tanggal' => $data['tanggal'],
+                'supplier_id' => $jenis === 'masuk' ? ($data['supplier_id'] ?? null) : null,
+                'penerima' => $jenis === 'keluar' ? ($data['penerima'] ?? null) : null,
+                'bukti' => $buktiPath,
+                'catatan' => $data['catatan'] ?? null,
+                'user_id' => auth()->id(),
             ]);
 
-            // Catat riwayat stok
-            RiwayatStok::create([
-                'jenis_item'         => 'bahan_baku',
-                'id_item'            => $bahanBaku->id,
-                'jenis_pergerakan'   => 'masuk',
-                'jumlah'             => $data['quantity'],
-                'stok_sebelum'       => $stokSebelum,
-                'stok_sesudah'       => $stokSesudah,
-                'user_id'            => auth()->id(),
-                'keterangan'         => $data['keterangan'] ?? 'Stok masuk dari pembelian',
-                'referensi_type'     => StokMasukBahanBaku::class,
-                'referensi_id'       => $transaksi->id,
-            ]);
+            // Simpan detail & update stok
+            foreach ($data['items'] as $item) {
+                $bahanBaku = BahanBaku::findOrFail($item['bahan_baku_id']);
+                $qty = (int) $item['quantity'];
 
-            // Update stok tanpa trigger observer
-            BahanBaku::withoutEvents(function () use ($bahanBaku, $stokSesudah) {
-                $bahanBaku->stok = $stokSesudah;
-                $bahanBaku->save();
-            });
+                $stokSebelum = (int) $bahanBaku->stok;
+                $stokSesudah = $jenis === 'masuk' ? ($stokSebelum + $qty) : ($stokSebelum - $qty);
+
+                // Buat detail
+                $transaksi->detailPergerakanStok()->create([
+                    'bahan_baku_id' => $bahanBaku->id,
+                    'jumlah' => $qty,
+                ]);
+
+                // Catat riwayat stok
+                $keteranganRiwayat = $jenis === 'masuk' 
+                    ? ($data['catatan'] ?? 'Stok masuk bulk')
+                    : 'Diberikan ke: ' . $transaksi->penerima . (($data['catatan'] ?? null) ? ' | ' . $data['catatan'] : '');
+
+                RiwayatStok::create([
+                    'jenis_item' => 'bahan_baku',
+                    'id_item' => $bahanBaku->id,
+                    'jenis_pergerakan' => $jenis,
+                    'jumlah' => $qty,
+                    'stok_sebelum' => $stokSebelum,
+                    'stok_sesudah' => $stokSesudah,
+                    'user_id' => auth()->id(),
+                    'keterangan' => $keteranganRiwayat,
+                    'referencing_type' => PergerakanStokBahanBaku::class, // sesuaikan penamaan model lama jika referensi_type / referencing_type
+                    'referensi_type' => PergerakanStokBahanBaku::class,
+                    'referensi_id' => $transaksi->id,
+                ]);
+
+                // Update stok bahan baku
+                BahanBaku::withoutEvents(function () use ($bahanBaku, $stokSesudah) {
+                    $bahanBaku->stok = $stokSesudah;
+                    $bahanBaku->save();
+                });
+            }
 
             return $transaksi;
         });
     }
 
     /**
-     * Hapus (batal) transaksi stok MASUK + catat penyesuaian + kembalikan stok.
+     * Hapus (batal) transaksi pergerakan stok.
      */
-    public function destroyStokMasuk(StokMasukBahanBaku $transaksi): void
+    public function destroy(PergerakanStokBahanBaku $transaksi): void
     {
         DB::transaction(function () use ($transaksi) {
-            $bahanBaku   = $transaksi->bahanBaku;
-            $stokSebelum = (int) $bahanBaku->stok;
-            $stokSesudah = max(0, $stokSebelum - $transaksi->jumlah);
+            $jenis = $transaksi->jenis_pergerakan;
 
-            // Catat penyesuaian pembatalan
-            RiwayatStok::create([
-                'jenis_item'       => 'bahan_baku',
-                'id_item'          => $bahanBaku->id,
-                'jenis_pergerakan' => 'penyesuaian',
-                'jumlah'           => $transaksi->jumlah,
-                'stok_sebelum'     => $stokSebelum,
-                'stok_sesudah'     => $stokSesudah,
-                'user_id'          => auth()->id(),
-                'keterangan'       => 'Pembatalan stok masuk',
-            ]);
+            // Kembalikan stok untuk setiap item detail
+            foreach ($transaksi->detailPergerakanStok as $detail) {
+                $bahanBaku = $detail->bahanBaku;
+                $stokSebelum = (int) $bahanBaku->stok;
+                
+                $stokSesudah = $jenis === 'masuk' 
+                    ? max(0, $stokSebelum - $detail->jumlah)
+                    : ($stokSebelum + $detail->jumlah);
 
-            // Kembalikan stok tanpa trigger observer
-            BahanBaku::withoutEvents(function () use ($bahanBaku, $stokSesudah) {
-                $bahanBaku->stok = $stokSesudah;
-                $bahanBaku->save();
-            });
+                // Catat penyesuaian pembatalan
+                RiwayatStok::create([
+                    'jenis_item' => 'bahan_baku',
+                    'id_item' => $bahanBaku->id,
+                    'jenis_pergerakan' => 'penyesuaian',
+                    'jumlah' => $detail->jumlah,
+                    'stok_sebelum' => $stokSebelum,
+                    'stok_sesudah' => $stokSesudah,
+                    'user_id' => auth()->id(),
+                    'keterangan' => 'Pembatalan ' . ($jenis === 'masuk' ? 'stok masuk' : 'stok keluar') . ' bulk: ' . $transaksi->nomor_transaksi,
+                ]);
 
-            // Hapus file bukti jika ada
-            if ($transaksi->bukti_pembelian) {
-                Storage::disk('public')->delete($transaksi->bukti_pembelian);
+                // Kembalikan stok bahan baku
+                BahanBaku::withoutEvents(function () use ($bahanBaku, $stokSesudah) {
+                    $bahanBaku->stok = $stokSesudah;
+                    $bahanBaku->save();
+                });
+            }
+
+            // Hapus file bukti
+            if ($transaksi->bukti) {
+                Storage::disk('public')->delete($transaksi->bukti);
             }
 
             $transaksi->delete();
@@ -195,91 +229,25 @@ class PergerakanStokService
     }
 
     /**
-     * Simpan transaksi stok KELUAR + catat riwayat + update stok bahan baku.
+     * Generate nomor transaksi otomatis
      */
-    public function storeStokKeluar(array $data, ?UploadedFile $buktiFile = null): StokKeluarBahanBaku
+    public function generateNomorTransaksi(string $jenis): string
     {
-        return DB::transaction(function () use ($data, $buktiFile) {
-            $bahanBaku   = BahanBaku::findOrFail($data['bahan_baku_id']);
-            $stokSebelum = (int) $bahanBaku->stok;
-            $stokSesudah = $stokSebelum - $data['quantity'];
+        $prefix = $jenis === 'masuk' ? 'TRX-BM' : 'TRX-BK';
+        $date = now()->format('Ymd');
+        
+        $last = PergerakanStokBahanBaku::where('jenis_pergerakan', $jenis)
+            ->whereDate('created_at', now()->toDateString())
+            ->orderBy('id', 'desc')
+            ->first();
 
-            // Upload bukti pengeluaran
-            $buktiPath = $buktiFile
-                ? $buktiFile->store('img/bukti-pengeluaran', 'public')
-                : null;
+        if ($last) {
+            $lastNum = (int) substr($last->nomor_transaksi, -4);
+            $nextNum = str_pad($lastNum + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNum = '0001';
+        }
 
-            // Simpan transaksi
-            $transaksi = StokKeluarBahanBaku::create([
-                'bahan_baku_id'    => $data['bahan_baku_id'],
-                'jumlah'           => $data['quantity'],
-                'penerima'         => $data['penerima'],
-                'bukti_pengeluaran' => $buktiPath,
-                'user_id'          => auth()->id(),
-                'keterangan'       => $data['keterangan'] ?? null,
-            ]);
-
-            // Catat riwayat stok
-            $keterangan = 'Diberikan ke: ' . $data['penerima']
-                . (($data['keterangan'] ?? null) ? ' | ' . $data['keterangan'] : '');
-
-            RiwayatStok::create([
-                'jenis_item'       => 'bahan_baku',
-                'id_item'          => $bahanBaku->id,
-                'jenis_pergerakan' => 'keluar',
-                'jumlah'           => $data['quantity'],
-                'stok_sebelum'     => $stokSebelum,
-                'stok_sesudah'     => $stokSesudah,
-                'user_id'          => auth()->id(),
-                'keterangan'       => $keterangan,
-                'referensi_type'   => StokKeluarBahanBaku::class,
-                'referensi_id'     => $transaksi->id,
-            ]);
-
-            // Update stok tanpa trigger observer
-            BahanBaku::withoutEvents(function () use ($bahanBaku, $stokSesudah) {
-                $bahanBaku->stok = $stokSesudah;
-                $bahanBaku->save();
-            });
-
-            return $transaksi;
-        });
-    }
-
-    /**
-     * Hapus (batal) transaksi stok KELUAR + catat penyesuaian + kembalikan stok.
-     */
-    public function destroyStokKeluar(StokKeluarBahanBaku $transaksi): void
-    {
-        DB::transaction(function () use ($transaksi) {
-            $bahanBaku   = $transaksi->bahanBaku;
-            $stokSebelum = (int) $bahanBaku->stok;
-            $stokSesudah = $stokSebelum + $transaksi->jumlah;
-
-            // Catat penyesuaian pembatalan
-            RiwayatStok::create([
-                'jenis_item'       => 'bahan_baku',
-                'id_item'          => $bahanBaku->id,
-                'jenis_pergerakan' => 'penyesuaian',
-                'jumlah'           => $transaksi->jumlah,
-                'stok_sebelum'     => $stokSebelum,
-                'stok_sesudah'     => $stokSesudah,
-                'user_id'          => auth()->id(),
-                'keterangan'       => 'Pembatalan stok keluar',
-            ]);
-
-            // Kembalikan stok tanpa trigger observer
-            BahanBaku::withoutEvents(function () use ($bahanBaku, $stokSesudah) {
-                $bahanBaku->stok = $stokSesudah;
-                $bahanBaku->save();
-            });
-
-            // Hapus file bukti jika ada
-            if ($transaksi->bukti_pengeluaran) {
-                Storage::disk('public')->delete($transaksi->bukti_pengeluaran);
-            }
-
-            $transaksi->delete();
-        });
+        return "{$prefix}-{$date}-{$nextNum}";
     }
 }

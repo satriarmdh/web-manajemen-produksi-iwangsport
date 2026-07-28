@@ -14,6 +14,18 @@
     </x-slot:header>
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <!-- Header -->
+        <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-t-xl">
+            <div>
+                <h3 class="text-lg font-bold text-[#0F034D]">Daftar Pergerakan Stok</h3>
+                <p class="text-sm text-gray-500 mt-1">Catat transaksi masuk/keluar bahan baku untuk memperbarui stok secara otomatis.</p>
+            </div>
+            <a href="{{ route('admin.pergerakan-stok.create', ['tab' => $tab]) }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Tambah Stok {{ $tab === 'masuk' ? 'Masuk' : 'Keluar' }}
+            </a>
+        </div>
+
         <!-- Tab Navigation -->
         <div class="px-6 pt-5 pb-3 border-b border-gray-100 flex gap-2">
             <a href="{{ route('admin.pergerakan-stok.index', ['tab' => 'masuk']) }}" 
@@ -159,10 +171,17 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         @if(request($tanggalMulaiName) || request($tanggalAkhirName))
                             @php
-                                $mulai = request($tanggalMulaiName) ? \Carbon\Carbon::parse(request($tanggalMulaiName))->format('d M Y') : 'Awal';
-                                $akhir = request($tanggalAkhirName) ? \Carbon\Carbon::parse(request($tanggalAkhirName))->format('d M Y') : 'Sekarang';
+                                $mulai = request($tanggalMulaiName);
+                                $akhir = request($tanggalAkhirName);
+                                if ($mulai && $akhir) {
+                                    $labelText = \Carbon\Carbon::parse($mulai)->format('d M Y') . ' — ' . \Carbon\Carbon::parse($akhir)->format('d M Y');
+                                } elseif ($mulai) {
+                                    $labelText = \Carbon\Carbon::parse($mulai)->format('d M Y') . ' — Sekarang';
+                                } else {
+                                    $labelText = 's/d ' . \Carbon\Carbon::parse($akhir)->format('d M Y');
+                                }
                             @endphp
-                            {{ $mulai }} — {{ $akhir }}
+                            {{ $labelText }}
                         @else
                             Rentang Tanggal
                         @endif
@@ -198,16 +217,6 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </a>
                 @endif
-
-                <!-- Spacer -->
-                <div class="flex-1"></div>
-
-                <!-- Tombol Tambah -->
-                <button data-open-panel="add-modal-{{ $tab }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                    <span class="hidden sm:inline">Tambah Stok {{ $tab === 'masuk' ? 'Masuk' : 'Keluar' }}</span>
-                    <span class="sm:hidden">Tambah</span>
-                </button>
             </div>
         </div>
 
@@ -217,48 +226,34 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-50/80 border-b border-gray-100">
                         <tr>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nomor Transaksi</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bahan Baku</th>
-                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jumlah</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Supplier</th>
+                            <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Item</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</th>
-                            <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 bg-white">
                         @forelse($stokMasuk as $item)
                             <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#0F034D]">{{ $item->nomor_transaksi }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                    {{ $item->created_at->format('d M Y') }}
-                                    <span class="block text-xs text-gray-400 mt-0.5">{{ $item->created_at->format('H:i') }} WIB</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $item->bahanBaku?->nama_bahan }}</div>
-                                    <div class="text-xs text-gray-400">{{ $item->bahanBaku?->kode_bahan }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1 text-green-700 font-semibold bg-green-50 px-2.5 py-1 rounded-lg text-xs">
-                                        +{{ $item->jumlah }}
-                                    </span>
+                                    {{ $item->tanggal->format('d M Y') }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $item->supplier?->nama_supplier ?? '-' }}</td>
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-green-700 font-semibold bg-green-50 px-2.5 py-1 rounded-lg text-xs">
+                                        +{{ $item->detailPergerakanStok->sum('jumlah') }}
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <button data-show-detail="masuk" data-detail-json='{{ json_encode([
-                                            'tanggal' => $item->created_at->format('d M Y H:i'),
-                                            'bahan_baku' => $item->bahanBaku?->nama_bahan,
-                                            'kode_bahan' => $item->bahanBaku?->kode_bahan,
-                                            'jumlah' => $item->jumlah,
-                                            'satuan' => $item->bahanBaku?->satuan ?? '-',
-                                            'supplier' => $item->supplier?->nama_supplier,
-                                            'admin' => $item->user?->name,
-                                            'catatan' => $item->catatan,
-                                            'bukti' => $item->bukti_pembelian ? asset('storage/' . $item->bukti_pembelian) : null,
-                                        ]) }}' class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <a href="{{ route('admin.pergerakan-stok.show', $item) }}" class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        </button>
-                                        <form method="POST" action="{{ route('admin.pemasukan-bahan.destroy', $item) }}" data-confirm-delete>
+                                        </a>
+                                        <form method="POST" action="{{ route('admin.pergerakan-stok.destroy', $item) }}" data-confirm-delete>
                                             @csrf @method('DELETE')
                                             <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -291,48 +286,34 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-50/80 border-b border-gray-100">
                         <tr>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nomor Transaksi</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bahan Baku</th>
-                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jumlah</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Penerima</th>
+                            <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Item</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</th>
-                            <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 bg-white">
                         @forelse($stokKeluar as $item)
                             <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#0F034D]">{{ $item->nomor_transaksi }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                    {{ $item->created_at->format('d M Y') }}
-                                    <span class="block text-xs text-gray-400 mt-0.5">{{ $item->created_at->format('H:i') }} WIB</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $item->bahanBaku?->nama_bahan }}</div>
-                                    <div class="text-xs text-gray-400">{{ $item->bahanBaku?->kode_bahan }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1 text-red-700 font-semibold bg-red-50 px-2.5 py-1 rounded-lg text-xs">
-                                        -{{ $item->jumlah }}
-                                    </span>
+                                    {{ $item->tanggal->format('d M Y') }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $item->penerima }}</td>
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-red-700 font-semibold bg-red-50 px-2.5 py-1 rounded-lg text-xs">
+                                        -{{ $item->detailPergerakanStok->sum('jumlah') }}
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <button data-show-detail="keluar" data-detail-json='{{ json_encode([
-                                            'tanggal' => $item->created_at->format('d M Y H:i'),
-                                            'bahan_baku' => $item->bahanBaku?->nama_bahan,
-                                            'kode_bahan' => $item->bahanBaku?->kode_bahan,
-                                            'jumlah' => $item->jumlah,
-                                            'satuan' => $item->bahanBaku?->satuan ?? '-',
-                                            'penerima' => $item->penerima,
-                                            'admin' => $item->user?->name,
-                                            'keterangan' => $item->keterangan,
-                                            'bukti' => $item->bukti_pengeluaran ? asset('storage/' . $item->bukti_pengeluaran) : null,
-                                        ]) }}' class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <a href="{{ route('admin.pergerakan-stok.show', $item) }}" class="p-2 text-[#0F034D] hover:bg-[#0F034D]/5 rounded-lg transition-colors cursor-pointer" title="Lihat Detail">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        </button>
-                                        <form method="POST" action="{{ route('admin.pengeluaran-bahan.destroy', $item) }}" data-confirm-delete>
+                                        </a>
+                                        <form method="POST" action="{{ route('admin.pergerakan-stok.destroy', $item) }}" data-confirm-delete>
                                             @csrf @method('DELETE')
                                             <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -360,15 +341,9 @@
         </div>
     </div>
 
-    {{-- ========================================= --}}
-    @include('admin.pergerakan-stok.partials._detail-transaksi')
-
-
     @vite([
-        'resources/css/global-modal.css',
         'resources/js/admin/custom-forms.js',
         'resources/js/admin/filter-dropdown.js',
-        'resources/js/admin/pergerakan-stok/toggle-modal.js',
     ])
 </x-layouts.admin>
 

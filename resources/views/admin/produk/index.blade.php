@@ -1,4 +1,4 @@
-﻿<x-layouts.admin>
+<x-layouts.admin>
     <x-slot:breadcrumb>
         <li class="flex items-center">
             <span class="text-gray-400 select-none">Manajemen Data</span>
@@ -12,6 +12,47 @@
     <x-slot:header>
         Produk
     </x-slot:header>
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-50 text-[#0F034D] rounded-xl flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Item Produk</p>
+                <h4 class="text-xl font-bold text-gray-950 mt-1">{{ $stats['total_items'] }} Varian</h4>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Stok Menipis (< 100)</p>
+                <h4 class="text-xl font-bold text-gray-950 mt-1">{{ $stats['stok_menipis'] }} Item</h4>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Produk Aktif</p>
+                <h4 class="text-xl font-bold text-gray-950 mt-1">{{ $stats['produk_aktif'] }} Varian</h4>
+            </div>
+        </div>
+    </div>
+
+    @if($stats['stok_menipis'] > 0)
+        <div class="mb-6 px-4 py-3.5 bg-amber-50 border border-amber-100 text-amber-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-2.5">
+                <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Ada <strong>{{ $stats['stok_menipis'] }}</strong> produk dengan stok yang hampir habis (di bawah 100 pcs).</span>
+            </div>
+            <a href="{{ request()->fullUrlWithQuery(['stok' => 'menipis']) }}" class="text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0">Lihat</a>
+        </div>
+    @endif
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <!-- Header -->
@@ -174,7 +215,7 @@
                     <tr>
                         <th scope="col" class="px-6 py-4 font-semibold">Kode & Nama Produk</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Ukuran</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Warna</th>
+                        <th scope="col" class="px-6 py-4 font-semibold text-left">Warna</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Harga Satuan</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Satuan</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-right">Total Stok</th>
@@ -200,7 +241,7 @@
                                 </span>
                             </td>
 
-                            <td class="px-6 py-4 text-center">
+                            <td class="px-6 py-4 text-left">
                                 @php
                                     $warnaProduk = strtolower($item->warna ?? '-');
                                     $warnaDotMap = [
@@ -213,9 +254,9 @@
                                     $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
                                     $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
                                 @endphp
-                                <span class="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-600 capitalize">
+                                <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 capitalize">
+                                    <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}"></span>
                                     {{ $item->warna }}
-                                    <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}" title="Warna {{ ucfirst($item->warna ?? '-') }}"></span>
                                 </span>
                             </td>
 
@@ -228,16 +269,40 @@
                             </td>
 
                             <td class="px-6 py-4 text-right">
-                                @if($item->stok == 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
-                                        <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                                        Stockout
-                                    </span>
-                                @else
-                                    <span class="text-sm font-bold {{ $item->stok < 10 ? 'text-amber-600' : 'text-gray-900' }}">
-                                        {{ number_format($item->stok, 0, ',', '.') }}
-                                    </span>
-                                @endif
+                                <div class="flex items-center justify-end gap-2">
+                                    @if($item->riwayatStokTerakhir && $item->riwayatStokTerakhir->jenis_pergerakan !== 'inisiasi data')
+                                        @php
+                                            $selisih = $item->riwayatStokTerakhir->stok_sesudah - $item->riwayatStokTerakhir->stok_sebelum;
+                                            if ($selisih > 0) {
+                                                $badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                                                $sign = '+';
+                                                $jumlahDisplay = $selisih;
+                                            } elseif ($selisih < 0) {
+                                                $badgeColor = 'bg-rose-50 text-rose-600 border-rose-100';
+                                                $sign = ''; // tanda minus (-) sudah bawaan dari $selisih yang bernilai negatif
+                                                $jumlahDisplay = $selisih;
+                                            } else {
+                                                $badgeColor = 'bg-gray-50 text-gray-500 border-gray-100';
+                                                $sign = '';
+                                                $jumlahDisplay = 0;
+                                            }
+                                        @endphp
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border {{ $badgeColor }}" title="Pergerakan terakhir: {{ $item->riwayatStokTerakhir->keterangan }} ({{ ucfirst($item->riwayatStokTerakhir->jenis_pergerakan) }})">
+                                            {{ $sign }}{{ $jumlahDisplay }}
+                                        </span>
+                                    @endif
+
+                                    @if($item->stok == 0)
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                            Stockout
+                                        </span>
+                                    @else
+                                        <span class="text-sm font-bold {{ $item->stok < 100 ? 'text-amber-600' : 'text-gray-900' }}">
+                                            {{ number_format($item->stok, 0, ',', '.') }}
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
 
                             <td class="px-6 py-4 text-center">

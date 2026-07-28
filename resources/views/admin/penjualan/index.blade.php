@@ -42,14 +42,21 @@
 
                 <!-- Filter: Tanggal (Custom Dropdown) -->
                 <div class="relative" data-dropdown="tanggal">
-                    <button type="button" data-penjualan-dropdown="tanggal" class="flex items-center gap-2 px-4 py-2.5 bg-white border {{ (request('tanggal_mulai') || request('tanggal_akhir')) ? 'border-[#0F034D] text-[#0F034D]' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" data-stock-dropdown="tanggal" class="flex items-center gap-2 px-4 py-2.5 bg-white border {{ (request('tanggal_mulai') || request('tanggal_akhir')) ? 'border-[#0F034D] text-[#0F034D]' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         @if(request('tanggal_mulai') || request('tanggal_akhir'))
                             @php
-                                $mulai = request('tanggal_mulai') ? \Carbon\Carbon::parse(request('tanggal_mulai'))->format('d M Y') : 'Awal';
-                                $akhir = request('tanggal_akhir') ? \Carbon\Carbon::parse(request('tanggal_akhir'))->format('d M Y') : 'Sekarang';
+                                $mulai = request('tanggal_mulai');
+                                $akhir = request('tanggal_akhir');
+                                if ($mulai && $akhir) {
+                                    $labelText = \Carbon\Carbon::parse($mulai)->format('d M Y') . ' — ' . \Carbon\Carbon::parse($akhir)->format('d M Y');
+                                } elseif ($mulai) {
+                                    $labelText = \Carbon\Carbon::parse($mulai)->format('d M Y') . ' — Sekarang';
+                                } else {
+                                    $labelText = 's/d ' . \Carbon\Carbon::parse($akhir)->format('d M Y');
+                                }
                             @endphp
-                            {{ $mulai }} — {{ $akhir }}
+                            {{ $labelText }}
                         @else
                             Rentang Tanggal
                         @endif

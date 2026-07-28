@@ -62,7 +62,9 @@ class PenjualanService
 
                 $produk = Produk::find($itemData['produk_id']);
                 $stokSebelum = $produk->stok;
-                $produk->decrement('stok', $itemData['qty']);
+                Produk::withoutEvents(function () use ($produk, $itemData) {
+                    $produk->decrement('stok', $itemData['qty']);
+                });
                 $stokSesudah = $produk->fresh()->stok;
 
                 RiwayatStok::create([
@@ -93,7 +95,9 @@ class PenjualanService
             foreach ($penjualan->detailPenjualan as $oldDetail) {
                 $produk = Produk::lockForUpdate()->find($oldDetail->produk_id);
                 $stokSebelum = $produk->stok;
-                $produk->increment('stok', $oldDetail->qty);
+                Produk::withoutEvents(function () use ($produk, $oldDetail) {
+                    $produk->increment('stok', $oldDetail->qty);
+                });
                 $stokSesudah = $produk->fresh()->stok;
 
                 RiwayatStok::create([
@@ -130,7 +134,9 @@ class PenjualanService
                 ]);
 
                 $stokSebelum = $produk->stok;
-                $produk->decrement('stok', $item['qty']);
+                Produk::withoutEvents(function () use ($produk, $item) {
+                    $produk->decrement('stok', $item['qty']);
+                });
                 $stokSesudah = $produk->fresh()->stok;
 
                 RiwayatStok::create([
@@ -172,7 +178,9 @@ class PenjualanService
             foreach ($penjualan->detailPenjualan as $detail) {
                 $produk = Produk::lockForUpdate()->find($detail->produk_id);
                 $stokSebelum = $produk->stok;
-                $produk->increment('stok', $detail->qty);
+                Produk::withoutEvents(function () use ($produk, $detail) {
+                    $produk->increment('stok', $detail->qty);
+                });
                 $stokSesudah = $produk->fresh()->stok;
 
                 RiwayatStok::create([

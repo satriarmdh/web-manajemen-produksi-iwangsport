@@ -9,7 +9,7 @@ class BahanBakuService
 {
     public function getAllPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
-        $query = BahanBaku::query();
+        $query = BahanBaku::with('riwayatStokTerakhir');
 
         // 1. Fitur Pencarian (Berdasarkan Nama atau Kode)
         if (!empty($filters['search'])) {
@@ -30,6 +30,8 @@ class BahanBakuService
                 $query->where('stok', '>', 0);
             } elseif ($filters['stok'] === 'habis') {
                 $query->where('stok', 0);
+            } elseif ($filters['stok'] === 'menipis') {
+                $query->where('stok', '<', 10);
             }
         }
 

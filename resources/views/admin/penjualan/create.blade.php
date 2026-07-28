@@ -6,9 +6,11 @@
         <li class="flex items-center">
             <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             <a href="{{ route('admin.penjualan.index') }}" class="text-gray-400 hover:text-[#0F034D] transition-colors">Penjualan Produk</a>
-            <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </li>
-        <li class="flex items-center text-[#0F034D] font-semibold">Tambah Penjualan</li>
+        <li class="flex items-center text-[#0F034D] font-semibold">
+            <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            Tambah Transaksi Penjualan
+        </li>
     </x-slot:breadcrumb>
 
     <x-slot:header>
@@ -24,6 +26,11 @@
             @csrf
             <!-- Invoice Info -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="tanggal" class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal <span class="text-red-500">*</span></label>
+                    <input type="date" name="tanggal" id="tanggal" value="{{ old('tanggal', now()->format('Y-m-d')) }}" max="{{ now()->format('Y-m-d') }}" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-700 focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors @error('tanggal') border-red-300 @enderror">
+                    @error('tanggal') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pelanggan <span class="text-red-500">*</span></label>
                     <div class="relative">
@@ -46,11 +53,6 @@
                     </div>
                     @error('pelanggan_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
-                <div>
-                    <label for="tanggal" class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal <span class="text-red-500">*</span></label>
-                    <input type="date" name="tanggal" id="tanggal" value="{{ old('tanggal', now()->format('Y-m-d')) }}" max="{{ now()->format('Y-m-d') }}" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-700 focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors @error('tanggal') border-red-300 @enderror">
-                    @error('tanggal') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                </div>
             </div>
 
             <!-- Detail Produk -->
@@ -59,12 +61,12 @@
 
                 <!-- Form Input Detail -->
                 <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Produk <span class="text-red-500">*</span></label>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Produk <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <input type="hidden" id="input_produk_value">
-                                <input type="text" id="input_produk_input" placeholder="Ketik untuk mencari produk..." autocomplete="off" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D]/30 outline-none transition-all text-gray-500">
+                                <input type="text" id="input_produk_input" placeholder="Ketik untuk mencari produk..." autocomplete="off" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 pr-10 text-sm focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] outline-none transition-colors text-gray-500">
                                 <svg class="dropdown-arrow absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 <div id="input_produk_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden">
                                     <div class="p-2">
@@ -80,19 +82,18 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Jumlah PCS <span class="text-red-500">*</span></label>
-                            <input type="number" id="input-qty" min="1" placeholder="Contoh: 10" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D]/30 outline-none">
-                            <p id="input-stock-hint" class="text-[11px] text-gray-400 mt-1">Pilih produk terlebih dahulu</p>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Jumlah PCS <span class="text-red-500">*</span> <span id="input-stock-hint" class="text-[11px] text-gray-400 font-normal ml-1">(Pilih produk)</span></label>
+                            <input type="number" id="input-qty" min="1" placeholder="Contoh: 10" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] outline-none text-gray-700">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Harga Satuan</label>
-                            <input type="text" id="input-harga" readonly value="-" class="w-full bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Harga Satuan</label>
+                            <input type="text" id="input-harga" readonly value="-" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-600 cursor-not-allowed">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Subtotal</label>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Subtotal</label>
                             <div class="flex gap-2">
-                                <input type="text" id="input-subtotal" readonly value="-" class="min-w-0 flex-1 bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 cursor-not-allowed">
-                                <button type="button" id="btn-tambah-item" disabled class="h-[38px] px-4 text-sm font-medium text-white bg-[#0F034D] rounded-lg hover:bg-[#1a0a6e] transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed">Tambah</button>
+                                <input type="text" id="input-subtotal" readonly value="-" class="min-w-0 flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-600 cursor-not-allowed">
+                                <button type="button" id="btn-tambah-item" disabled class="px-5 py-2.5 text-sm font-semibold text-white bg-[#0F034D] rounded-xl hover:bg-[#0a0235] transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer shrink-0">Tambah</button>
                             </div>
                         </div>
                     </div>
@@ -161,7 +162,7 @@
             const qty = Number(document.getElementById('input-qty').value || 0);
             document.getElementById('input-harga').value = product ? formatRupiah(product.harga) : '-';
             document.getElementById('input-subtotal').value = product && qty > 0 ? formatRupiah(product.harga * qty) : '-';
-            document.getElementById('input-stock-hint').textContent = product ? `Stok tersedia: ${product.stok} pcs` : 'Pilih produk terlebih dahulu';
+            document.getElementById('input-stock-hint').textContent = product ? `(Tersedia: ${product.stok} pcs)` : '(Pilih produk)';
             document.getElementById('btn-tambah-item').disabled = !product || qty < 1;
         }
 

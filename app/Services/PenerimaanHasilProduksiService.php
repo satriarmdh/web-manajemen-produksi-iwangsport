@@ -63,7 +63,9 @@ class PenerimaanHasilProduksiService
             // 5. Increase produk stock
             $produk = $detail->produk;
             $stokSebelum = $produk->stok;
-            $produk->increment('stok', $data['qty_diterima']);
+            Produk::withoutEvents(function () use ($produk, $data) {
+                $produk->increment('stok', $data['qty_diterima']);
+            });
             $stokSesudah = $produk->fresh()->stok;
 
             // 6. Update detail totals dan hitung status penerimaan (otomatis cek stok_virtual untuk selisih_kurang)
@@ -122,7 +124,9 @@ class PenerimaanHasilProduksiService
             // 4. Decrease produk stock (reverse the increase)
             $produk = $detail->produk;
             $stokSebelum = $produk->stok;
-            $produk->decrement('stok', $original->qty_diterima);
+            Produk::withoutEvents(function () use ($produk, $original) {
+                $produk->decrement('stok', $original->qty_diterima);
+            });
             $stokSesudah = $produk->fresh()->stok;
 
             // 5. Update detail totals dan hitung status penerimaan (otomatis cek stok_virtual untuk selisih_kurang)

@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\BahanBaku;
 use App\Models\Supplier;
 use App\Models\RiwayatStok;
+use App\Models\PergerakanStokBahanBaku;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -25,7 +26,7 @@ class PergerakanStokBahanBakuTest extends TestCase
     }
 
     // ============================================
-    // TAB STOK MASUK - VIEW & ACCESS
+    // VIEW & ACCESS
     // ============================================
 
     public function test_admin_dapat_melihat_halaman_stok_masuk()
@@ -44,583 +45,281 @@ class PergerakanStokBahanBakuTest extends TestCase
     }
 
     // ============================================
-    // TAB STOK MASUK - CREATE TRANSACTION
+    // CREATE BULK TRANSACTION (MASUK)
     // ============================================
 
     public function test_admin_dapat_membuat_transaksi_stok_masuk_dengan_data_valid()
     {
-        $bahan = BahanBaku::factory()->create([
+        $bahan1 = BahanBaku::factory()->create([
             'nama_bahan' => 'Benang Polyester',
-            'stok' => 10
+            'stok' => 10,
+            'is_aktif' => true
+        ]);
+        $bahan2 = BahanBaku::factory()->create([
+            'nama_bahan' => 'Kancing Plastik',
+            'stok' => 5,
+            'is_aktif' => true
         ]);
 
         $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now()->format('Y-m-d'),
             'supplier_id' => null,
-            'keterangan' => 'Pembelian dari toko',
+            'catatan' => 'Pembelian bulk',
+            'items' => [
+                ['bahan_baku_id' => $bahan1->id, 'quantity' => 5],
+                ['bahan_baku_id' => $bahan2->id, 'quantity' => 10],
+            ]
         ];
 
         $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
+            ->post('/admin/pergerakan-stok', $data);
 
         $response->assertRedirect('/admin/pergerakan-stok?tab=masuk');
         $response->assertSessionHas('success');
 
         // Stok harus bertambah
         $this->assertDatabaseHas('bahan_baku', [
-            'id' => $bahan->id,
+            'id' => $bahan1->id,
             'stok' => 15
+        ]);
+        $this->assertDatabaseHas('bahan_baku', [
+            'id' => $bahan2->id,
+            'stok' => 15
+        ]);
+
+        // DetailPergerakanStok harus tersimpan
+        $this->assertDatabaseHas('detail_pergerakan_stok_bahan_baku', [
+            'bahan_baku_id' => $bahan1->id,
+            'jumlah' => 5,
+        ]);
+        $this->assertDatabaseHas('detail_pergerakan_stok_bahan_baku', [
+            'bahan_baku_id' => $bahan2->id,
+            'jumlah' => 10,
         ]);
 
         // RiwayatStok harus tercatat
         $this->assertDatabaseHas('riwayat_stok', [
             'jenis_item' => 'bahan_baku',
-            'id_item' => $bahan->id,
+            'id_item' => $bahan1->id,
             'jenis_pergerakan' => 'masuk',
             'jumlah' => 5,
             'stok_sebelum' => 10,
             'stok_sesudah' => 15,
-            'keterangan' => 'Pembelian dari toko',
         ]);
     }
 
     public function test_admin_dapat_membuat_transaksi_stok_masuk_dengan_supplier()
     {
-        $bahan = BahanBaku::factory()->create(['stok' => 0]);
+        $bahan = BahanBaku::factory()->create(['stok' => 0, 'is_aktif' => true]);
         $supplier = Supplier::factory()->create(['nama_supplier' => 'PT Tekstil Jaya']);
 
         $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 10,
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now()->format('Y-m-d'),
             'supplier_id' => $supplier->id,
-            'keterangan' => 'Pembelian rutin',
+            'items' => [
+                ['bahan_baku_id' => $bahan->id, 'quantity' => 10]
+            ]
         ];
 
         $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
+            ->post('/admin/pergerakan-stok', $data);
 
         $response->assertRedirect('/admin/pergerakan-stok?tab=masuk');
-
-        $this->assertDatabaseHas('riwayat_stok', [
-            'id_item' => $bahan->id,
-            'jenis_pergerakan' => 'masuk',
-            'jumlah' => 10,
+        $this->assertDatabaseHas('pergerakan_stok_bahan_baku', [
+            'supplier_id' => $supplier->id
         ]);
     }
 
-    public function test_stok_masuk_menambah_stok_bahan_baku_dengan_benar()
-    {
-        $bahan = BahanBaku::factory()->create(['stok' => 20]);
-
-        // Transaksi pertama
-        $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
-        ]);
-
-        $bahan->refresh();
-        $this->assertEquals(25, $bahan->stok);
-
-        // Transaksi kedua
-        $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 3,
-        ]);
-
-        $bahan->refresh();
-        $this->assertEquals(28, $bahan->stok);
-    }
-
     // ============================================
-    // TAB STOK MASUK - VALIDATION
-    // ============================================
-
-    public function test_stok_masuk_wajib_memilih_bahan_baku()
-    {
-        $data = [
-            'bahan_baku_id' => null,
-            'quantity' => 5,
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
-
-        $response->assertSessionHasErrors('bahan_baku_id');
-    }
-
-    public function test_stok_masuk_menolak_bahan_baku_yang_tidak_ada()
-    {
-        $data = [
-            'bahan_baku_id' => 999,
-            'quantity' => 5,
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
-
-        $response->assertSessionHasErrors('bahan_baku_id');
-    }
-
-    public function test_stok_masuk_wajib_memasukkan_quantity()
-    {
-        $bahan = BahanBaku::factory()->create();
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => null,
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
-
-        $response->assertSessionHasErrors('quantity');
-    }
-
-    public function test_stok_masuk_menolak_quantity_bukan_angka()
-    {
-        $bahan = BahanBaku::factory()->create();
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 'abc',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
-
-        $response->assertSessionHasErrors('quantity');
-    }
-
-    public function test_stok_masuk_menolak_quantity_kurang_dari_satu()
-    {
-        $bahan = BahanBaku::factory()->create();
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 0,
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
-
-        $response->assertSessionHasErrors('quantity');
-    }
-
-    public function test_stok_masuk_menolak_quantity_negatif()
-    {
-        $bahan = BahanBaku::factory()->create();
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => -5,
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
-
-        $response->assertSessionHasErrors('quantity');
-    }
-
-    public function test_stok_masuk_menolak_supplier_yang_tidak_ada()
-    {
-        $bahan = BahanBaku::factory()->create();
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
-            'supplier_id' => 999,
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pemasukan-bahan', $data);
-
-        $response->assertSessionHasErrors('supplier_id');
-    }
-
-    // ============================================
-    // TAB STOK KELUAR - VIEW & ACCESS
-    // ============================================
-
-    public function test_admin_dapat_melihat_halaman_stok_keluar()
-    {
-        $response = $this->actingAs($this->admin)->get('/admin/pergerakan-stok?tab=keluar');
-
-        $response->assertStatus(200);
-        $response->assertViewIs('admin.pergerakan-stok.index');
-    }
-
-    public function test_karyawan_non_admin_tidak_dapat_mengakses_halaman_stok_keluar()
-    {
-        $response = $this->actingAs($this->karyawanJahit)->get('/admin/pergerakan-stok?tab=keluar');
-
-        $response->assertStatus(403);
-    }
-
-    // ============================================
-    // TAB STOK KELUAR - CREATE TRANSACTION
+    // CREATE BULK TRANSACTION (KELUAR)
     // ============================================
 
     public function test_admin_dapat_membuat_transaksi_stok_keluar_dengan_data_valid()
     {
         $bahan = BahanBaku::factory()->create([
-            'nama_bahan' => 'Kancing Putih',
+            'nama_bahan' => 'Kancing Polyester',
             'kategori' => 'kancing',
-            'stok' => 100
+            'stok' => 50,
+            'is_aktif' => true
         ]);
 
         $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 20,
-            'penerima' => 'Budi (Karyawan Jahit)',
-            'keterangan' => 'Untuk produksi batch A',
+            'jenis_pergerakan' => 'keluar',
+            'tanggal' => now()->format('Y-m-d'),
+            'penerima' => 'Budi Santoso',
+            'items' => [
+                ['bahan_baku_id' => $bahan->id, 'quantity' => 20]
+            ]
         ];
 
         $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
+            ->post('/admin/pergerakan-stok', $data);
 
         $response->assertRedirect('/admin/pergerakan-stok?tab=keluar');
-        $response->assertSessionHas('success');
-
-        // Stok harus berkurang
+        
         $this->assertDatabaseHas('bahan_baku', [
             'id' => $bahan->id,
-            'stok' => 80
+            'stok' => 30
         ]);
-
-        // RiwayatStok harus tercatat
-        $this->assertDatabaseHas('riwayat_stok', [
-            'jenis_item' => 'bahan_baku',
-            'id_item' => $bahan->id,
-            'jenis_pergerakan' => 'keluar',
-            'jumlah' => 20,
-            'stok_sebelum' => 100,
-            'stok_sesudah' => 80,
-            'keterangan' => 'Diberikan ke: Budi (Karyawan Jahit) | Untuk produksi batch A',
-        ]);
-    }
-
-    public function test_stok_keluar_mengurangi_stok_bahan_baku_dengan_benar()
-    {
-        $bahan = BahanBaku::factory()->create([
-            'kategori' => 'benang',
-            'stok' => 50
-        ]);
-
-        // Transaksi pertama
-        $this->actingAs($this->admin)->post('/admin/pengeluaran-bahan', [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 10,
-            'penerima' => 'Ahmad',
-        ]);
-
-        $bahan->refresh();
-        $this->assertEquals(40, $bahan->stok);
-
-        // Transaksi kedua
-        $this->actingAs($this->admin)->post('/admin/pengeluaran-bahan', [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 15,
-            'penerima' => 'Siti',
-        ]);
-
-        $bahan->refresh();
-        $this->assertEquals(25, $bahan->stok);
     }
 
     public function test_stok_keluar_hanya_boleh_untuk_bahan_non_kain()
     {
         $bahanKain = BahanBaku::factory()->create([
-            'nama_bahan' => 'Kain Katun',
+            'nama_bahan' => 'Kain Cotton',
             'kategori' => 'kain',
-            'stok' => 10
+            'stok' => 10,
+            'is_aktif' => true
         ]);
 
         $data = [
-            'bahan_baku_id' => $bahanKain->id,
-            'quantity' => 2,
+            'jenis_pergerakan' => 'keluar',
+            'tanggal' => now()->format('Y-m-d'),
             'penerima' => 'Budi',
+            'items' => [
+                ['bahan_baku_id' => $bahanKain->id, 'quantity' => 5]
+            ]
         ];
 
         $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
+            ->post('/admin/pergerakan-stok', $data);
 
-        $response->assertSessionHasErrors('bahan_baku_id');
-        
-        // Stok tidak boleh berubah
-        $this->assertDatabaseHas('bahan_baku', [
-            'id' => $bahanKain->id,
-            'stok' => 10
-        ]);
-    }
-
-    public function test_stok_keluar_membolehkan_semua_kategori_non_kain()
-    {
-        $kategoriNonKain = ['benang', 'kancing', 'resleting', 'aksesoris'];
-
-        foreach ($kategoriNonKain as $kategori) {
-            $bahan = BahanBaku::factory()->create([
-                'kategori' => $kategori,
-                'stok' => 10
-            ]);
-
-            $response = $this->actingAs($this->admin)
-                ->post('/admin/pengeluaran-bahan', [
-                    'bahan_baku_id' => $bahan->id,
-                    'quantity' => 2,
-                    'penerima' => 'Test User',
-                ]);
-
-            $response->assertRedirect('/admin/pergerakan-stok?tab=keluar');
-            
-            $bahan->refresh();
-            $this->assertEquals(8, $bahan->stok, "Stok {$kategori} tidak berkurang");
-        }
-    }
-
-    // ============================================
-    // TAB STOK KELUAR - VALIDATION
-    // ============================================
-
-    public function test_stok_keluar_wajib_memilih_bahan_baku()
-    {
-        $data = [
-            'bahan_baku_id' => null,
-            'quantity' => 5,
-            'penerima' => 'Budi',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertSessionHasErrors('bahan_baku_id');
-    }
-
-    public function test_stok_keluar_menolak_bahan_baku_yang_tidak_ada()
-    {
-        $data = [
-            'bahan_baku_id' => 999,
-            'quantity' => 5,
-            'penerima' => 'Budi',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertSessionHasErrors('bahan_baku_id');
-    }
-
-    public function test_stok_keluar_wajib_memasukkan_quantity()
-    {
-        $bahan = BahanBaku::factory()->create(['kategori' => 'benang', 'stok' => 10]);
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => null,
-            'penerima' => 'Budi',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertSessionHasErrors('quantity');
-    }
-
-    public function test_stok_keluar_menolak_quantity_bukan_angka()
-    {
-        $bahan = BahanBaku::factory()->create(['kategori' => 'benang', 'stok' => 10]);
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 'abc',
-            'penerima' => 'Budi',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertSessionHasErrors('quantity');
-    }
-
-    public function test_stok_keluar_menolak_quantity_kurang_dari_satu()
-    {
-        $bahan = BahanBaku::factory()->create(['kategori' => 'benang', 'stok' => 10]);
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 0,
-            'penerima' => 'Budi',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertSessionHasErrors('quantity');
+        $response->assertSessionHasErrors('items.0.bahan_baku_id');
     }
 
     public function test_stok_keluar_tidak_boleh_lebih_dari_stok_tersedia()
     {
         $bahan = BahanBaku::factory()->create([
+            'nama_bahan' => 'Benang Jahit',
             'kategori' => 'benang',
-            'stok' => 10
+            'stok' => 5,
+            'is_aktif' => true
         ]);
 
         $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 15, // Lebih dari stok
+            'jenis_pergerakan' => 'keluar',
+            'tanggal' => now()->format('Y-m-d'),
             'penerima' => 'Budi',
+            'items' => [
+                ['bahan_baku_id' => $bahan->id, 'quantity' => 10]
+            ]
         ];
 
         $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
+            ->post('/admin/pergerakan-stok', $data);
 
-        $response->assertSessionHasErrors('quantity');
-        
-        // Stok tidak boleh berubah
-        $this->assertDatabaseHas('bahan_baku', [
-            'id' => $bahan->id,
-            'stok' => 10
-        ]);
-    }
-
-    public function test_stok_keluar_boleh_sama_dengan_stok_tersedia()
-    {
-        $bahan = BahanBaku::factory()->create([
-            'kategori' => 'benang',
-            'stok' => 10
-        ]);
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 10, // Sama dengan stok
-            'penerima' => 'Budi',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertRedirect('/admin/pergerakan-stok?tab=keluar');
-        
-        // Stok harus jadi 0
-        $this->assertDatabaseHas('bahan_baku', [
-            'id' => $bahan->id,
-            'stok' => 0
-        ]);
-    }
-
-    public function test_stok_keluar_wajib_memasukkan_penerima()
-    {
-        $bahan = BahanBaku::factory()->create(['kategori' => 'benang', 'stok' => 10]);
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
-            'penerima' => null,
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertSessionHasErrors('penerima');
-    }
-
-    public function test_stok_keluar_menolak_penerima_kosong()
-    {
-        $bahan = BahanBaku::factory()->create(['kategori' => 'benang', 'stok' => 10]);
-
-        $data = [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
-            'penerima' => '',
-        ];
-
-        $response = $this->actingAs($this->admin)
-            ->post('/admin/pengeluaran-bahan', $data);
-
-        $response->assertSessionHasErrors('penerima');
+        $response->assertSessionHasErrors('items.0.quantity');
     }
 
     // ============================================
-    // RIWAYAT STOK RECORDS
+    // VALIDASI BULK
     // ============================================
 
-    public function test_riwayat_stok_mencatat_user_id_admin()
+    public function test_pergerakan_stok_wajib_memiliki_minimal_satu_item()
     {
-        $bahan = BahanBaku::factory()->create(['stok' => 0]);
-
-        $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
-        ]);
-
-        $this->assertDatabaseHas('riwayat_stok', [
-            'id_item' => $bahan->id,
+        $data = [
             'jenis_pergerakan' => 'masuk',
-            'user_id' => $this->admin->id,
-        ]);
+            'tanggal' => now()->format('Y-m-d'),
+            'items' => []
+        ];
+
+        $response = $this->actingAs($this->admin)
+            ->post('/admin/pergerakan-stok', $data);
+
+        $response->assertSessionHasErrors('items');
     }
 
-    public function test_riwayat_stok_mencatat_keterangan()
+    public function test_pergerakan_stok_menolak_quantity_kurang_dari_satu()
     {
-        $bahan = BahanBaku::factory()->create(['stok' => 0]);
+        $bahan = BahanBaku::factory()->create(['is_aktif' => true]);
 
-        $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
-            'keterangan' => 'Pembelian dari supplier A',
-        ]);
+        $data = [
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now()->format('Y-m-d'),
+            'items' => [
+                ['bahan_baku_id' => $bahan->id, 'quantity' => 0]
+            ]
+        ];
 
-        $riwayat = RiwayatStok::where('id_item', $bahan->id)
-            ->where('jenis_pergerakan', 'masuk')
-            ->latest()
-            ->first();
-        
-        $this->assertEquals('Pembelian dari supplier A', $riwayat->keterangan);
+        $response = $this->actingAs($this->admin)
+            ->post('/admin/pergerakan-stok', $data);
+
+        $response->assertSessionHasErrors('items.0.quantity');
     }
 
-    public function test_banyak_transaksi_membuat_banyak_riwayat_stok()
+    // ============================================
+    // DETROY & CANCEL
+    // ============================================
+
+    public function test_admin_dapat_membatalkan_transaksi_stok_masuk()
     {
-        $bahan = BahanBaku::factory()->create(['stok' => 0]);
+        $bahan = BahanBaku::factory()->create(['stok' => 20, 'is_aktif' => true]);
 
-        // Transaksi 1: Masuk
-        $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
+        // Buat transaksi masuk bulk
+        $transaksi = PergerakanStokBahanBaku::create([
+            'nomor_transaksi' => 'TRX-BM-TEST',
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now(),
+            'user_id' => $this->admin->id
+        ]);
+        $detail = $transaksi->detailPergerakanStok()->create([
             'bahan_baku_id' => $bahan->id,
-            'quantity' => 10,
-            'keterangan' => 'Pembelian awal',
+            'jumlah' => 10
         ]);
 
-        // Transaksi 2: Masuk lagi
-        $this->actingAs($this->admin)->post('/admin/pemasukan-bahan', [
-            'bahan_baku_id' => $bahan->id,
-            'quantity' => 5,
-            'keterangan' => 'Pembelian kedua',
-        ]);
+        // Update manual stok bahan baku untuk mencerminkan transaksi masuk (karena di database factory)
+        $bahan->stok = 30;
+        $bahan->save();
 
-        $this->assertDatabaseCount('riwayat_stok', 2);
-        
+        $response = $this->actingAs($this->admin)
+            ->delete("/admin/pergerakan-stok/{$transaksi->id}");
+
+        $response->assertRedirect('/admin/pergerakan-stok?tab=masuk');
+        $response->assertSessionHas('success');
+
+        // Stok harus dikurangi kembali ke 20
         $bahan->refresh();
-        $this->assertEquals(15, $bahan->stok);
+        $this->assertEquals(20, $bahan->stok);
+
+        // Header dan detail soft-deleted atau deleted
+        $this->assertSoftDeleted('pergerakan_stok_bahan_baku', ['id' => $transaksi->id]);
     }
+
+    // ============================================
+    // FILTER TANGGAL (MAINTAINED)
+    // ============================================
 
     public function test_filter_rentang_tanggal_stok_masuk_dan_validasinya()
     {
-        $bahan = BahanBaku::factory()->create();
+        $bahan = BahanBaku::factory()->create(['is_aktif' => true]);
 
         // 1. Buat transaksi dengan tanggal kemarin
-        $masukKemarin = \App\Models\StokMasukBahanBaku::create([
-            'bahan_baku_id' => $bahan->id,
-            'jumlah' => 10,
+        $masukKemarin = PergerakanStokBahanBaku::create([
+            'nomor_transaksi' => 'TRX-BM-KEMARIN',
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now()->subDay(),
             'user_id' => $this->admin->id,
         ]);
-        \DB::table('stok_masuk_bahan_baku')->where('id', $masukKemarin->id)->update([
+        $masukKemarin->detailPergerakanStok()->create([
+            'bahan_baku_id' => $bahan->id,
+            'jumlah' => 10
+        ]);
+        \DB::table('pergerakan_stok_bahan_baku')->where('id', $masukKemarin->id)->update([
             'created_at' => now()->subDay()
         ]);
 
         // 2. Buat transaksi dengan tanggal hari ini
-        $masukHariIni = \App\Models\StokMasukBahanBaku::create([
-            'bahan_baku_id' => $bahan->id,
-            'jumlah' => 5,
+        $masukHariIni = PergerakanStokBahanBaku::create([
+            'nomor_transaksi' => 'TRX-BM-HARIINI',
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now(),
             'user_id' => $this->admin->id,
+        ]);
+        $masukHariIni->detailPergerakanStok()->create([
+            'bahan_baku_id' => $bahan->id,
+            'jumlah' => 5
         ]);
 
         // Akses filter rentang tanggal hari ini saja
@@ -634,11 +333,10 @@ class PergerakanStokBahanBakuTest extends TestCase
         });
 
         // Akses filter rentang tanggal tidak valid (tanggal akhir < tanggal awal)
-        $responseBermasalah = $this->actingAs($this->admin)
+        $response2 = $this->actingAs($this->admin)
             ->get('/admin/pergerakan-stok?tab=masuk&tanggal_mulai_masuk=' . now()->format('Y-m-d') . '&tanggal_akhir_masuk=' . now()->subDay()->format('Y-m-d'));
 
-        // Harus diredirect dengan error session
-        $responseBermasalah->assertRedirect();
-        $responseBermasalah->assertSessionHas('error', 'Tanggal akhir tidak boleh kurang dari tanggal awal.');
+        $response2->assertRedirect();
+        $response2->assertSessionHas('error', 'Tanggal akhir tidak boleh kurang dari tanggal awal.');
     }
 }

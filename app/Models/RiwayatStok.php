@@ -33,7 +33,7 @@ class RiwayatStok extends Model
      */
     public function item(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo('item', 'jenis_item', 'id_item');
     }
 
     /**
@@ -41,7 +41,7 @@ class RiwayatStok extends Model
      */
     public function referensi(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo('referensi', 'referensi_type', 'referensi_id');
     }
 
     public function user()

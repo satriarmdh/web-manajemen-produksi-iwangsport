@@ -29,6 +29,11 @@ class Produk extends Model
         'is_aktif' => 'boolean',
     ];
 
+    public function riwayatStokTerakhir()
+    {
+        return $this->morphOne(RiwayatStok::class, 'item', 'jenis_item', 'id_item')->latestOfMany();
+    }
+
     /**
      * Relasi ke standard baseline produksi
      */

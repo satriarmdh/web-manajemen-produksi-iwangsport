@@ -24,7 +24,13 @@ class BahanBakuController extends Controller
         $bahanBaku = $this->bahanBakuService->getAllPaginated($filters);
         $nextNumbers = $this->bahanBakuService->getNextNumbers();
 
-        return view('admin.bahan-baku.index', compact('bahanBaku', 'nextNumbers'));
+        $stats = [
+            'total_items' => BahanBaku::count(),
+            'stok_menipis' => BahanBaku::where('stok', '<', 10)->count(),
+            'total_kategori' => BahanBaku::distinct('kategori')->count('kategori'),
+        ];
+
+        return view('admin.bahan-baku.index', compact('bahanBaku', 'nextNumbers', 'stats'));
     }
 
     public function store(StoreBahanBakuRequest $request)

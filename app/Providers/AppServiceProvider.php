@@ -29,5 +29,11 @@ class AppServiceProvider extends ServiceProvider
         // Daftarkan observer untuk mencatat perubahan stok
         Produk::observe(ProdukObserver::class);
         BahanBaku::observe(BahanBakuObserver::class);
+
+        // Daftarkan morphMap untuk polymorphic relations
+        \Illuminate\Database\Eloquent\Relations\Relation::enforceMorphMap([
+            'bahan_baku' => \App\Models\BahanBaku::class,
+            'produk' => \App\Models\Produk::class,
+        ]);
     }
 }

@@ -36,9 +36,15 @@
         <nav class="flex-1 overflow-y-auto no-scrollbar px-4 py-6 space-y-2">
             
             @php $isDashboard = request()->routeIs('owner.dashboard'); @endphp
-            <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $isDashboard ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}" title="Dashboard Inventori">
+            <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $isDashboard ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}" title="Dashboard">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span class="sidebar-text font-medium text-sm whitespace-nowrap">Dashboard</span>
+            </a>
+
+            @php $isInventori = request()->routeIs('owner.inventori'); @endphp
+            <a href="{{ route('owner.inventori') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $isInventori ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}" title="Laporan Inventori Gudang">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                <span class="sidebar-text font-medium text-sm whitespace-nowrap">Laporan Inventori</span>
             </a>
 
             @php $isProduksiGroup = request()->routeIs('owner.persetujuan-workorder', 'owner.perintah-produksi.*', 'owner.pantau-progres'); @endphp

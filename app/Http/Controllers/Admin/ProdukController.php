@@ -21,7 +21,13 @@ class ProdukController extends Controller
         $produk = $this->produkService->getAllPaginated($filters);
         $nextNumber = $this->produkService->generateKodeProduk();
 
-        return view('admin.produk.index', compact('produk', 'nextNumber'));
+        $stats = [
+            'total_items' => Produk::count(),
+            'stok_menipis' => Produk::where('stok', '<', 100)->count(),
+            'produk_aktif' => Produk::where('is_aktif', true)->count(),
+        ];
+
+        return view('admin.produk.index', compact('produk', 'nextNumber', 'stats'));
     }
 
     public function store(StoreProdukRequest $request)

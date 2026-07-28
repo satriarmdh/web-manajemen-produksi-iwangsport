@@ -11,7 +11,7 @@ class ProdukService
      */
     public function getAllPaginated(array $filters = [], int $perPage = 10)
     {
-        $query = Produk::query();
+        $query = Produk::with('riwayatStokTerakhir');
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -29,6 +29,8 @@ class ProdukService
                 $query->where('stok', '>', 0);
             } elseif ($filters['stok'] === 'habis') {
                 $query->where('stok', 0);
+            } elseif ($filters['stok'] === 'menipis') {
+                $query->where('stok', '<', 100);
             }
         }
 

@@ -268,6 +268,13 @@ class PenerimaanHasilProduksiTest extends TestCase
         $this->assertEquals(30, $riwayat->jumlah);
         $this->assertEquals(0, $riwayat->stok_sebelum);
         $this->assertEquals(30, $riwayat->stok_sesudah);
+
+        // Pastikan tidak ada duplikasi riwayat dengan jenis_pergerakan 'penyesuaian'
+        $penyesuaianCount = RiwayatStok::where('jenis_item', 'produk')
+            ->where('id_item', $data['produk']->id)
+            ->where('jenis_pergerakan', 'penyesuaian')
+            ->count();
+        $this->assertEquals(0, $penyesuaianCount);
     }
 
     public function test_total_qty_diterima_di_detail_bertambah()

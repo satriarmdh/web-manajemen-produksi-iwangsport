@@ -4,13 +4,12 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Owner\UserManagementController;
+use App\Http\Controllers\Owner\DashboardOwnerController;
 use App\Http\Controllers\Admin\BahanBakuController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\StandardBaselineProduksiController;
 use App\Http\Controllers\Admin\PergerakanStokController;
-use App\Http\Controllers\Admin\PemasukanBahanController;
-use App\Http\Controllers\Admin\PengeluaranBahanController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\PerintahProduksiController;
 use App\Http\Controllers\Admin\PenerimaanHasilProduksiController;
@@ -32,9 +31,9 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
-    Route::get('/dashboard', function () { 
-        return view('owner.dashboard'); 
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardOwnerController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/sales-trend', [DashboardOwnerController::class, 'salesTrend'])->name('dashboard.sales-trend');
+    Route::get('/inventori', [DashboardOwnerController::class, 'inventori'])->name('inventori');
 
     Route::get('/persetujuan-workorder', function () { 
         return view('owner.persetujuan-workorder'); 
@@ -72,14 +71,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Rute pengelolaan Standard Baseline Produksi
     Route::resource('standard-baseline-produksi', StandardBaselineProduksiController::class)->except(['create', 'edit']);
 
-    // Rute Pergerakan Stok Bahan Baku
-    Route::get('pergerakan-stok', [PergerakanStokController::class, 'index'])->name('pergerakan-stok.index');
-
-    // Rute Pemasukan Bahan Baku (Stok Masuk)
-    Route::resource('pemasukan-bahan', PemasukanBahanController::class)->except(['create', 'show', 'edit']);
-
-    // Rute Pengeluaran Bahan Baku (Stok Keluar)
-    Route::resource('pengeluaran-bahan', PengeluaranBahanController::class)->except(['create', 'show', 'edit']);
+    // Rute Pergerakan Stok Bahan Baku Bulk
+    Route::resource('pergerakan-stok', PergerakanStokController::class)->except(['edit', 'update']);
 
     // Rute Perintah Produksi
     Route::resource('perintah-produksi', PerintahProduksiController::class);

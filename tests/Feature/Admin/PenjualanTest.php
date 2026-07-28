@@ -224,6 +224,13 @@ class PenjualanTest extends TestCase
         $this->assertEquals(10, $riwayat->jumlah);
         $this->assertEquals(50, $riwayat->stok_sebelum);
         $this->assertEquals(40, $riwayat->stok_sesudah);
+
+        // Pastikan tidak ada duplikasi riwayat dengan jenis_pergerakan 'penyesuaian'
+        $penyesuaianCount = RiwayatStok::where('jenis_item', 'produk')
+            ->where('id_item', $produk->id)
+            ->where('jenis_pergerakan', 'penyesuaian')
+            ->count();
+        $this->assertEquals(0, $penyesuaianCount);
     }
 
     public function test_detail_penjualan_tercatat_dengan_harga_dan_subtotal()
