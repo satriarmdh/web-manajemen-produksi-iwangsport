@@ -12,6 +12,16 @@ class StoreUserRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        if (!$this->has('password')) {
+            $this->merge([
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [

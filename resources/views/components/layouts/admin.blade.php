@@ -35,7 +35,7 @@
         <nav class="flex-1 overflow-y-auto no-scrollbar px-4 py-6 space-y-2">
             
             @php $isDashboard = request()->routeIs('admin.dashboard'); @endphp
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $isDashboard ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $isDashboard ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span class="sidebar-text font-medium text-sm whitespace-nowrap">Dashboard</span>
             </a>
@@ -49,12 +49,12 @@
                 $isManajemenGroup = $isBahanBaku || $isProduk || $isSupplier || $isPelanggan || $isStandardBaseline;
             @endphp
             <div>
-                <button onclick="toggleMenu('menu-manajemen', 'icon-manajemen')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isManajemenGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
+                <button onclick="toggleMenu('menu-manajemen', 'icon-manajemen')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isManajemenGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5 shrink-0 transition-colors {{ $isManajemenGroup ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
                         <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isManajemenGroup ? 'font-bold' : '' }}">Manajemen Data</span>
                     </div>
-                    <svg id="icon-manajemen" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isManajemenGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg id="icon-manajemen" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isManajemenGroup ? 'rotate-180 text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
                 <div id="menu-manajemen" class="overflow-hidden transition-all duration-300 {{ $isManajemenGroup ? 'max-h-96' : 'max-h-0' }}">
                     <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">
@@ -112,7 +112,7 @@
                 $isProduksiGroup = $isPerintah;
             @endphp
             <div>
-                <a href="{{ route('admin.perintah-produksi.index') }}" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isProduksiGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
+                <a href="{{ route('admin.perintah-produksi.index') }}" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isProduksiGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5 shrink-0 transition-colors {{ $isProduksiGroup ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                         <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isProduksiGroup ? 'font-bold' : '' }}">Perintah Produksi</span>
@@ -126,12 +126,12 @@
                 $isTransaksiStokGroup = $isPergerakanBahan || $isPenjualan;
             @endphp
             <div>
-                <button onclick="toggleMenu('menu-transaksi-stok', 'icon-transaksi-stok')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isTransaksiStokGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
+                <button onclick="toggleMenu('menu-transaksi-stok', 'icon-transaksi-stok')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group {{ $isTransaksiStokGroup ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5 shrink-0 transition-colors {{ $isTransaksiStokGroup ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"></path></svg>
                         <span class="sidebar-text font-medium text-sm whitespace-nowrap {{ $isTransaksiStokGroup ? 'font-bold' : '' }}">Transaksi Stok</span>
                     </div>
-                    <svg id="icon-transaksi-stok" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isTransaksiStokGroup ? 'rotate-180 text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg id="icon-transaksi-stok" class="sidebar-text shrink-0 w-4 h-4 transition-transform duration-300 transform {{ $isTransaksiStokGroup ? 'rotate-180 text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
                 <div id="menu-transaksi-stok" class="overflow-hidden transition-all duration-300 {{ $isTransaksiStokGroup ? 'max-h-96' : 'max-h-0' }}">
                     <ul class="relative ml-6 pl-4 mt-1 mb-2 space-y-1">

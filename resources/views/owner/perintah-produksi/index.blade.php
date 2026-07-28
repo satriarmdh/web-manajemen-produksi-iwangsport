@@ -79,22 +79,9 @@
                 <h3 class="text-lg font-bold text-[#0F034D]">Daftar Perintah Produksi Menunggu Persetujuan</h3>
                 <p class="text-sm text-gray-500 mt-1 max-w-3xl">Review perintah produksi dari admin sebelum masuk siklus produksi. Pastikan produk, penggunaan roll, dan estimasi hasil sudah sesuai.</p>
             </div>
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 text-sm font-semibold shrink-0">
-                <span class="relative flex h-2.5 w-2.5">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-60"></span>
-                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-                </span>
-                {{ $totalPending }} WO Pending
-            </div>
         </div>
 
         <div class="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center gap-4 rounded-b-2xl">
-            @if(request()->hasAny(['search', 'sort']))
-                <a href="{{ route('owner.perintah-produksi.index') }}" title="Hapus Filter & Pencarian" class="hidden sm:flex items-center justify-center w-10 h-10 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-xl transition-colors shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </a>
-            @endif
-
             <form method="GET" action="{{ route('owner.perintah-produksi.index') }}" class="relative flex-1 w-full">
                 @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -106,6 +93,11 @@
             <div class="flex items-center gap-2 w-full sm:w-auto">
                 <a href="{{ request()->fullUrlWithQuery(['sort' => 'terbaru']) }}" class="flex-1 sm:flex-none px-4 py-2.5 text-center text-sm font-medium rounded-xl border transition-colors {{ !request('sort') || request('sort') === 'terbaru' ? 'border-[#0F034D] text-[#0F034D] bg-[#0F034D]/5' : 'border-gray-200 text-gray-600 bg-white hover:bg-gray-50' }}">Terbaru</a>
                 <a href="{{ request()->fullUrlWithQuery(['sort' => 'terlama']) }}" class="flex-1 sm:flex-none px-4 py-2.5 text-center text-sm font-medium rounded-xl border transition-colors {{ request('sort') === 'terlama' ? 'border-[#0F034D] text-[#0F034D] bg-[#0F034D]/5' : 'border-gray-200 text-gray-600 bg-white hover:bg-gray-50' }}">Terlama</a>
+                @if(request()->hasAny(['search', 'sort']))
+                    <a href="{{ route('owner.perintah-produksi.index') }}" title="Hapus Filter & Pencarian" class="flex items-center justify-center w-10 h-10 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-xl transition-colors shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </a>
+                @endif
             </div>
         </div>
     </div>

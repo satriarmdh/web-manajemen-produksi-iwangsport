@@ -86,3 +86,4 @@ class DashboardOwnerController extends Controller
         return view('owner.inventori', compact('stats', 'mutasiStok', 'bahanBaku', 'produk'));
     }
 }
+

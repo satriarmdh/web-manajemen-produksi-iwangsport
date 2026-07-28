@@ -189,7 +189,7 @@
                     @endif
 
                     <div class="flex items-center gap-2 pt-3 border-t border-gray-50 mt-auto">
-                        <a href="{{ route('admin.perintah-produksi.show', $wo) }}" class="flex-1 text-center py-2 text-xs font-semibold text-[#0F034D] bg-gray-50 rounded-lg hover:bg-[#0F034D]/5 transition-colors">Detail</a>
+                        <a href="{{ route('admin.perintah-produksi.show', $wo) }}" class="flex-1 text-center py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer shadow-md shadow-[#0F034D]/10">Detail</a>
                         @if($wo->status_produksi === 'pending')
                             <a href="{{ route('admin.perintah-produksi.edit', $wo) }}" class="flex-1 text-center py-2 text-xs font-semibold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">Edit</a>
                             <form action="{{ route('admin.perintah-produksi.destroy', $wo) }}" method="POST" class="flex-1">

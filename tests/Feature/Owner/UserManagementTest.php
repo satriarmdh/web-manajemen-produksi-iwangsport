@@ -119,7 +119,7 @@ class UserManagementTest extends TestCase
     {
         $response = $this->actingAs($this->owner)->post('/owner/users', []);
 
-        $response->assertSessionHasErrors(['name', 'email', 'password', 'role', 'jenis_kelamin']);
+        $response->assertSessionHasErrors(['name', 'email', 'role', 'jenis_kelamin']);
     }
 
     public function test_validasi_email_harus_unik()

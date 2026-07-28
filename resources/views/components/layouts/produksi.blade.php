@@ -70,8 +70,8 @@
             </div>
             <nav class="flex-1 p-4 space-y-2">
                 @foreach($navItems as $item)
-                    <a href="{{ $item['route'] }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ $item['active'] ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-[#0F034D] hover:bg-gray-100' }}">
-                        <svg class="w-5 h-5 shrink-0 {{ $item['active'] ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $item['icon'] }}"></path></svg>
+                    <a href="{{ $item['route'] }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all group {{ $item['active'] ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
+                        <svg class="w-5 h-5 shrink-0 transition-colors {{ $item['active'] ? 'text-white' : 'text-gray-400 group-hover:text-[#0F034D]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $item['icon'] }}"></path></svg>
                         <span class="font-medium text-sm">{{ $item['label'] }}</span>
                         @if(($item['badge'] ?? 0) > 0)
                             <span class="ml-auto inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white">{{ $item['badge'] }}</span>

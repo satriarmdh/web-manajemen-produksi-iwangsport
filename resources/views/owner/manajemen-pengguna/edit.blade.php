@@ -1,10 +1,6 @@
 <x-layouts.owner>
     <x-slot:breadcrumb>
         <li class="flex items-center">
-            <span class="text-gray-400 select-none">Pengaturan Sistem</span>
-        </li>
-        <li class="flex items-center">
-            <svg class="w-4 h-4 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             <a href="{{ route('owner.users.index') }}" class="text-gray-400 hover:text-[#0F034D] transition-colors">Manajemen Pengguna</a>
         </li>
         <li class="flex items-center text-[#0F034D] font-semibold">
@@ -193,7 +189,6 @@
     </form>
 
     @vite([
-        'resources/js/owner/manajemen-pengguna/toggle-dropdown-role.js',
-        'resources/js/owner/manajemen-pengguna/toggle-show-password.js'
+        'resources/js/owner/manajemen-pengguna/toggle-dropdown-role.js'
     ])
 </x-layouts.owner>

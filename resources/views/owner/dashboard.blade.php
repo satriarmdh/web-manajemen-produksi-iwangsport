@@ -178,7 +178,6 @@
                         <h3 class="text-base font-bold text-gray-900">Produk Terlaris</h3>
                         <p class="text-[11px] text-gray-400 mt-0.5">30 hari terakhir</p>
                     </div>
-                    <a href="{{ route('owner.inventori') }}" class="text-[11px] font-semibold text-[#0F034D] hover:underline shrink-0 mt-1">Lihat semua</a>
                 </div>
 
                 @php $maxQty = $topProduk->max('total_qty') ?: 1; @endphp
@@ -284,6 +283,12 @@
                         </div>
                     </div>
                 @endforelse
+
+                <div class="mt-4 pt-3 border-t border-gray-100 flex justify-center">
+                    <a href="{{ route('owner.inventori', ['tab' => 'mutasi-gudang']) }}" class="text-xs font-semibold text-[#0F034D] hover:text-[#0b0238] hover:underline transition-colors">
+                        Lihat semua aktivitas stok
+                    </a>
+                </div>
             </div>
         </div>
     </div>

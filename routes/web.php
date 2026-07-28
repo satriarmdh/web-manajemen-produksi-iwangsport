@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Owner\UserManagementController;
 use App\Http\Controllers\Owner\DashboardOwnerController;
+use App\Http\Controllers\Owner\MutasiBahanBakuOwnerController;
 use App\Http\Controllers\Admin\BahanBakuController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\SupplierController;
@@ -34,6 +35,8 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     Route::get('/dashboard', [DashboardOwnerController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/sales-trend', [DashboardOwnerController::class, 'salesTrend'])->name('dashboard.sales-trend');
     Route::get('/inventori', [DashboardOwnerController::class, 'inventori'])->name('inventori');
+    Route::get('/mutasi-bahan-baku', [MutasiBahanBakuOwnerController::class, 'mutasiBahanBaku'])->name('mutasi-bahan-baku.index');
+    Route::get('/mutasi-bahan-baku/{pergerakanStok}', [MutasiBahanBakuOwnerController::class, 'showMutasiBahanBaku'])->name('mutasi-bahan-baku.show');
 
     Route::get('/persetujuan-workorder', function () { 
         return view('owner.persetujuan-workorder'); 
@@ -41,10 +44,18 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
 
     Route::resource('users', UserManagementController::class)->except(['show']);
 
-    // Rute Perintah Produksi untuk Approval Owner (BELEUM DIPAKAI)
+    // Rute Perintah Produksi untuk Approval Owner
     Route::get('perintah-produksi', [PerintahProduksiOwnerController::class, 'index'])->name('perintah-produksi.index');
     Route::post('perintah-produksi/{perintahProduksi}/approve', [PerintahProduksiOwnerController::class, 'approve'])->name('perintah-produksi.approve');
     Route::post('perintah-produksi/{perintahProduksi}/reject', [PerintahProduksiOwnerController::class, 'reject'])->name('perintah-produksi.reject');
+
+    // Rute Pantau Progres Produksi Owner
+    Route::get('pantau-progres', [PerintahProduksiOwnerController::class, 'pantauProgres'])->name('pantau-progres.index');
+    Route::get('pantau-progres/{perintahProduksi}', [PerintahProduksiOwnerController::class, 'showProgres'])->name('pantau-progres.show');
+
+    // Rute Riwayat Transaksi Penjualan Owner
+    Route::get('riwayat-penjualan', [\App\Http\Controllers\Owner\RiwayatPenjualanOwnerController::class, 'index'])->name('riwayat-penjualan.index');
+    Route::get('riwayat-penjualan/{penjualan}', [\App\Http\Controllers\Owner\RiwayatPenjualanOwnerController::class, 'show'])->name('riwayat-penjualan.show');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

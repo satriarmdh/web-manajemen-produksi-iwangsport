@@ -72,7 +72,7 @@
 
 <!-- Tab Content: Stok Karyawan -->
 <div class="space-y-2">
-    @foreach($karyawanStok as $index => $item)
+    @forelse($karyawanStok as $index => $item)
         @php
             $readyToTransfer = max(0, $item['total_selesai'] - $item['total_dikeluarkan']);
             $wipInput = (int) $item['qty_hold'];
@@ -141,5 +141,7 @@
                 Detail
             </button>
         </div>
-    @endforeach
+    @empty
+        <p class="text-xs text-gray-400 py-4 text-center">Belum ada informasi stok karyawan.</p>
+    @endforelse
 </div>
