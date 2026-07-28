@@ -186,44 +186,7 @@
         </div>
     @endif
 
-    <script>
-        // Custom dropdown toggle
-        document.querySelectorAll('[data-dropdown]').forEach((wrapper) => {
-            const button = wrapper.querySelector('button');
-            const menu = wrapper.querySelector('[id^="dropdown-"]');
-            if (button && menu) {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const arrow = button.querySelector('.dropdown-arrow');
-                    
-                    // Close others
-                    document.querySelectorAll('[id^="dropdown-"]').forEach((m) => {
-                        if (m !== menu) {
-                            m.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                            const otherArrow = m.closest('[data-dropdown]').querySelector('.dropdown-arrow');
-                            if (otherArrow) otherArrow.classList.remove('rotate-180');
-                        }
-                    });
-
-                    // Toggle current
-                    if (menu.classList.contains('hidden')) {
-                        menu.classList.remove('hidden', 'opacity-0', 'scale-95', 'pointer-events-none');
-                        if (arrow) arrow.classList.add('rotate-180');
-                    } else {
-                        menu.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                        if (arrow) arrow.classList.remove('rotate-180');
-                    }
-                });
-            }
-        });
-
-        // Close on click outside
-        document.addEventListener('click', () => {
-            document.querySelectorAll('[id^="dropdown-"]').forEach((m) => {
-                m.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                const arrow = m.closest('[data-dropdown]').querySelector('.dropdown-arrow');
-                if (arrow) arrow.classList.remove('rotate-180');
-            });
-        });
-    </script>
+    @vite([
+        'resources/js/owner/pantau-progres/index.js'
+    ])
 </x-layouts.owner>

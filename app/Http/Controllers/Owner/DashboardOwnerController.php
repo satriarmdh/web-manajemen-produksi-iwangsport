@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Owner\SalesTrendRequest;
 use App\Services\DashboardOwnerService;
 use Illuminate\Http\Request;
 
@@ -43,13 +44,9 @@ class DashboardOwnerController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function salesTrend(Request $request)
+    public function salesTrend(SalesTrendRequest $request)
     {
-        $validated = $request->validate([
-            'range' => ['nullable', 'in:7d,30d,1y'],
-            'start' => ['nullable', 'date'],
-            'end'   => ['nullable', 'date', 'after_or_equal:start'],
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['start']) && !empty($validated['end'])) {
             $start = \Carbon\Carbon::parse($validated['start']);

@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePenjualanRequest;
 use App\Http\Requests\Admin\UpdatePenjualanRequest;
-use App\Models\Pelanggan;
 use App\Models\Penjualan;
-use App\Models\Produk;
 use App\Services\PenjualanService;
 use Illuminate\Http\Request;
 
@@ -22,28 +20,10 @@ class PenjualanController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Penjualan::with(['pelanggan', 'user'])
-            ->latest('tanggal');
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('nomor_invoice', 'like', "%{$search}%")
-                  ->orWhereHas('pelanggan', function ($q) use ($search) {
-                      $q->where('nama_pelanggan', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('tanggal', '>=', $request->input('tanggal_mulai'));
-        }
-
-        if ($request->filled('tanggal_akhir')) {
-            $query->whereDate('tanggal', '<=', $request->input('tanggal_akhir'));
-        }
-
-        $penjualan = $query->paginate(10)->withQueryString();
+        $penjualan = $this->service->getPenjualanPaginated(
+            $request->only(['search', 'tanggal_mulai', 'tanggal_akhir']),
+            10
+        );
 
         return view('admin.penjualan.index', compact('penjualan'));
     }
@@ -53,10 +33,9 @@ class PenjualanController extends Controller
      */
     public function create()
     {
-        $pelanggan = Pelanggan::where('is_aktif', true)->orderBy('nama_pelanggan')->get();
-        $produk = Produk::where('is_aktif', true)->where('stok', '>', 0)->orderBy('nama_produk')->get();
+        $data = $this->service->getCreateData();
 
-        return view('admin.penjualan.create', compact('pelanggan', 'produk'));
+        return view('admin.penjualan.create', $data);
     }
 
     /**
@@ -96,11 +75,9 @@ class PenjualanController extends Controller
      */
     public function edit(Penjualan $penjualan)
     {
-        $penjualan->load(['pelanggan', 'detailPenjualan.produk']);
-        $pelanggan = Pelanggan::where('is_aktif', true)->orderBy('nama_pelanggan')->get();
-        $produk = Produk::where('is_aktif', true)->orderBy('nama_produk')->get();
+        $data = $this->service->getEditData($penjualan);
 
-        return view('admin.penjualan.edit', compact('penjualan', 'pelanggan', 'produk'));
+        return view('admin.penjualan.edit', $data);
     }
 
     /**

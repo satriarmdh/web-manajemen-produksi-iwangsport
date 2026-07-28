@@ -24,16 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeAllDropdowns(exceptDropdown = null) {
-        const selectors = [
-            '#dropdown-kategori',
-            '#dropdown-tanggal',
-            '#dropdown-tanggal-mulai',
-            '#filterDropdownMobile',
-            '#filterDropdown',
-            '#sortDropdown'
-        ];
-        selectors.forEach(sel => {
-            const dropdown = document.querySelector(sel);
+        const dropdowns = document.querySelectorAll('[id^="dropdown-"], #filterDropdownMobile, #filterDropdown, #sortDropdown');
+        dropdowns.forEach(dropdown => {
             if (dropdown && dropdown !== exceptDropdown) {
                 closeDropdown(dropdown);
             }
@@ -66,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close when clicking outside
     document.addEventListener('click', (e) => {
-        const clickedInside = e.target.closest('#dropdown-kategori, #dropdown-tanggal, #dropdown-tanggal-mulai, #filterDropdownMobile, #filterDropdown, #sortDropdown');
+        const clickedInside = e.target.closest('[id^="dropdown-"], #filterDropdownMobile, #filterDropdown, #sortDropdown');
         const clickedTrigger = e.target.closest('[data-toggle-filter-menu], [data-stock-dropdown]');
         if (!clickedInside && !clickedTrigger) {
             closeAllDropdowns();

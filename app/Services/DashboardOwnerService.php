@@ -65,7 +65,7 @@ class DashboardOwnerService
     public function getRecentActivity(int $limit = 5): array
     {
         return [
-            'perintahProduksi' => PerintahProduksi::with('user')
+            'perintahProduksi' => PerintahProduksi::with(['user', 'details.produk'])
                 ->latest('created_at')
                 ->limit($limit)
                 ->get(),

@@ -95,6 +95,15 @@ class DashboardOwnerTest extends TestCase
                 && array_key_exists('total', $salesTrend)
                 && $salesTrend['total'] === 10;
         });
+
+        $response->assertViewHas('recentActivity', function ($recentActivity) {
+            return isset($recentActivity['perintahProduksi']) && $recentActivity['perintahProduksi']->count() > 0;
+        });
+
+        $wo = PerintahProduksi::first();
+        if ($wo) {
+            $response->assertSee($wo->nomor_wo);
+        }
     }
 
     /** @test */

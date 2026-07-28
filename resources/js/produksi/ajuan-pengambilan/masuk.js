@@ -3,9 +3,18 @@ const form = modal?.querySelector('form');
 const textarea = modal?.querySelector('textarea');
 
 const closeModal = () => {
-    modal?.classList.add('hidden');
-    modal?.classList.remove('flex');
-    form?.reset();
+    if (!modal) return;
+    modal.classList.add('opacity-0');
+    const body = modal.querySelector('div');
+    if (body) {
+        body.classList.remove('scale-100');
+        body.classList.add('scale-95');
+    }
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        form?.reset();
+    }, 300);
 };
 
 document.querySelectorAll('[data-open-reject-modal]').forEach((button) => {
@@ -14,6 +23,14 @@ document.querySelectorAll('[data-open-reject-modal]').forEach((button) => {
         form.action = button.dataset.rejectAction;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            const body = modal.querySelector('div');
+            if (body) {
+                body.classList.remove('scale-95');
+                body.classList.add('scale-100');
+            }
+        });
         textarea?.focus();
     });
 });

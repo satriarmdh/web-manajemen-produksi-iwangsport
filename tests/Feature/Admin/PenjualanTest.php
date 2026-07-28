@@ -461,4 +461,53 @@ class PenjualanTest extends TestCase
         $this->assertEquals(50, $produk->fresh()->stok);
         $this->assertSoftDeleted($penjualan);
     }
+
+    public function test_admin_dapat_mencari_dan_memfilter_transaksi_penjualan()
+    {
+        $produk = $this->createProdukWithStok(50);
+        $pelanggan1 = Pelanggan::factory()->create(['nama_pelanggan' => 'Alice']);
+        $pelanggan2 = Pelanggan::factory()->create(['nama_pelanggan' => 'Bob']);
+
+        // Create transaction 1 (Alice)
+        $penjualan1 = Penjualan::factory()->create([
+            'pelanggan_id' => $pelanggan1->id,
+            'user_id' => $this->admin->id,
+            'tanggal' => '2026-07-01',
+            'nomor_invoice' => 'INV-20260701-0001',
+        ]);
+        DetailPenjualan::create([
+            'penjualan_id' => $penjualan1->id,
+            'produk_id' => $produk->id,
+            'qty' => 5,
+            'harga_satuan' => 50000,
+            'subtotal' => 250000,
+        ]);
+
+        // Create transaction 2 (Bob)
+        $penjualan2 = Penjualan::factory()->create([
+            'pelanggan_id' => $pelanggan2->id,
+            'user_id' => $this->admin->id,
+            'tanggal' => '2026-07-15',
+            'nomor_invoice' => 'INV-20260715-0002',
+        ]);
+        DetailPenjualan::create([
+            'penjualan_id' => $penjualan2->id,
+            'produk_id' => $produk->id,
+            'qty' => 5,
+            'harga_satuan' => 50000,
+            'subtotal' => 250000,
+        ]);
+
+        // Search for Alice
+        $response = $this->actingAs($this->admin)
+            ->get('/admin/penjualan?search=Alice');
+        $response->assertSee($penjualan1->nomor_invoice);
+        $response->assertDontSee($penjualan2->nomor_invoice);
+
+        // Filter date range
+        $response = $this->actingAs($this->admin)
+            ->get('/admin/penjualan?tanggal_mulai=2026-07-10&tanggal_akhir=2026-07-20');
+        $response->assertDontSee($penjualan1->nomor_invoice);
+        $response->assertSee($penjualan2->nomor_invoice);
+    }
 }

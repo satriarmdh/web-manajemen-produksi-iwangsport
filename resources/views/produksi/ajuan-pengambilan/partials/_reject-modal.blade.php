@@ -1,5 +1,5 @@
-<div data-reject-modal class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#0F034D]/40 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl shadow-[#0F034D]/20">
+<div data-reject-modal class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#0F034D]/40 px-4 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl shadow-[#0F034D]/20 transform scale-95 transition-transform duration-300">
         <div class="flex items-start justify-between gap-3">
             <div>
                 <h3 class="text-base font-bold text-[#0F034D]">Tolak Ajuan?</h3>

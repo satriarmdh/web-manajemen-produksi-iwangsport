@@ -75,8 +75,24 @@
                         <!-- Penerima -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1.5">Penerima <span class="text-red-500">*</span></label>
-                            <input type="text" name="penerima" value="{{ old('penerima') }}" placeholder="Nama karyawan penerima..." required
-                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors bg-white outline-none text-gray-700">
+                            <div class="relative">
+                                <input type="hidden" name="penerima" id="penerima_value" value="{{ old('penerima') }}" required>
+                                <input type="text" id="penerima_input" placeholder="Cari / pilih penerima..." autocomplete="off" class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500 bg-white">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="dropdown-arrow w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                                <div id="penerima_dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-52 overflow-y-auto hidden">
+                                    <div class="p-2">
+                                        @foreach($karyawan as $k)
+                                        <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="{{ $k->name }}" data-text="{{ $k->name }} ({{ ucfirst($k->role) }})">
+                                            <span class="text-sm font-medium text-gray-700">{{ $k->name }} <span class="text-gray-400 text-xs">({{ ucfirst($k->role) }})</span></span>
+                                            <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    <div id="penerima_no_results" class="hidden p-4 text-center text-sm text-gray-500">Tidak ditemukan</div>
+                                </div>
+                            </div>
                         </div>
                     @endif
 
@@ -189,6 +205,17 @@
             initCustomDropdown('input_bahan_baku');
             if (document.getElementById('supplier_input')) {
                 initCustomDropdown('supplier');
+                const oldSupplier = "{{ old('supplier_id') }}";
+                if (oldSupplier) {
+                    setCustomDropdownValue('supplier', oldSupplier);
+                }
+            }
+            if (document.getElementById('penerima_input')) {
+                initCustomDropdown('penerima');
+                const oldPenerima = "{{ old('penerima') }}";
+                if (oldPenerima) {
+                    setCustomDropdownValue('penerima', oldPenerima);
+                }
             }
 
             const hiddenBahanInput = document.getElementById('input_bahan_baku_value');

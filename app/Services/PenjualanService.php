@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Models\DetailPenjualan;
 use App\Models\Penjualan;
 use App\Models\Produk;
+use App\Models\Pelanggan;
 use App\Models\RiwayatStok;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PenjualanService
 {
@@ -220,5 +222,59 @@ class PenjualanService
         }
 
         return $prefix . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Get paginated penjualan with filters.
+     */
+    public function getPenjualanPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    {
+        $query = Penjualan::with(['pelanggan', 'user'])
+            ->latest('tanggal')
+            ->latest('id');
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_invoice', 'like', "%{$search}%")
+                  ->orWhereHas('pelanggan', function ($q2) use ($search) {
+                      $q2->where('nama_pelanggan', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->whereDate('tanggal', '>=', $filters['tanggal_mulai']);
+        }
+
+        if (!empty($filters['tanggal_akhir'])) {
+            $query->whereDate('tanggal', '<=', $filters['tanggal_akhir']);
+        }
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    /**
+     * Get data for creating a new penjualan.
+     */
+    public function getCreateData(): array
+    {
+        return [
+            'pelanggan' => Pelanggan::where('is_aktif', true)->orderBy('nama_pelanggan')->get(),
+            'produk' => Produk::where('is_aktif', true)->where('stok', '>', 0)->orderBy('nama_produk')->get(),
+        ];
+    }
+
+    /**
+     * Get data for editing an existing penjualan.
+     */
+    public function getEditData(Penjualan $penjualan): array
+    {
+        $penjualan->load(['pelanggan', 'detailPenjualan.produk']);
+        return [
+            'penjualan' => $penjualan,
+            'pelanggan' => Pelanggan::where('is_aktif', true)->orderBy('nama_pelanggan')->get(),
+            'produk' => Produk::where('is_aktif', true)->orderBy('nama_produk')->get(),
+        ];
     }
 }

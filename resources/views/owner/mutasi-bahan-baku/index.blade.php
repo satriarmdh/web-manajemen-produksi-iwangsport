@@ -72,15 +72,15 @@
                         {{ request($kategoriName) ? ucfirst(request($kategoriName)) : 'Kategori' }}
                         <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                     </button>
-                    <div id="dropdown-kategori" class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2">
+                    <div id="dropdown-kategori" class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden p-1.5">
                         @php
                             $kategoriList = ['kain','benang','kancing','resleting','aksesoris'];
                         @endphp
                         <a href="{{ route('owner.mutasi-bahan-baku.index', ['tab' => $tab, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                           class="block px-4 py-2 text-sm transition-colors {{ !request($kategoriName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
+                           class="block px-3 py-2 rounded-lg text-sm transition-colors {{ !request($kategoriName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
                         @foreach($kategoriList as $kat)
                             <a href="{{ route('owner.mutasi-bahan-baku.index', ['tab' => $tab, $kategoriName => $kat, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                               class="block px-4 py-2 text-sm transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucfirst($kat) }}</a>
+                               class="block px-3 py-2 rounded-lg text-sm transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucfirst($kat) }}</a>
                         @endforeach
                     </div>
                 </div>
@@ -262,44 +262,7 @@
         </div>
     </div>
 
-    <script>
-        // Custom dropdown toggle
-        document.querySelectorAll('[data-dropdown]').forEach((wrapper) => {
-            const button = wrapper.querySelector('button');
-            const menu = wrapper.querySelector('[id^="dropdown-"]');
-            if (button && menu) {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const arrow = button.querySelector('.dropdown-arrow');
-                    
-                    // Close others
-                    document.querySelectorAll('[id^="dropdown-"]').forEach((m) => {
-                        if (m !== menu) {
-                            m.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                            const otherArrow = m.closest('[data-dropdown]').querySelector('.dropdown-arrow');
-                            if (otherArrow) otherArrow.classList.remove('rotate-180');
-                        }
-                    });
-
-                    // Toggle current
-                    if (menu.classList.contains('hidden')) {
-                        menu.classList.remove('hidden', 'opacity-0', 'scale-95', 'pointer-events-none');
-                        if (arrow) arrow.classList.add('rotate-180');
-                    } else {
-                        menu.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                        if (arrow) arrow.classList.remove('rotate-180');
-                    }
-                });
-            }
-        });
-
-        // Close on click outside
-        document.addEventListener('click', () => {
-            document.querySelectorAll('[id^="dropdown-"]').forEach((m) => {
-                m.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                const arrow = m.closest('[data-dropdown]').querySelector('.dropdown-arrow');
-                if (arrow) arrow.classList.remove('rotate-180');
-            });
-        });
-    </script>
+    @vite([
+        'resources/js/owner/mutasi-bahan-baku/index.js'
+    ])
 </x-layouts.owner>

@@ -31,7 +31,7 @@ class PenerimaanHasilProduksi extends Model
 
     public function detail(): BelongsTo
     {
-        return $this->belongsTo(PerintahProduksiDetail::class, 'perintah_produksi_detail_id');
+        return $this->belongsTo(DetailPerintahProduksi::class, 'perintah_produksi_detail_id');
     }
 
     public function admin(): BelongsTo

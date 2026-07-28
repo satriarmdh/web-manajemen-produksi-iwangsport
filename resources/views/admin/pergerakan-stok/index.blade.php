@@ -150,17 +150,17 @@
                         {{ request($kategoriName) ? ucfirst(request($kategoriName)) : 'Kategori' }}
                         <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                     </button>
-                    <div id="dropdown-kategori" class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2">
+                    <div id="dropdown-kategori" class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden p-1.5">
                         @php
                             $kategoriList = $tab === 'masuk' 
                                 ? ['kain','benang','kancing','resleting','aksesoris'] 
                                 : ['benang','kancing','resleting','aksesoris'];
                         @endphp
                         <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                           class="block px-4 py-2 text-sm transition-colors {{ !request($kategoriName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
+                           class="block px-3 py-2 rounded-lg text-sm transition-colors {{ !request($kategoriName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
                         @foreach($kategoriList as $kat)
                             <a href="{{ route('admin.pergerakan-stok.index', ['tab' => $tab, $kategoriName => $kat, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                               class="block px-4 py-2 text-sm transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucfirst($kat) }}</a>
+                               class="block px-3 py-2 rounded-lg text-sm transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucfirst($kat) }}</a>
                         @endforeach
                     </div>
                 </div>

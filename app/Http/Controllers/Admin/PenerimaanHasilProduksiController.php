@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePenerimaanHasilProduksiRequest;
+use App\Http\Requests\Admin\ReversalHasilProduksiRequest;
 use App\Models\DetailPerintahProduksi;
 use App\Models\PenerimaanHasilProduksi;
 use App\Services\PenerimaanHasilProduksiService;
@@ -70,23 +71,13 @@ class PenerimaanHasilProduksiController extends Controller
         ]);
     }
 
-    /**
-     * Create reversal/correction entry
-     */
-    public function reversal(Request $request, PenerimaanHasilProduksi $penerimaan)
+    public function reversal(ReversalHasilProduksiRequest $request, PenerimaanHasilProduksi $penerimaan)
     {
-        $request->validate([
-            'catatan' => 'required|string|max:500'
-        ], [
-            'catatan.required' => 'Alasan koreksi harus diisi.',
-            'catatan.max' => 'Alasan koreksi maksimal 500 karakter.'
-        ]);
-
         try {
             $reversal = $this->service->createReversal(
                 $penerimaan,
                 $request->user(),
-                $request->catatan
+                $request->validated('catatan')
             );
 
             return redirect()

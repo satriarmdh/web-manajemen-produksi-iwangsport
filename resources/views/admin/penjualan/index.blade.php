@@ -161,77 +161,8 @@
         @endif
     </div>
 
-    @vite(['resources/js/admin/custom-forms.js'])
-    <script>
-        // Custom dropdown toggle for filter
-        document.querySelectorAll('[data-penjualan-dropdown]').forEach((button) => {
-            button.addEventListener('click', (event) => {
-                event.stopPropagation();
-                const name = button.dataset.penjualanDropdown;
-                const dropdown = document.getElementById('dropdown-' + name);
-
-                // Close all other dropdowns
-                document.querySelectorAll('[id^="dropdown-"]').forEach(d => {
-                    if (d.id !== 'dropdown-' + name) {
-                        d.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                        const otherName = d.id.replace('dropdown-', '');
-                        const arrow = document.querySelector(`[data-dropdown="${otherName}"] .dropdown-arrow`);
-                        if (arrow) arrow.classList.remove('rotate-180');
-                    }
-                });
-
-                // Toggle current
-                if (dropdown.classList.contains('hidden')) {
-                    dropdown.classList.remove('hidden', 'opacity-0', 'scale-95', 'pointer-events-none');
-                    const arrow = button.querySelector('.dropdown-arrow');
-                    if (arrow) arrow.classList.add('rotate-180');
-                } else {
-                    dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                    const arrow = button.querySelector('.dropdown-arrow');
-                    if (arrow) arrow.classList.remove('rotate-180');
-                }
-            });
-        });
-
-        // Close dropdown on outside click
-        document.addEventListener('click', (e) => {
-            document.querySelectorAll('[id^="dropdown-"]').forEach(d => {
-                const button = document.querySelector(`[data-penjualan-dropdown="${d.id.replace('dropdown-', '')}"]`);
-                if (button && !button.contains(e.target) && !d.contains(e.target)) {
-                    d.classList.add('opacity-0', 'scale-95', 'pointer-events-none', 'hidden');
-                    const arrow = button.querySelector('.dropdown-arrow');
-                    if (arrow) arrow.classList.remove('rotate-180');
-                }
-            });
-        });
-
-        // Confirm delete
-        document.querySelectorAll('[data-confirm-delete]').forEach((form) => {
-            form.addEventListener('submit', (event) => {
-                event.preventDefault();
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: 'Hapus Penjualan?',
-                        text: 'Stok produk akan dikembalikan. Data tidak dapat dikembalikan.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc2626',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Ya, Hapus!',
-                        cancelButtonText: 'Batal',
-                        reverseButtons: true,
-                        customClass: {
-                            popup: 'rounded-xl font-sans',
-                            confirmButton: 'px-5 py-2.5 text-sm font-semibold rounded-lg',
-                            cancelButton: 'px-5 py-2.5 text-sm font-semibold rounded-lg'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) form.submit();
-                    });
-                } else {
-                    if (confirm('Hapus penjualan ini? Stok akan dikembalikan.')) form.submit();
-                }
-            });
-        });
-    </script>
+    @vite([
+        'resources/js/admin/custom-forms.js',
+        'resources/js/admin/penjualan/index.js'
+    ])
 </x-layouts.admin>

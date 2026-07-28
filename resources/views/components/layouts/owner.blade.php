@@ -115,7 +115,7 @@
                             <a href="{{ route('owner.riwayat-penjualan.index') }}" class="relative flex items-center py-2.5 px-3 text-sm font-medium rounded-lg transition-colors group whitespace-nowrap {{ $isRiwayatJual ? 'bg-[#0F034D] text-white shadow-md shadow-[#0F034D]/20' : 'text-gray-400 hover:text-[#0F034D] hover:bg-gray-100' }}">
                                 <span class="absolute -left-4 -top-2 z-20 bottom-1/2 border-l-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
                                 <span class="absolute -left-4 top-1/2 z-10 w-4 border-t-2 transition-colors {{ $isRiwayatJual ? 'border-[#0F034D]' : 'border-gray-100' }}"></span>
-                                Riwayat Penjualan
+                                Penjualan
                             </a>
                         </li>
                     </ul>

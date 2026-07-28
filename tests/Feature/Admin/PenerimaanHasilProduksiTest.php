@@ -422,4 +422,93 @@ class PenerimaanHasilProduksiTest extends TestCase
 
         $response->assertSessionHasErrors(['dari_karyawan_id']);
     }
+
+    public function test_admin_dapat_melakukan_reversal_penerimaan_hasil_produksi()
+    {
+        $data = $this->createDetailWithReadyStok();
+
+        // 1. Submit penerimaan first
+        $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 50,
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'bukti_foto' => UploadedFile::fake()->image('bukti.jpg'),
+            ]);
+
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::first();
+        $this->assertNotNull($penerimaan);
+
+        // Verify product stock is 50
+        $this->assertEquals(50, $data['produk']->fresh()->stok);
+
+        // 2. Perform reversal
+        $response = $this->actingAs($this->admin)
+            ->post("/admin/penerimaan-hasil-produksi/{$penerimaan->id}/reversal", [
+                'catatan' => 'Salah input qty'
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        // Verify product stock is back to 0
+        $this->assertEquals(0, $data['produk']->fresh()->stok);
+    }
+
+    public function test_reversal_validasi_catatan_wajib_dan_max_karakter()
+    {
+        $data = $this->createDetailWithReadyStok();
+
+        // Submit penerimaan first
+        $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 50,
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'bukti_foto' => UploadedFile::fake()->image('bukti.jpg'),
+            ]);
+
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::first();
+
+        // Reversal without catatan
+        $response = $this->actingAs($this->admin)
+            ->post("/admin/penerimaan-hasil-produksi/{$penerimaan->id}/reversal", [
+                'catatan' => ''
+            ]);
+        $response->assertSessionHasErrors(['catatan']);
+
+        // Reversal with too long catatan
+        $response = $this->actingAs($this->admin)
+            ->post("/admin/penerimaan-hasil-produksi/{$penerimaan->id}/reversal", [
+                'catatan' => str_repeat('a', 501)
+            ]);
+        $response->assertSessionHasErrors(['catatan']);
+    }
+
+    public function test_non_admin_tidak_dapat_melakukan_reversal_penerimaan_hasil_produksi()
+    {
+        $data = $this->createDetailWithReadyStok();
+
+        // Submit penerimaan first
+        $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 50,
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'bukti_foto' => UploadedFile::fake()->image('bukti.jpg'),
+            ]);
+
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::first();
+
+        // Non-admin trying to perform reversal
+        $response = $this->actingAs($this->nonAdmin)
+            ->post("/admin/penerimaan-hasil-produksi/{$penerimaan->id}/reversal", [
+                'catatan' => 'Salah input qty'
+            ]);
+
+        $response->assertStatus(403);
+    }
 }
