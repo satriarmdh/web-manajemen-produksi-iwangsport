@@ -1,10 +1,11 @@
 <x-layouts.owner>
     <x-slot:breadcrumb>
-        <li class="flex items-center">
-            <a href="{{ route('owner.users.index') }}" class="text-gray-400 hover:text-[#0F034D] transition-colors">Manajemen Pengguna</a>
+        <li class="flex items-center gap-1.5 text-gray-400">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <a href="{{ route('owner.users.index') }}" class="hover:text-[#0F034D] transition-colors">Manajemen Pengguna</a>
         </li>
         <li class="flex items-center text-[#0F034D] font-semibold">
-            <svg class="w-4 h-4 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             Tambah Pengguna
         </li>
     </x-slot:breadcrumb>

@@ -1,6 +1,7 @@
 <x-layouts.owner>
     <x-slot:breadcrumb>
-        <li class="flex items-center text-[#0F034D] font-semibold">
+        <li class="flex items-center text-[#0F034D] font-semibold gap-1.5">
+            <svg class="w-4 h-4 shrink-0 text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Manajemen Pengguna
         </li>
     </x-slot:breadcrumb>
@@ -230,5 +231,5 @@
             </div>
         @endif
     </div>
-    @vite('resources/js/owner/manajemen-pengguna/filter-dropdown.js')
+    @vite('resources/js/admin/filter-dropdown.js')
 </x-layouts.owner>

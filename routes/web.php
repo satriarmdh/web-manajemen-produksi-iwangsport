@@ -57,11 +57,8 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     Route::get('riwayat-penjualan', [\App\Http\Controllers\Owner\RiwayatPenjualanOwnerController::class, 'index'])->name('riwayat-penjualan.index');
     Route::get('riwayat-penjualan/{penjualan}', [\App\Http\Controllers\Owner\RiwayatPenjualanOwnerController::class, 'show'])->name('riwayat-penjualan.show');
 });
-
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () { 
-        return view('admin.dashboard'); 
-    })->name('dashboard');    
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardAdminController::class, 'index'])->name('dashboard');
 
     // Rute pengelolaan Bahan Baku
     Route::resource('bahan-baku', BahanBakuController::class)->except(['create', 'show', 'edit']);

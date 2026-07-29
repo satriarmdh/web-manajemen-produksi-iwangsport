@@ -1,7 +1,8 @@
 <x-layouts.admin>
     <x-slot:breadcrumb>
-        <li class="flex items-center">
-            <span class="text-gray-400 select-none">Transaksi Stok</span>
+        <li class="flex items-center gap-1.5 text-gray-400">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"></path></svg>
+            <span class="select-none">Transaksi Stok</span>
         </li>
         <li class="flex items-center">
             <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>

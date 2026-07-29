@@ -27,6 +27,7 @@ class BahanBakuController extends Controller
         $stats = [
             'total_items' => BahanBaku::count(),
             'stok_menipis' => BahanBaku::where('stok', '<', 10)->count(),
+            'stok_habis' => BahanBaku::where('stok', '=', 0)->count(),
             'total_kategori' => BahanBaku::distinct('kategori')->count('kategori'),
         ];
 

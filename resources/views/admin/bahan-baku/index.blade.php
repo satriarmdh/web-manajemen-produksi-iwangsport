@@ -1,7 +1,8 @@
 <x-layouts.admin>
     <x-slot:breadcrumb>
-        <li class="flex items-center">
-            <span class="text-gray-400 select-none">Manajemen Data</span>
+        <li class="flex items-center gap-1.5 text-gray-400">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            <span class="select-none">Manajemen Data</span>
         </li>
         <li class="flex items-center text-[#0F034D] font-semibold">
             <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
@@ -14,32 +15,63 @@
     </x-slot:header>
 
     <!-- Stat Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-50 text-[#0F034D] rounded-xl flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <!-- Card 1: Total Item Bahan -->
+        <a href="{{ route('admin.bahan-baku.index') }}" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Total Item Bahan</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['total_items'] }} <span class="text-xs font-normal text-gray-400">jenis</span></h3>
+                <span class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1 font-medium group-hover:text-[#0F034D] transition-colors">
+                    Semua katalog bahan baku
+                    <svg class="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </span>
             </div>
-            <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Item Bahan</p>
-                <h4 class="text-xl font-bold text-gray-950 mt-1">{{ $stats['total_items'] }} Jenis</h4>
+            <div class="w-11 h-11 bg-blue-50 text-[#0F034D] rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
             </div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </a>
+
+        <!-- Card 2: Stok Menipis -->
+        <a href="{{ request()->fullUrlWithQuery(['stok' => 'menipis']) }}" class="bg-white p-5 rounded-2xl shadow-sm border {{ request('stok') == 'menipis' ? 'border-amber-400 bg-amber-50/20' : 'border-gray-100' }} flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Stok Menipis (&lt; 10)</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['stok_menipis'] }} <span class="text-xs font-normal text-gray-400">item</span></h3>
+                <span class="text-[11px] {{ $stats['stok_menipis'] > 0 ? 'text-amber-600' : 'text-gray-400' }} mt-1.5 flex items-center gap-1 font-medium group-hover:underline">
+                    Perlu perhatian segera
+                    <svg class="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </span>
             </div>
-            <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Stok Menipis (< 10)</p>
-                <h4 class="text-xl font-bold text-gray-950 mt-1">{{ $stats['stok_menipis'] }} Item</h4>
+            <div class="w-11 h-11 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        </a>
+
+        <!-- Card 3: Stok Habis -->
+        <a href="{{ request()->fullUrlWithQuery(['stok' => 'habis']) }}" class="bg-white p-5 rounded-2xl shadow-sm border {{ request('stok') == 'habis' ? 'border-rose-400 bg-rose-50/20' : 'border-gray-100' }} flex items-center justify-between gap-3 min-h-[92px] hover:border-rose-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Stok Habis</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['stok_habis'] }} <span class="text-xs font-normal text-gray-400">item</span></h3>
+                <span class="text-[11px] {{ $stats['stok_habis'] > 0 ? 'text-rose-600 font-bold' : 'text-gray-400' }} mt-1.5 flex items-center gap-1 font-medium group-hover:underline">
+                    Stok kosong (= 0)
+                    <svg class="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </span>
             </div>
-            <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Kategori</p>
-                <h4 class="text-xl font-bold text-gray-950 mt-1">{{ $stats['total_kategori'] }} Kategori</h4>
+            <div class="w-11 h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-red-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            </div>
+        </a>
+
+        <!-- Card 4: Total Kategori -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] group">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Total Kategori</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['total_kategori'] }} <span class="text-xs font-normal text-gray-400">kategori</span></h3>
+                <span class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1 font-medium">
+                    Kain, benang, aksesoris, dll
+                </span>
+            </div>
+            <div class="w-11 h-11 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-purple-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
             </div>
         </div>
     </div>

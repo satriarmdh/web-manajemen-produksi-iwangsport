@@ -24,7 +24,7 @@ class ProdukController extends Controller
         $stats = [
             'total_items' => Produk::count(),
             'stok_menipis' => Produk::where('stok', '<', 100)->count(),
-            'produk_aktif' => Produk::where('is_aktif', true)->count(),
+            'produk_habis' => Produk::where('stok', '=', 0)->count(),
         ];
 
         return view('admin.produk.index', compact('produk', 'nextNumber', 'stats'));

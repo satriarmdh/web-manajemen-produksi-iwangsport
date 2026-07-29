@@ -1,11 +1,8 @@
-﻿<x-layouts.admin>
+<x-layouts.admin>
     <x-slot:breadcrumb>
-        <li class="flex items-center">
-            <span class="text-gray-400 select-none">Produksi</span>
-        </li>
-        <li class="flex items-center">
-            <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-            <a href="{{ route('admin.perintah-produksi.index') }}" class="text-gray-400 hover:text-[#0F034D] transition-colors">Perintah Produksi</a>
+        <li class="flex items-center gap-1.5 text-gray-400">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <a href="{{ route('admin.perintah-produksi.index') }}" class="hover:text-[#0F034D] transition-colors">Perintah Produksi</a>
         </li>
         <li class="flex items-center text-[#0F034D] font-semibold">
             <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>

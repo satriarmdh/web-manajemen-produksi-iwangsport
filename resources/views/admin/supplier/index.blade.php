@@ -1,7 +1,8 @@
-﻿<x-layouts.admin>
+<x-layouts.admin>
     <x-slot:breadcrumb>
-        <li class="flex items-center">
-            <span class="text-gray-400 select-none">Manajemen Data</span>
+        <li class="flex items-center gap-1.5 text-gray-400">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            <span class="select-none">Manajemen Data</span>
         </li>
         <li class="flex items-center text-[#0F034D] font-semibold">
             <svg class="w-3 h-3 text-gray-300 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
