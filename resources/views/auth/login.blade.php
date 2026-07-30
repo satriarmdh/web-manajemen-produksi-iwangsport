@@ -109,6 +109,7 @@
                             </div>
                             <span class="text-sm text-gray-600">Ingat Saya</span>
                         </div>
+                        <a href="{{ route('password.request') }}" class="text-sm font-semibold text-[#0F034D] hover:underline">Lupa Kata Sandi?</a>
                     </div>
                     
                     <button type="submit" class="w-full py-3 px-4 bg-[#0F034D] hover:bg-[#0a0235] text-white font-semibold rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-[#0F034D] focus:ring-offset-2 transition-all mt-4 cursor-pointer">

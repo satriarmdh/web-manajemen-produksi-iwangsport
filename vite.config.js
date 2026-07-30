@@ -8,6 +8,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css', 
                 'resources/js/app.js',
+                'resources/js/owner/manajemen-pengguna/toggle-dropdown-role.js',
                 // 'resources/js/login-slider.js',
                 // 'resources/js/password-toggle.js'
             ],

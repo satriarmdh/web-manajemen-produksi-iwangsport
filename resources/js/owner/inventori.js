@@ -328,11 +328,11 @@ function showCardFilterAlert(type, status) {
     
     if (status === 'menipis') {
         alertDiv.className = "mb-6 px-4 py-3.5 bg-amber-50 border border-amber-100 text-amber-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm";
-        alertDiv.querySelector('svg').className = "w-5 h-5 text-amber-500 shrink-0";
+        alertDiv.querySelector('svg').setAttribute('class', "w-5 h-5 text-amber-500 shrink-0");
         alertBtn.className = "text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0";
     } else {
         alertDiv.className = "mb-6 px-4 py-3.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm";
-        alertDiv.querySelector('svg').className = "w-5 h-5 text-rose-500 shrink-0";
+        alertDiv.querySelector('svg').setAttribute('class', "w-5 h-5 text-rose-500 shrink-0");
         alertBtn.className = "text-xs font-bold bg-rose-100 hover:bg-rose-200 text-rose-900 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0";
     }
     

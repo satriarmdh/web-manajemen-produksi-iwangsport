@@ -19,6 +19,8 @@ class User extends Authenticatable
         'password',
         'role',
         'jenis_kelamin',
+        'no_hp',
+        'alamat',
         'online_status',
         'last_seen',
     ];
