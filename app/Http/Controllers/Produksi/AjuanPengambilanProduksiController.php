@@ -9,6 +9,7 @@ use App\Http\Requests\Produksi\RespondAjuanPengambilanProduksiRequest;
 use App\Http\Requests\Produksi\StoreAjuanPengambilanProduksiRequest;
 use App\Models\AjuanPengambilanProduksi;
 use App\Services\AjuanPengambilanProduksiService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class AjuanPengambilanProduksiController extends Controller
@@ -39,11 +40,36 @@ class AjuanPengambilanProduksiController extends Controller
 
     public function store(StoreAjuanPengambilanProduksiRequest $request)
     {
+        $items = $request->ajuanItems();
+
+        // Kumpulkan unique dari_karyawan_id dari stok_virtual sebelum create
+        $dariKaryawanIds = [];
+        foreach ($items as $item) {
+            $stokVirtual = \App\Models\StokVirtual::find($item['stok_virtual_id']);
+            if ($stokVirtual && !in_array($stokVirtual->id_karyawan, $dariKaryawanIds)) {
+                $dariKaryawanIds[] = $stokVirtual->id_karyawan;
+            }
+        }
+
         $this->service->storeMany(
-            $request->ajuanItems(),
+            $items,
             $request->user(),
             $request->validated('catatan_pengaju')
         );
+
+        // Notifikasi -> karyawan pemilik stok (dariKaryawan) yang perlu approve
+        foreach ($dariKaryawanIds as $karyawanId) {
+            $karyawan = \App\Models\User::find($karyawanId);
+            if ($karyawan) {
+                app(NotificationService::class)->notifyUser(
+                    $karyawan,
+                    'Ajuan Pengambilan Baru',
+                    "{$request->user()->name} mengajukan pengambilan barang dari stok Anda.",
+                    NotificationService::TYPE_AJUAN_BARU,
+                    '/produksi/ajuan-masuk'
+                );
+            }
+        }
 
         return redirect()
             ->route('produksi.ajuan-pengambilan.index')
@@ -55,6 +81,14 @@ class AjuanPengambilanProduksiController extends Controller
         AjuanPengambilanProduksi $ajuan
     ) {
         $this->service->approve($ajuan, $request->user());
+
+        // Notifikasi -> karyawan pengaju
+        if ($ajuan->keKaryawan) {
+            app(NotificationService::class)->ajuanDisetujui(
+                $ajuan->keKaryawan,
+                $ajuan->id
+            );
+        }
 
         return redirect()
             ->route('produksi.ajuan-pengambilan.masuk')
@@ -70,6 +104,14 @@ class AjuanPengambilanProduksiController extends Controller
             $request->user(),
             $request->validated('catatan_respon')
         );
+
+        // Notifikasi -> karyawan pengaju
+        if ($ajuan->keKaryawan) {
+            app(NotificationService::class)->ajuanDitolak(
+                $ajuan->keKaryawan,
+                $ajuan->id
+            );
+        }
 
         return redirect()
             ->route('produksi.ajuan-pengambilan.masuk')

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Owner Panel | Iwangsport' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/css/global-modal.css', 'resources/js/app.js'])
@@ -147,10 +148,16 @@
         </div>
 
         <div class="flex items-center gap-2 sm:gap-5">
-            <button class="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                <span class="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+            <!-- Notification Bell -->
+            <div class="relative">
+                <button id="notification-bell" class="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    <span id="notification-badge" class="hidden absolute top-1 right-1 sm:top-1.5 sm:right-1.5 min-w-[16px] h-4 flex items-center justify-center px-1 bg-red-500 rounded-full border-2 border-white text-[10px] font-bold text-white leading-none">0</span>
+                </button>
+                <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-gray-100 z-50 origin-top-right max-h-[480px] flex flex-col">
+                        <div class="p-4 text-center text-sm text-gray-400">Memuat...</div>
+                    </div>
+            </div>
 
             <div class="hidden sm:block w-px h-6 bg-gray-200 mx-1"></div>
 
@@ -174,7 +181,7 @@
                         </a>
                     </div>
                     <div class="p-2 border-t border-gray-50">
-                        <form method="POST" action="{{ url('/logout') }}">
+                        <form method="POST" action="{{ url('/logout') }}" data-swal-confirm data-confirm-title="Keluar?" data-confirm-message="Anda akan keluar dari sistem. Lanjutkan?" data-confirm-button="Ya, Keluar">
                             @csrf
                             <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
                                 <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -222,7 +229,9 @@
 
     @vite([
         'resources/js/layout/toggle-navbar-menu.js',
-        'resources/js/layout/toast.js'
+        'resources/js/layout/toast.js',
+        'resources/js/utils/swal-confirm.js',
+        'resources/js/notifications/bell.js'
     ])
 </body>
 </html>

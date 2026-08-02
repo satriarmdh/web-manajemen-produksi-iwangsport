@@ -34,7 +34,7 @@
         <!-- Card 2: Stok Menipis -->
         <a href="{{ request()->fullUrlWithQuery(['stok' => 'menipis']) }}" class="bg-white p-5 rounded-2xl shadow-sm border {{ request('stok') == 'menipis' ? 'border-amber-400 bg-amber-50/20' : 'border-gray-100' }} flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Stok Menipis (&lt; 100)</p>
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Stok Menipis</p>
                 <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['stok_menipis'] }} <span class="text-xs font-normal text-gray-400">item</span></h3>
                 <span class="text-[11px] {{ $stats['stok_menipis'] > 0 ? 'text-amber-600' : 'text-gray-400' }} mt-1.5 flex items-center gap-1 font-medium group-hover:underline">
                     Perlu perhatian segera
@@ -66,7 +66,7 @@
         <div class="mb-6 px-4 py-3.5 bg-amber-50 border border-amber-100 text-amber-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm">
             <div class="flex items-center gap-2.5">
                 <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                <span>Ada <strong>{{ $stats['stok_menipis'] }}</strong> produk dengan stok yang hampir habis (di bawah 100 pcs).</span>
+                <span>Ada <strong>{{ $stats['stok_menipis'] }}</strong> produk dengan stok di bawah batas minimal.</span>
             </div>
             <a href="{{ request()->fullUrlWithQuery(['stok' => 'menipis']) }}" class="text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0">Lihat</a>
         </div>
@@ -315,8 +315,16 @@
                                             <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
                                             Stockout
                                         </span>
+                                    @elseif($item->isStokMenipis())
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                                {{ number_format($item->stok, 0, ',', '.') }}
+                                            </span>
+                                            <span class="text-[10px] text-amber-600 font-medium">min. {{ $item->stok_minimal }}</span>
+                                        </div>
                                     @else
-                                        <span class="text-sm font-bold {{ $item->stok < 100 ? 'text-amber-600' : 'text-gray-900' }}">
+                                        <span class="text-sm font-bold text-gray-900">
                                             {{ number_format($item->stok, 0, ',', '.') }}
                                         </span>
                                     @endif
@@ -349,18 +357,15 @@
                                             data-harga="{{ $item->harga_satuan }}"
                                             data-satuan="{{ $item->satuan }}"
                                             data-stok="{{ $item->stok }}"
+                                            data-stok-minimal="{{ $item->stok_minimal ?? 0 }}"
                                             data-is-aktif="{{ $item->is_aktif ? '1' : '0' }}"
                                             class="p-2 text-gray-400 hover:text-[#0F034D] hover:bg-gray-100 rounded-lg transition-colors cursor-pointer" title="Edit Produk">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                     </button>
 
-                                    <form action="{{ route('admin.produk.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk {{ $item->nama_produk }}? Data terkait mungkin akan terpengaruh.');" class="inline-block">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Hapus Produk">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                        </button>
-                                    </form>
+                                    <button type="button" data-swal-delete data-url="{{ route('admin.produk.destroy', $item->id) }}" data-method="DELETE" data-message="Produk '{{ $item->nama_produk }}' akan dihapus. Data terkait mungkin akan terpengaruh." class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Hapus Produk">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

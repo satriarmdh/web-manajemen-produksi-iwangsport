@@ -8,10 +8,7 @@ class SelesaikanPerintahProduksiRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $perintahProduksi = $this->route('perintahProduksi');
-
-        return $this->user()?->role === 'admin'
-            && $perintahProduksi?->status_produksi === 'dalam_produksi';
+        return $this->user()?->role === 'admin';
     }
 
     public function rules(): array

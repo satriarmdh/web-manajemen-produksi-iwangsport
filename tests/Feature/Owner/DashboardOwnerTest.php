@@ -146,14 +146,14 @@ class DashboardOwnerTest extends TestCase
     public function laporan_inventori_menampilkan_data_statistik_inventori_real_time_secara_akurat()
     {
         // 1. Setup Bahan Baku
-        BahanBaku::factory()->create(['stok' => 50]); // normal
-        BahanBaku::factory()->create(['stok' => 8]); // menipis (<10)
-        BahanBaku::factory()->create(['stok' => 0]); // habis/menipis (<10)
+        BahanBaku::factory()->create(['stok' => 50]); // normal (stok_minimal = 0)
+        BahanBaku::factory()->create(['stok' => 8, 'stok_minimal' => 10]); // menipis
+        BahanBaku::factory()->create(['stok' => 0, 'stok_minimal' => 5]); // habis/menipis
 
         // 2. Setup Produk
-        Produk::factory()->create(['stok' => 200]); // normal
-        Produk::factory()->create(['stok' => 80]); // menipis (<100)
-        Produk::factory()->create(['stok' => 0]); // habis/menipis (<100)
+        Produk::factory()->create(['stok' => 200]); // normal (stok_minimal = 0)
+        Produk::factory()->create(['stok' => 80, 'stok_minimal' => 100]); // menipis
+        Produk::factory()->create(['stok' => 0, 'stok_minimal' => 50]); // habis/menipis
 
         $response = $this->actingAs($this->owner)
             ->get(route('owner.inventori'));
@@ -178,8 +178,8 @@ class DashboardOwnerTest extends TestCase
         $filteredBahan = $filteredResponse->original->getData()['bahanBaku'];
         $filteredProduk = $filteredResponse->original->getData()['produk'];
 
-        $this->assertEquals(2, $filteredBahan->count()); // stok 8 dan 0
-        $this->assertEquals(2, $filteredProduk->count()); // stok 80 dan 0
+        $this->assertEquals(1, $filteredBahan->count()); // stok 8 only (stok=0 is "habis", not "menipis")
+        $this->assertEquals(1, $filteredProduk->count()); // stok 80 only (stok=0 is "habis")
     }
 
     /** @test */

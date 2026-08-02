@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Produk;
+use App\Services\NotificationService;
 
 class ProdukService
 {
@@ -30,7 +31,7 @@ class ProdukService
             } elseif ($filters['stok'] === 'habis') {
                 $query->where('stok', 0);
             } elseif ($filters['stok'] === 'menipis') {
-                $query->where('stok', '<', 100);
+                $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
             }
         }
 
@@ -90,7 +91,44 @@ class ProdukService
      */
     public function update(Produk $produk, array $data): bool
     {
-        return $produk->update($data);
+        $stokLama = $produk->stok;
+        $hargaLama = $produk->harga_satuan;
+        $result = $produk->update($data);
+
+        if ($result) {
+            // Notifikasi perubahan harga -> owner
+            $hargaBaru = $data['harga_satuan'] ?? $hargaLama;
+            if ((int) $hargaBaru !== (int) $hargaLama) {
+                app(NotificationService::class)->hargaProdukChanged(
+                    $produk->nama_produk . ' (' . $produk->ukuran . ' - ' . $produk->warna . ')',
+                    $hargaLama,
+                    $hargaBaru
+                );
+            }
+
+            // Notifikasi perubahan stok manual -> owner
+            $stokBaru = $data['stok'] ?? $stokLama;
+            if ((int) $stokBaru !== (int) $stokLama) {
+                app(NotificationService::class)->stokManualChanged(
+                    $produk->nama_produk . ' (' . $produk->ukuran . ' - ' . $produk->warna . ')',
+                    $stokLama,
+                    $stokBaru,
+                    'produk'
+                );
+
+                $produk->refresh();
+                if ($produk->isStokMenipis()) {
+                    app(NotificationService::class)->stokKritis(
+                        $produk->nama_produk . ' (' . $produk->ukuran . ' - ' . $produk->warna . ')',
+                        $produk->stok,
+                        $produk->stok_minimal,
+                        'produk'
+                    );
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**

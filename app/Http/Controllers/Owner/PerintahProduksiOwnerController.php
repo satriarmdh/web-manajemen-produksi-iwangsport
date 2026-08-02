@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Owner\RejectPerintahProduksiRequest;
 use App\Models\PerintahProduksi;
+use App\Services\NotificationService;
 use App\Services\PerintahProduksiService;
 use Illuminate\Http\Request;
 
@@ -35,7 +36,24 @@ class PerintahProduksiOwnerController extends Controller
      */
     public function approve(PerintahProduksi $perintahProduksi)
     {
-        $this->service->approve($perintahProduksi);
+        try {
+            $this->service->approve($perintahProduksi);
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('owner.perintah-produksi.index')
+                ->with('error', $e->getMessage());
+        }
+
+        // Notifikasi -> admin
+        app(NotificationService::class)->woApproved($perintahProduksi->nomor_wo);
+        // Notifikasi -> semua karyawan produksi (potong, jahit, finishing)
+        app(NotificationService::class)->notifyRoles(
+            ['potong', 'jahit', 'finishing'],
+            'WO Disetujui - Siap Dikerjakan',
+            "Perintah produksi {$perintahProduksi->nomor_wo} telah disetujui Owner. Silakan cek pekerjaan Anda.",
+            NotificationService::TYPE_WO_ASSIGNED,
+            '/produksi/perintah-produksi'
+        );
 
         return redirect()
             ->route('owner.perintah-produksi.index')
@@ -47,7 +65,19 @@ class PerintahProduksiOwnerController extends Controller
      */
     public function reject(RejectPerintahProduksiRequest $request, PerintahProduksi $perintahProduksi)
     {
-        $this->service->reject($perintahProduksi, $request->validated('alasan_penolakan'));
+        try {
+            $this->service->reject($perintahProduksi, $request->validated('alasan_penolakan'));
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('owner.perintah-produksi.index')
+                ->with('error', $e->getMessage());
+        }
+
+        // Notifikasi -> admin
+        app(NotificationService::class)->woRejected(
+            $perintahProduksi->nomor_wo,
+            $request->validated('alasan_penolakan')
+        );
 
         return redirect()
             ->route('owner.perintah-produksi.index')

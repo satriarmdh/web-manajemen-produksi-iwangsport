@@ -23,7 +23,7 @@ class ProdukController extends Controller
 
         $stats = [
             'total_items' => Produk::count(),
-            'stok_menipis' => Produk::where('stok', '<', 100)->count(),
+            'stok_menipis' => Produk::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count(),
             'produk_habis' => Produk::where('stok', '=', 0)->count(),
         ];
 

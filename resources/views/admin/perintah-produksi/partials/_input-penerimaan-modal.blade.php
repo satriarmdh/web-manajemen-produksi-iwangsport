@@ -47,10 +47,16 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                         Pilih Karyawan Finishing <span class="text-red-500">*</span>
                     </label>
-                    <select name="dari_karyawan_id" id="input_dari_karyawan" required
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20 outline-none transition-all text-sm">
-                        <option value="">-- Pilih Karyawan --</option>
-                    </select>
+                    <div class="relative" id="penerimaan_karyawan_wrapper">
+                        <input type="text" id="penerimaan_karyawan_input" placeholder="Cari karyawan..." autocomplete="off"
+                            class="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-300 focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20 outline-none transition-all text-sm text-gray-500">
+                        <input type="hidden" name="dari_karyawan_id" id="penerimaan_karyawan_value">
+                        <svg class="dropdown-arrow w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 transition-transform duration-200 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        <div id="penerimaan_karyawan_dropdown" class="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 py-2 max-h-48 overflow-y-auto hidden z-50">
+                            <p class="px-4 py-2 text-xs text-gray-400">Memuat...</p>
+                        </div>
+                        <div id="penerimaan_karyawan_no_results" class="hidden px-4 py-2 text-xs text-gray-400">Tidak ditemukan</div>
+                    </div>
                     <p class="text-xs text-gray-500 mt-1.5">Hanya karyawan dengan stok ready yang ditampilkan</p>
                 </div>
 

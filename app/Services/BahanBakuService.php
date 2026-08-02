@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BahanBaku;
+use App\Services\NotificationService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class BahanBakuService
@@ -31,7 +32,7 @@ class BahanBakuService
             } elseif ($filters['stok'] === 'habis') {
                 $query->where('stok', 0);
             } elseif ($filters['stok'] === 'menipis') {
-                $query->where('stok', '<', 10);
+                $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
             }
         }
 
@@ -97,6 +98,19 @@ class BahanBakuService
     }
 
     /**
+     * Statistik ringkas bahan baku
+     */
+    public function getStats(): array
+    {
+        return [
+            'total_items' => BahanBaku::count(),
+            'stok_menipis' => BahanBaku::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count(),
+            'stok_habis' => BahanBaku::where('stok', '=', 0)->count(),
+            'total_kategori' => BahanBaku::distinct('kategori')->count('kategori'),
+        ];
+    }
+
+    /**
      * Proses simpan data (termasuk inject kode_bahan otomatis)
      */
     public function store(array $data): BahanBaku
@@ -114,11 +128,35 @@ class BahanBakuService
     {
         // Cek apakah kategori berubah
         if (isset($data['kategori']) && $data['kategori'] !== $bahanBaku->kategori) {
-            // Generate kode baru untuk kategori yang baru
             $data['kode_bahan'] = $this->generateKodeBahan($data['kategori']);
         }
 
-        return $bahanBaku->update($data);
+        // Cek perubahan stok manual -> notifikasi owner
+        $stokLama = $bahanBaku->stok;
+        $stokBaru = $data['stok'] ?? $stokLama;
+        $result = $bahanBaku->update($data);
+
+        if ($result && (int) $stokBaru !== (int) $stokLama) {
+            app(NotificationService::class)->stokManualChanged(
+                $bahanBaku->nama_bahan . ' (' . $bahanBaku->warna . ')',
+                $stokLama,
+                $stokBaru,
+                'bahan_baku'
+            );
+
+            // Cek stok kritis setelah update
+            $bahanBaku->refresh();
+            if ($bahanBaku->isStokMenipis()) {
+                app(NotificationService::class)->stokKritis(
+                    $bahanBaku->nama_bahan . ' (' . $bahanBaku->warna . ')',
+                    $bahanBaku->stok,
+                    $bahanBaku->stok_minimal,
+                    'bahan_baku'
+                );
+            }
+        }
+
+        return $result;
     }
 
     /**

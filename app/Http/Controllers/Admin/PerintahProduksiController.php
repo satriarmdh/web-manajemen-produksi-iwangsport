@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\SelesaikanPerintahProduksiRequest;
 use App\Http\Requests\Admin\StorePerintahProduksiRequest;
 use App\Http\Requests\Admin\UpdatePerintahProduksiRequest;
 use App\Models\PerintahProduksi;
+use App\Services\NotificationService;
 use App\Services\PerintahProduksiService;
 use Illuminate\Http\Request;
 
@@ -43,7 +44,20 @@ class PerintahProduksiController extends Controller
      */
     public function store(StorePerintahProduksiRequest $request)
     {
-        $perintahProduksi = $this->service->create($request->validated());
+        try {
+            $perintahProduksi = $this->service->create($request->validated());
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.perintah-produksi.create')
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
+
+        // Notifikasi -> owner
+        app(NotificationService::class)->woBaru(
+            $perintahProduksi->nomor_wo,
+            auth()->user()->name
+        );
 
         return redirect()
             ->route('admin.perintah-produksi.index')
@@ -65,7 +79,13 @@ class PerintahProduksiController extends Controller
      */
     public function edit(PerintahProduksi $perintahProduksi)
     {
-        $this->service->ensurePending($perintahProduksi);
+        try {
+            $this->service->ensurePending($perintahProduksi);
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.perintah-produksi.index')
+                ->with('error', 'Perintah produksi tidak bisa diedit karena status sudah berubah.');
+        }
 
         return view('admin.perintah-produksi.edit', array_merge(
             ['perintahProduksi' => $perintahProduksi],
@@ -78,7 +98,14 @@ class PerintahProduksiController extends Controller
      */
     public function update(UpdatePerintahProduksiRequest $request, PerintahProduksi $perintahProduksi)
     {
-        $this->service->update($perintahProduksi, $request->validated());
+        try {
+            $this->service->update($perintahProduksi, $request->validated());
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.perintah-produksi.edit', $perintahProduksi)
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('admin.perintah-produksi.index')
@@ -90,11 +117,16 @@ class PerintahProduksiController extends Controller
      */
     public function destroy(PerintahProduksi $perintahProduksi)
     {
-        if ($perintahProduksi->status_produksi !== 'pending') {
-            abort(403, 'Perintah produksi hanya bisa dihapus saat status masih pending');
+        try {
+            if ($perintahProduksi->status_produksi !== 'pending') {
+                throw new \Exception('Perintah produksi hanya bisa dihapus saat status masih pending');
+            }
+            $this->service->delete($perintahProduksi);
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.perintah-produksi.index')
+                ->with('error', $e->getMessage());
         }
-
-        $this->service->delete($perintahProduksi);
 
         return redirect()
             ->route('admin.perintah-produksi.index')
@@ -106,7 +138,16 @@ class PerintahProduksiController extends Controller
      */
     public function selesai(SelesaikanPerintahProduksiRequest $request, PerintahProduksi $perintahProduksi)
     {
-        $this->service->selesai($perintahProduksi, $request->validated('tgl_selesai'));
+        try {
+            $this->service->selesai($perintahProduksi, $request->validated('tgl_selesai'));
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.perintah-produksi.show', $perintahProduksi)
+                ->with('error', $e->getMessage());
+        }
+
+        // Notifikasi -> admin + owner
+        app(NotificationService::class)->woSelesai($perintahProduksi->nomor_wo);
 
         return redirect()
             ->route('admin.perintah-produksi.index')

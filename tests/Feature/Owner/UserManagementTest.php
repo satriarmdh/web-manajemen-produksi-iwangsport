@@ -317,9 +317,9 @@ class UserManagementTest extends TestCase
 
     public function test_owner_dapat_menggabungkan_filter_dan_search()
     {
-        User::factory()->create(['name' => 'Budi Admin', 'role' => 'admin']);
-        User::factory()->create(['name' => 'Budi Jahit', 'role' => 'jahit']);
-        User::factory()->create(['name' => 'Ani Admin', 'role' => 'admin']);
+        User::factory()->create(['name' => 'Budi Admin', 'email' => 'budi.admin@example.com', 'role' => 'admin']);
+        User::factory()->create(['name' => 'Budi Jahit', 'email' => 'budi.jahit@example.com', 'role' => 'jahit']);
+        User::factory()->create(['name' => 'Ani Admin', 'email' => 'ani.admin@example.com', 'role' => 'admin']);
 
         $response = $this->actingAs($this->owner)
             ->get('/owner/users?search=Budi&role=admin');

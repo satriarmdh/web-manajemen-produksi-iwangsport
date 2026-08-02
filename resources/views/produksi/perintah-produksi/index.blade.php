@@ -8,86 +8,113 @@
         $stageLabel = $roleLabels[$role] ?? 'Produksi';
     @endphp
 
-    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-                <h3 class="font-bold text-[#0F034D]">Daftar Perintah Produksi</h3>
-                <p class="text-sm text-gray-500 mt-1">Perintah produksi yang sudah disetujui owner dan siap dikerjakan.</p>
-            </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-5">
+        <div class="px-5 pt-5 pb-4 border-b border-gray-100">
+            <h3 class="font-bold text-[#0F034D]">Daftar Perintah Produksi</h3>
+            <p class="text-sm text-gray-500 mt-1">Perintah produksi yang sudah disetujui owner dan siap dikerjakan.</p>
         </div>
-    </div>
 
-    @php
-        $statusOptions = [
-            '' => 'Semua Status',
-            'disetujui' => 'Disetujui',
-            'dalam_produksi' => 'Dalam Produksi',
-        ];
-        $sortOptions = [
-            'mulai_terlama' => 'Urutan Pengerjaan',
-            'mulai_terbaru' => 'Mulai terbaru',
-            'terbaru' => 'Terbaru dibuat',
-            'wo_asc' => 'Nomor perintah produksi A-Z',
-        ];
-        $hasActiveFilters = $search !== '' || $status !== '' || $filterTanggal !== '' || $sort !== 'mulai_terlama';
-    @endphp
+        @php
+            $statusOptions = [
+                '' => 'Semua Status',
+                'disetujui' => 'Disetujui',
+                'dalam_produksi' => 'Dalam Produksi',
+            ];
+            $sortOptions = [
+                'mulai_terlama' => 'Urutan Pengerjaan',
+                'mulai_terbaru' => 'Mulai terbaru',
+                'terbaru' => 'Terbaru dibuat',
+                'wo_asc' => 'Nomor perintah produksi A-Z',
+            ];
+            $hasActiveFilters = $search !== '' || $status !== '' || $filterTanggal !== '' || $sort !== 'mulai_terlama';
+        @endphp
 
-    <form method="GET" action="{{ route('produksi.perintah-produksi.index') }}" class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm mb-5">
-        <div class="grid gap-3 {{ $hasActiveFilters ? 'lg:grid-cols-[1fr_170px_180px_180px_auto]' : 'lg:grid-cols-[1fr_170px_180px_180px]' }} lg:items-end">
-            <div>
-                <label for="search-pekerjaan" class="block text-xs font-bold text-gray-500 mb-1.5">Cari pekerjaan</label>
-                <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.35-4.35"></path><circle cx="11" cy="11" r="8"></circle></svg>
-                    <input id="search-pekerjaan" type="text" name="search" value="{{ $search }}" placeholder="Cari nomor perintah produksi, produk, warna, bahan..." class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm focus:bg-white focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" data-search-input>
+        <div class="px-5 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center gap-3 relative z-20">
+            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                <!-- Filter Status -->
+                <div class="relative" data-dropdown="status">
+                    <button type="button" id="btn-dropdown-status" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $status !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        <span>{{ $statusOptions[$status] ?? 'Status' }}</span>
+                        @if($status !== '')
+                            <span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0F034D] opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-[#0F034D]"></span></span>
+                        @endif
+                        <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div id="dropdown-status" class="absolute left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2">
+                        <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status Produksi</div>
+                        <div class="px-2 space-y-0.5">
+                            @foreach($statusOptions as $value => $label)
+                                <a href="{{ request()->fullUrlWithQuery(['status' => $value ?: null, 'page' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ $status === $value ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ $label }}</a>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label for="tanggal-pekerjaan" class="block text-xs font-bold text-gray-500 mb-1.5">Tanggal Mulai Produksi</label>
-                <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path></svg>
-                    <input id="tanggal-pekerjaan" type="date" name="tanggal" value="{{ $filterTanggal }}" class="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm font-semibold text-[#0F034D] focus:bg-white focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" data-date-input>
+                <!-- Filter Tanggal -->
+                <div class="relative" data-dropdown="tanggal">
+                    <button type="button" id="btn-dropdown-tanggal" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $filterTanggal !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        {{ $filterTanggal !== '' ? \Carbon\Carbon::parse($filterTanggal)->format('d M Y') : 'Tanggal' }}
+                        <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div id="dropdown-tanggal" class="absolute left-0 mt-2 w-72 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden p-4">
+                        <form method="GET" action="{{ route('produksi.perintah-produksi.index') }}">
+                            @if($status) <input type="hidden" name="status" value="{{ $status }}"> @endif
+                            @if($sort !== 'mulai_terlama') <input type="hidden" name="sort" value="{{ $sort }}"> @endif
+                            @if($search) <input type="hidden" name="search" value="{{ $search }}"> @endif
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Pilih Tanggal</label>
+                                    <input type="date" name="tanggal" value="{{ $filterTanggal }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors">
+                                </div>
+                                <div class="flex gap-2 pt-1">
+                                    <button type="submit" class="flex-1 py-2 px-3 bg-[#0F034D] hover:bg-[#1a0a6e] text-white text-xs font-semibold rounded-lg transition-colors">Terapkan</button>
+                                    <a href="{{ route('produksi.perintah-produksi.index', ['status' => $status, 'sort' => $sort, 'search' => $search]) }}" class="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition-colors">Reset</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
 
-            <div class="relative" data-custom-dropdown>
-                <label class="block text-xs font-bold text-gray-500 mb-1.5">Status</label>
-                <input type="hidden" name="status" value="{{ $status }}" data-dropdown-input>
-                <button type="button" class="w-full flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm font-semibold text-[#0F034D]" data-dropdown-button>
-                    <span data-dropdown-label>{{ $statusOptions[$status] ?? 'Semua Status' }}</span>
-                    <svg class="w-4 h-4 text-gray-400 transition-transform" data-dropdown-arrow fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-                </button>
-                <div class="absolute left-0 right-0 top-full mt-2 z-20 rounded-xl border border-gray-100 bg-white shadow-xl shadow-[#0F034D]/10 p-1 opacity-0 scale-95 pointer-events-none transition-all" data-dropdown-menu>
-                    @foreach($statusOptions as $value => $label)
-                        <button type="button" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold {{ $status === $value ? 'bg-[#0F034D]/5 text-[#0F034D]' : 'text-gray-600 hover:bg-gray-50' }}" data-dropdown-option data-value="{{ $value }}" data-label="{{ $label }}">{{ $label }}</button>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="relative" data-custom-dropdown>
-                <label class="block text-xs font-bold text-gray-500 mb-1.5">Urutkan</label>
-                <input type="hidden" name="sort" value="{{ $sort }}" data-dropdown-input>
-                <button type="button" class="w-full flex items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm font-semibold text-[#0F034D]" data-dropdown-button>
-                    <span data-dropdown-label>{{ $sortOptions[$sort] ?? 'Urutan Pengerjaan' }}</span>
-                    <svg class="w-4 h-4 text-gray-400 transition-transform" data-dropdown-arrow fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-                </button>
-                <div class="absolute left-0 right-0 top-full mt-2 z-20 rounded-xl border border-gray-100 bg-white shadow-xl shadow-[#0F034D]/10 p-1 opacity-0 scale-95 pointer-events-none transition-all" data-dropdown-menu>
-                    @foreach($sortOptions as $value => $label)
-                        <button type="button" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold {{ $sort === $value ? 'bg-[#0F034D]/5 text-[#0F034D]' : 'text-gray-600 hover:bg-gray-50' }}" data-dropdown-option data-value="{{ $value }}" data-label="{{ $label }}">{{ $label }}</button>
-                    @endforeach
+                <!-- Sort -->
+                <div class="relative" data-dropdown="sort">
+                    <button type="button" id="btn-dropdown-sort" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $sort !== 'mulai_terlama' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                        {{ $sortOptions[$sort] ?? 'Urutan Pengerjaan' }}
+                        <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div id="dropdown-sort" class="absolute left-0 mt-2 w-full sm:w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden py-2">
+                        <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">Urutan</div>
+                        <div class="px-2 space-y-0.5">
+                            @foreach($sortOptions as $value => $label)
+                                <a href="{{ request()->fullUrlWithQuery(['sort' => $value, 'page' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ $sort === $value ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ $label }}</a>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
 
             @if($hasActiveFilters)
-                <div class="lg:flex lg:items-end">
-                    <a href="{{ route('produksi.perintah-produksi.index') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-                        Reset
-                    </a>
-                </div>
+                <a href="{{ route('produksi.perintah-produksi.index') }}" title="Hapus Semua Filter" class="hidden sm:flex items-center justify-center w-10 h-10 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-xl transition-colors shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </a>
             @endif
+
+            <!-- Search -->
+            <div class="flex-1 w-full">
+                <form method="GET" action="{{ route('produksi.perintah-produksi.index') }}" class="relative w-full">
+                    @if($status) <input type="hidden" name="status" value="{{ $status }}"> @endif
+                    @if($sort !== 'mulai_terlama') <input type="hidden" name="sort" value="{{ $sort }}"> @endif
+                    @if($filterTanggal) <input type="hidden" name="tanggal" value="{{ $filterTanggal }}"> @endif
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Ketik nomor perintah produksi untuk mencari..." class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] outline-none transition-colors bg-white shadow-sm">
+                </form>
+            </div>
         </div>
-    </form>
+    </div>
 
     @if($perintahProduksi->count() > 0)
         <div class="space-y-4 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0">

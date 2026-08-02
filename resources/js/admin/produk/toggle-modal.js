@@ -15,6 +15,7 @@ function openEditModal(button) {
     const harga = button.dataset.harga;
     const satuan = button.dataset.satuan;
     const stok = button.dataset.stok;
+    const stokMinimal = button.dataset.stokMinimal || '0';
     const isAktif = button.dataset.isAktif;
 
     // Set action URL form edit
@@ -27,6 +28,7 @@ function openEditModal(button) {
     document.getElementById('edit_harga').value = harga;
     document.getElementById('edit_satuan').value = satuan;
     document.getElementById('edit_stok').value = stok;
+    document.getElementById('edit_stok_minimal').value = stokMinimal;
 
     // Set custom dropdown values
     if (typeof setCustomDropdownValue === 'function') {

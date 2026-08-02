@@ -14,7 +14,11 @@
         Buat Perintah Produksi
     </x-slot:header>
 
-    <form action="{{ route('admin.perintah-produksi.store') }}" method="POST">
+    <form action="{{ route('admin.perintah-produksi.store') }}" method="POST"
+        data-swal-confirm
+        data-confirm-title="Buat Perintah Produksi?"
+        data-confirm-message="Pastikan data yang diisi sudah benar. Perintah produksi yang sudah dibuat akan dikirim ke Owner untuk disetujui."
+        data-confirm-button="Ya, Buat">
         @csrf
 
         {{-- Informasi Umum --}}

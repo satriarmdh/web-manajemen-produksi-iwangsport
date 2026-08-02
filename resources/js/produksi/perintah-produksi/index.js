@@ -1,59 +1,53 @@
-document.querySelectorAll('[data-custom-dropdown]').forEach((dropdown) => {
-            const button = dropdown.querySelector('[data-dropdown-button]');
-            const menu = dropdown.querySelector('[data-dropdown-menu]');
-            const input = dropdown.querySelector('[data-dropdown-input]');
-            const label = dropdown.querySelector('[data-dropdown-label]');
-            const arrow = dropdown.querySelector('[data-dropdown-arrow]');
+(() => {
+    // Custom dropdown toggle with transitions (same pattern as pantau-progres)
+    function openDropdown(menu, button) {
+        menu.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            menu.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+        });
+        const arrow = button.querySelector('.dropdown-arrow');
+        if (arrow) arrow.classList.add('rotate-180');
+    }
 
-            button?.addEventListener('click', (event) => {
-                event.stopPropagation();
-                const isOpen = menu.classList.contains('opacity-100');
+    function closeDropdown(menu) {
+        if (menu.classList.contains('hidden')) return;
+        menu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+        const wrapper = menu.closest('[data-dropdown]');
+        const arrow = wrapper?.querySelector('.dropdown-arrow');
+        if (arrow) arrow.classList.remove('rotate-180');
+        setTimeout(() => {
+            if (menu.classList.contains('opacity-0')) {
+                menu.classList.add('hidden');
+            }
+        }, 200);
+    }
 
-                document.querySelectorAll('[data-dropdown-menu]').forEach((otherMenu) => {
-                    otherMenu.classList.remove('opacity-100', 'scale-100');
-                    otherMenu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+    document.querySelectorAll('[data-dropdown]').forEach((wrapper) => {
+        const button = wrapper.querySelector('button');
+        const menu = wrapper.querySelector('[id^="dropdown-"]');
+        if (button && menu) {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Close others
+                document.querySelectorAll('[id^="dropdown-"]').forEach((m) => {
+                    if (m !== menu) closeDropdown(m);
                 });
-                document.querySelectorAll('[data-dropdown-arrow]').forEach((otherArrow) => otherArrow.classList.remove('rotate-180'));
 
-                if (!isOpen) {
-                    menu.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-                    menu.classList.add('opacity-100', 'scale-100');
-                    arrow?.classList.add('rotate-180');
+                // Toggle current
+                if (menu.classList.contains('hidden')) {
+                    openDropdown(menu, button);
+                } else {
+                    closeDropdown(menu);
                 }
             });
+        }
+    });
 
-            dropdown.querySelectorAll('[data-dropdown-option]').forEach((option) => {
-                option.addEventListener('click', () => {
-                    input.value = option.dataset.value ?? '';
-                    label.textContent = option.dataset.label ?? option.textContent.trim();
-                    menu.classList.remove('opacity-100', 'scale-100');
-                    menu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-                    arrow?.classList.remove('rotate-180');
-                    dropdown.closest('form')?.submit();
-                });
-            });
+    // Close on click outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('[id^="dropdown-"]').forEach((m) => {
+            closeDropdown(m);
         });
-
-        let searchSubmitTimer;
-        document.querySelectorAll('[data-search-input]').forEach((input) => {
-            input.addEventListener('input', () => {
-                clearTimeout(searchSubmitTimer);
-                searchSubmitTimer = setTimeout(() => {
-                    input.closest('form')?.submit();
-                }, 600);
-            });
-        });
-
-        document.querySelectorAll('[data-date-input]').forEach((input) => {
-            input.addEventListener('change', () => {
-                input.closest('form')?.submit();
-            });
-        });
-
-        document.addEventListener('click', () => {
-            document.querySelectorAll('[data-dropdown-menu]').forEach((menu) => {
-                menu.classList.remove('opacity-100', 'scale-100');
-                menu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-            });
-            document.querySelectorAll('[data-dropdown-arrow]').forEach((arrow) => arrow.classList.remove('rotate-180'));
-        });
+    });
+})();

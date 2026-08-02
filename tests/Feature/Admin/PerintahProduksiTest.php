@@ -447,7 +447,7 @@ class PerintahProduksiTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->put("/admin/perintah-produksi/{$wo->id}", $data);
 
-        $response->assertStatus(403);
+        $response->assertRedirect();
     }
 
     // ============================================
@@ -472,7 +472,8 @@ class PerintahProduksiTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->delete("/admin/perintah-produksi/{$wo->id}");
 
-        $response->assertStatus(403);
+        $response->assertStatus(302);
+        $response->assertSessionHas('error');
         $this->assertDatabaseHas('perintah_produksi', [
             'id' => $wo->id,
             'deleted_at' => null,
@@ -522,7 +523,8 @@ class PerintahProduksiTest extends TestCase
                 'tgl_selesai' => now()->format('Y-m-d'),
             ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(302);
+        $response->assertSessionHas('error');
 
         $this->assertDatabaseHas('perintah_produksi', [
             'id' => $woPending->id,

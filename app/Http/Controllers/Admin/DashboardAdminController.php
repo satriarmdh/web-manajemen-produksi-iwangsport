@@ -22,8 +22,8 @@ class DashboardAdminController extends Controller
         // 1. Hitung statistik
         $activeWoCount = PerintahProduksi::whereIn('status_produksi', ['disetujui', 'dalam_produksi'])->count();
         
-        $lowBahanCount = BahanBaku::where('stok', '<', 10)->count();
-        $lowProdukCount = Produk::where('stok', '<', 100)->count();
+        $lowBahanCount = BahanBaku::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count();
+        $lowProdukCount = Produk::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count();
         $lowStockCount = $lowBahanCount + $lowProdukCount;
 
         $partnersCount = Supplier::count() + Pelanggan::count();
@@ -56,15 +56,19 @@ class DashboardAdminController extends Controller
             ->get();
 
         // 3. Alerts untuk barang/bahan hampir habis
-        $lowBahanList = BahanBaku::where('stok', '<', 10)
-            ->select('nama_bahan as nama', 'stok', 'satuan')
+        $lowBahanList = BahanBaku::where('stok', '>', 0)
+            ->where('stok_minimal', '>', 0)
+            ->whereColumn('stok', '<', 'stok_minimal')
+            ->select('nama_bahan as nama', 'stok', 'stok_minimal', 'satuan')
             ->selectRaw("'Bahan Baku' as tipe")
             ->orderBy('stok', 'asc')
             ->take(3)
             ->get();
 
-        $lowProdukList = Produk::where('stok', '<', 100)
-            ->select('nama_produk as nama', 'stok')
+        $lowProdukList = Produk::where('stok', '>', 0)
+            ->where('stok_minimal', '>', 0)
+            ->whereColumn('stok', '<', 'stok_minimal')
+            ->select('nama_produk as nama', 'stok', 'stok_minimal')
             ->selectRaw("'Pcs' as satuan, 'Produk' as tipe")
             ->orderBy('stok', 'asc')
             ->take(3)

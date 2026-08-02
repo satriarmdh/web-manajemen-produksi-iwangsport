@@ -189,10 +189,7 @@
                         <a href="{{ route('admin.perintah-produksi.show', $wo) }}" class="flex-1 text-center py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer shadow-md shadow-[#0F034D]/10">Detail</a>
                         @if($wo->status_produksi === 'pending')
                             <a href="{{ route('admin.perintah-produksi.edit', $wo) }}" class="flex-1 text-center py-2 text-xs font-semibold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">Edit</a>
-                            <form action="{{ route('admin.perintah-produksi.destroy', $wo) }}" method="POST" class="flex-1">
-                                @csrf @method('DELETE')
-                                <button type="submit" data-confirm-action="Yakin hapus perintah produksi ini?" class="w-full py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Hapus</button>
-                            </form>
+                            <button type="button" data-swal-delete data-url="{{ route('admin.perintah-produksi.destroy', $wo) }}" data-method="DELETE" data-message="Perintah produksi ini akan dihapus. Tindakan ini tidak dapat dibatalkan." class="flex-1 py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors cursor-pointer">Hapus</button>
                         @endif
                     </div>
                 </div>

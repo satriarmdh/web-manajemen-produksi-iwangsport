@@ -1,1 +1,257 @@
 @import 'tailwindcss';
+
+/* ============================================================
+   SweetAlert2 — Custom Toast Top-End
+   ============================================================ */
+
+/* Toast popup card */
+.swal-custom-popup {
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(15, 3, 77, 0.08) !important;
+    box-shadow:
+        0 12px 40px -8px rgba(15, 3, 77, 0.12),
+        0 4px 12px -4px rgba(15, 3, 77, 0.08) !important;
+    padding: 0.875rem 1.25rem !important;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    min-width: 320px !important;
+    max-width: 420px !important;
+}
+
+/* Title */
+.swal-custom-title {
+    color: #0F034D !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: -0.01em;
+    margin-left: 0.5rem !important;
+}
+
+/* Body text */
+.swal-custom-html {
+    color: #64748b !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    line-height: 1.45 !important;
+    margin-left: 0.5rem !important;
+}
+
+/* Icon */
+.swal-custom-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border: none !important;
+    margin: 0 !important;
+}
+
+/* Success icon ring */
+.swal2-toast .swal2-success .swal2-success-ring {
+    border: 3px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+.swal2-toast .swal2-success [class^='swal2-success-line'] {
+    background-color: #10b981 !important;
+    height: 3px !important;
+    border-radius: 2px !important;
+}
+
+.swal2-toast .swal2-success .swal2-success-circular-line-right,
+.swal2-toast .swal2-success .swal2-success-circular-line-left {
+    display: none !important;
+}
+
+/* Error icon in toast */
+.swal2-toast .swal2-error [class^='swal2-x-mark-line'] {
+    background-color: #ef4444 !important;
+    height: 3px !important;
+    border-radius: 2px !important;
+}
+
+.swal2-toast .swal2-error .swal2-error-ring {
+    border: 3px solid rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Warning icon in popup */
+.swal2-popup .swal2-icon.swal2-warning {
+    border-color: rgba(245, 158, 11, 0.2) !important;
+    color: #f59e0b !important;
+    width: 72px !important;
+    height: 72px !important;
+    margin: 0 auto 0.5rem auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.swal2-popup .swal2-icon.swal2-warning .swal2-icon-content {
+    font-size: 0 !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.swal2-popup .swal2-icon.swal2-warning .swal2-icon-content::before {
+    content: '' !important;
+    display: block !important;
+    width: 40px !important;
+    height: 40px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+/* Success icon in popup — center only, keep default dimensions for SVG animation */
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success {
+    margin: 0 auto 0.5rem auto !important;
+}
+
+/* Question icon in confirm popup — vertical layout */
+.swal2-popup .swal2-icon.swal2-question {
+    border-color: rgba(15, 3, 77, 0.12) !important;
+    color: #0F034D !important;
+    width: 72px !important;
+    height: 72px !important;
+    margin: 0 auto 0.5rem auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.swal2-popup .swal2-icon.swal2-question .swal2-icon-content {
+    font-size: 0 !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.swal2-popup .swal2-icon.swal2-question .swal2-icon-content::before {
+    content: '' !important;
+    display: block !important;
+    width: 40px !important;
+    height: 40px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%230F034D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+/* Force confirm popup to vertical (column) layout */
+.swal2-popup:not(.swal2-toast) {
+    flex-direction: column !important;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-icon {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.swal2-popup:not(.swal2-toast) .swal2-html-container,
+.swal2-popup:not(.swal2-toast) .swal2-actions {
+    justify-content: center !important;
+}
+
+/* Close button */
+.swal-custom-close {
+    color: #94a3b8 !important;
+    font-size: 1.25rem !important;
+    font-weight: 400 !important;
+    transition: color 0.15s ease;
+    right: 0.5rem !important;
+    top: 0.5rem !important;
+}
+
+.swal-custom-close:hover {
+    color: #0F034D !important;
+}
+
+/* Progress bar */
+.swal-custom-progress {
+    background: rgba(15, 3, 77, 0.06) !important;
+    height: 3px !important;
+}
+
+.swal2-timer-progress-bar {
+    background: linear-gradient(90deg, #0F034D, #6366f1) !important;
+    height: 3px !important;
+    border-radius: 2px !important;
+}
+
+/* Confirm button (danger action / critical action) */
+.swal-confirm-btn {
+    background: linear-gradient(135deg, #0F034D, #24116f) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    font-size: 0.8125rem !important;
+    padding: 0.625rem 1.5rem !important;
+    border-radius: 0.75rem !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(15, 3, 77, 0.25) !important;
+    transition: all 0.15s ease !important;
+}
+
+.swal-confirm-btn:hover {
+    background: linear-gradient(135deg, #1a0a6e, #3b1ea8) !important;
+    box-shadow: 0 6px 20px rgba(15, 3, 77, 0.35) !important;
+}
+
+/* Cancel button */
+.swal-cancel-btn {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    font-size: 0.8125rem !important;
+    padding: 0.625rem 1.5rem !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.15s ease !important;
+}
+
+.swal-cancel-btn:hover {
+    background: #e2e8f0 !important;
+    color: #334155 !important;
+}
+
+/* Confirm text */
+.swal-confirm-text {
+    color: #64748b !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+}
+
+/* Reject button (danger red) */
+.swal-reject-btn {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25) !important;
+}
+
+.swal-reject-btn:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35) !important;
+}
+
+/* SweetAlert input/textarea */
+.swal-custom-input {
+    border-radius: 0.75rem !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 0.8125rem !important;
+    padding: 0.75rem 1rem !important;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    resize: vertical !important;
+}
+
+.swal-custom-input:focus {
+    border-color: #0F034D !important;
+    box-shadow: 0 0 0 3px rgba(15, 3, 77, 0.08) !important;
+    outline: none !important;
+}

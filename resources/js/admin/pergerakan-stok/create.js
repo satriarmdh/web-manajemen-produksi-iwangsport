@@ -29,6 +29,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const trEmpty = document.getElementById('tr-empty-state');
 
     let items = [];
+    let editingIndex = null;
+
+    function resetItemForm() {
+        editingIndex = null;
+        resetCustomDropdown('input_bahan_baku');
+        inputQty.value = '';
+        btnTambah.textContent = 'Tambah';
+    }
+
+    function editItem(index) {
+        const item = items[index];
+        editingIndex = index;
+        setCustomDropdownValue('input_bahan_baku', String(item.id));
+        inputQty.value = item.quantity;
+        btnTambah.textContent = 'Simpan';
+        inputQty.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function removeItem(index) {
+        items.splice(index, 1);
+        if (editingIndex === index) resetItemForm();
+        renderTable();
+    }
 
     function renderTable() {
         const rows = tableBody.querySelectorAll('tr:not(#tr-empty-state)');
@@ -53,24 +76,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     <input type="hidden" name="items[${index}][quantity]" value="${item.quantity}">
                 </td>
                 <td class="px-4 py-3 text-center">
-                    <button type="button" class="btn-hapus-item text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer" data-id="${item.id}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
+                    <div class="flex justify-center gap-1">
+                        <button type="button" class="btn-edit-item p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" data-index="${index}" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button type="button" class="btn-hapus-item p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" data-index="${index}" title="Hapus">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
                 </td>
             `;
             tableBody.appendChild(tr);
         });
 
+        document.querySelectorAll('.btn-edit-item').forEach(btn => {
+            btn.addEventListener('click', () => editItem(parseInt(btn.getAttribute('data-index'))));
+        });
+
         document.querySelectorAll('.btn-hapus-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                items = items.filter(it => it.id !== id);
-                renderTable();
-            });
+            btn.addEventListener('click', () => removeItem(parseInt(btn.getAttribute('data-index'))));
         });
     }
 
-    btnTambah.addEventListener('click', () => {
+    function addItem() {
         const id = hiddenBahanInput.value;
         const qty = parseInt(inputQty.value) || 0;
 
@@ -94,7 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const satuan = selectedOpt.getAttribute('data-satuan');
         const stokMax = parseInt(selectedOpt.getAttribute('data-stok')) || 0;
 
-        if (items.some(it => it.id === id)) {
+        // Cek duplikat (kecuali item yang sedang diedit)
+        if (items.some((it, idx) => idx !== editingIndex && it.id === id)) {
             alert('Bahan baku ini sudah ditambahkan ke dalam daftar!');
             return;
         }
@@ -106,12 +135,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        items.push({ id, nama, warna, kode, quantity: qty, satuan });
+        const newItem = { id, nama, warna, kode, quantity: qty, satuan };
+        if (editingIndex === null) {
+            items.push(newItem);
+        } else {
+            items[editingIndex] = newItem;
+        }
 
-        // Reset custom dropdown
-        resetCustomDropdown('input_bahan_baku');
-        inputQty.value = '';
-
+        resetItemForm();
         renderTable();
-    });
+    }
+
+    btnTambah.addEventListener('click', addItem);
 });

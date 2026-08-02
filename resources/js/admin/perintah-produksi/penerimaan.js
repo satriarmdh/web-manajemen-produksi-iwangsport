@@ -14,12 +14,18 @@
     const inputEstimasi = document.getElementById('input_estimasi');
     const inputDiterima = document.getElementById('input_diterima');
     const inputSisa = document.getElementById('input_sisa');
-    const inputKaryawanSelect = document.getElementById('input_dari_karyawan');
     const inputQty = document.getElementById('input_qty_diterima');
     const inputBuktiPhoto = document.getElementById('input_bukti_foto');
     const previewContainer = document.getElementById('preview_container');
     const previewImage = document.getElementById('preview_image');
     const uploadPlaceholder = document.getElementById('upload_placeholder');
+
+    // Custom dropdown elements (prefix: penerimaan_karyawan)
+    const searchInput = document.getElementById('penerimaan_karyawan_input');
+    const hiddenInput = document.getElementById('penerimaan_karyawan_value');
+    const karyawanDropdown = document.getElementById('penerimaan_karyawan_dropdown');
+    const karyawanNoResults = document.getElementById('penerimaan_karyawan_no_results');
+    const karyawanArrow = document.querySelector('#penerimaan_karyawan_wrapper .dropdown-arrow');
 
     // ========== OPEN INPUT MODAL ==========
     document.querySelectorAll('[data-open-penerimaan-modal]').forEach(btn => {
@@ -40,7 +46,13 @@
             // Reset form
             formInput.reset();
             inputDetailId.value = detailId;
-            inputKaryawanSelect.innerHTML = '<option value="">Memuat...</option>';
+            // Reset custom dropdown
+            searchInput.value = '';
+            hiddenInput.value = '';
+            searchInput.classList.remove('text-gray-900', 'font-medium');
+            searchInput.classList.add('text-gray-500');
+            karyawanDropdown.classList.add('hidden');
+            karyawanDropdown.innerHTML = '<p class="px-4 py-2 text-xs text-gray-400">Memuat...</p>';
             previewContainer.classList.add('hidden');
             uploadPlaceholder.classList.remove('hidden');
 
@@ -65,38 +77,44 @@
             const response = await fetch(`/admin/penerimaan-hasil-produksi/${detailId}/available-karyawan`);
             const data = await response.json();
             
-            inputKaryawanSelect.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
+            karyawanDropdown.innerHTML = '';
             
             if (data.karyawan.length === 0) {
-                inputKaryawanSelect.innerHTML = '<option value="">Tidak ada karyawan dengan stok ready</option>';
-                inputKaryawanSelect.disabled = true;
+                karyawanDropdown.innerHTML = '<p class="px-4 py-2 text-xs text-gray-400">Tidak ada karyawan dengan stok ready</p>';
+                searchInput.disabled = true;
             } else {
                 data.karyawan.forEach(k => {
-                    const option = document.createElement('option');
-                    option.value = k.karyawan_id;
-                    option.textContent = `${k.karyawan_name} (Ready: ${k.qty_ready} pcs)`;
-                    option.dataset.qtyReady = k.qty_ready;
-                    option.dataset.qtyDiserahkan = k.qty_diserahkan || 0;
-                    option.dataset.karyawanName = k.karyawan_name;
-                    inputKaryawanSelect.appendChild(option);
+                    const opt = document.createElement('div');
+                    opt.className = 'dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm';
+                    opt.dataset.value = k.karyawan_id;
+                    opt.dataset.text = `${k.karyawan_name} (Ready: ${k.qty_ready} pcs)`;
+                    opt.dataset.qtyReady = k.qty_ready;
+                    opt.dataset.qtyDiserahkan = k.qty_diserahkan || 0;
+                    opt.dataset.karyawanName = k.karyawan_name;
+                    opt.innerHTML = `<span class="text-sm font-medium text-gray-700">${k.karyawan_name} (Ready: ${k.qty_ready} pcs)</span><svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+                    karyawanDropdown.appendChild(opt);
                 });
-                inputKaryawanSelect.disabled = false;
+                searchInput.disabled = false;
+
+                // Init custom dropdown behavior
+                initCustomDropdown('penerimaan_karyawan');
             }
         } catch (error) {
             console.error('Error loading karyawan:', error);
-            inputKaryawanSelect.innerHTML = '<option value="">Error loading karyawan</option>';
+            karyawanDropdown.innerHTML = '<p class="px-4 py-2 text-xs text-red-400">Error loading karyawan</p>';
         }
     }
 
     // ========== SHOW KARYAWAN STAT CARD ON SELECTION ==========
-    inputKaryawanSelect.addEventListener('change', function() {
+    hiddenInput.addEventListener('change', function() {
         const statCard = document.getElementById('karyawan_stat_card');
         
         if (this.value) {
-            const selectedOption = this.options[this.selectedIndex];
-            const qtyReady = parseInt(selectedOption.dataset.qtyReady || 0);
-            const qtyDiserahkan = parseInt(selectedOption.dataset.qtyDiserahkan || 0);
-            const karyawanName = selectedOption.dataset.karyawanName || '-';
+            const selectedOpt = karyawanDropdown.querySelector(`.dropdown-option[data-value="${this.value}"]`);
+            if (!selectedOpt) return;
+            const qtyReady = parseInt(selectedOpt.dataset.qtyReady || 0);
+            const qtyDiserahkan = parseInt(selectedOpt.dataset.qtyDiserahkan || 0);
+            const karyawanName = selectedOpt.dataset.karyawanName || '-';
             const qtySisa = qtyReady - qtyDiserahkan;
             
             // Update card values
@@ -115,9 +133,9 @@
 
     // ========== QTY VALIDATION AGAINST KARYAWAN READY STOCK ==========
     inputQty.addEventListener('input', function() {
-        const selectedOption = inputKaryawanSelect.options[inputKaryawanSelect.selectedIndex];
-        if (selectedOption && selectedOption.dataset.qtyReady) {
-            const qtyReady = parseInt(selectedOption.dataset.qtyReady);
+        const selectedOpt = karyawanDropdown.querySelector(`.dropdown-option[data-value="${hiddenInput.value}"]`);
+        if (selectedOpt && selectedOpt.dataset.qtyReady) {
+            const qtyReady = parseInt(selectedOpt.dataset.qtyReady);
             const qtyInput = parseInt(this.value);
             const errorMsg = document.getElementById('error_qty');
             

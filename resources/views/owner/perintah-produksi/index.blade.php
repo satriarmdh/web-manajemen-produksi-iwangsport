@@ -176,18 +176,25 @@
                     </div>
 
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-gray-50 mt-auto">
-                        <form action="{{ route('owner.perintah-produksi.approve', $wo) }}" method="POST" class="flex-1">
+                        <form action="{{ route('owner.perintah-produksi.approve', $wo) }}" method="POST" class="flex-1"
+                            data-swal-confirm
+                            data-confirm-title="Setujui Perintah Produksi?"
+                            data-confirm-message="WO {{ $wo->nomor_wo }} akan disetujui dan stok kain akan dikurangi otomatis. Pastikan data sudah benar."
+                            data-confirm-button="Ya, Setujui">
                             @csrf
-                            <button type="submit" data-confirm-action="Setujui perintah produksi {{ $wo->nomor_wo }}?"
-                                class="w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 transition-colors shadow-md shadow-green-600/20">
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white bg-[#0F034D] rounded-xl hover:bg-[#1a0a6e] transition-colors shadow-md shadow-[#0F034D]/20">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                 Setujui WO
                             </button>
                         </form>
-                        <form action="{{ route('owner.perintah-produksi.reject', $wo) }}" method="POST" class="flex-1" onsubmit="return confirm('Tolak perintah produksi {{ $wo->nomor_wo }}?')">
+                        <form id="reject-form-{{ $wo->id }}" action="{{ route('owner.perintah-produksi.reject', $wo) }}" method="POST" class="flex-1">
                             @csrf
-                            <input type="hidden" name="alasan_penolakan" value="Ditolak oleh owner setelah review perintah produksi">
-                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-red-600 bg-red-50 border border-red-100 rounded-xl hover:bg-red-100 transition-colors">
+                            <input type="hidden" name="alasan_penolakan" id="alasan-{{ $wo->id }}">
+                            <button type="button"
+                                data-swal-reject="{{ $wo->id }}"
+                                data-reject-nomor="{{ $wo->nomor_wo }}"
+                                data-reject-form="reject-form-{{ $wo->id }}"
+                                class="w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-red-600 bg-red-50 border border-red-100 rounded-xl hover:bg-red-100 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 Tolak
                             </button>
@@ -211,5 +218,8 @@
             </div>
         </div>
     @endif
-    @vite('resources/js/admin/confirm-action.js')
+    @vite([
+        'resources/js/admin/confirm-action.js',
+        'resources/js/owner/reject-wo.js'
+    ])
 </x-layouts.owner>

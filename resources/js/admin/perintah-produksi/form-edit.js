@@ -10,7 +10,60 @@
 
         // Array untuk menyimpan detail yang ditambahkan
         let details = [...initialDetails];
+        let editingIndex = null;
 
+        function resetDetailForm() {
+            editingIndex = null;
+            resetSearchableDropdown('input-produk');
+            resetSearchableDropdown('input-bahan');
+            document.getElementById('input-qty').value = '';
+            document.getElementById('input-estimasi').value = '-';
+            document.getElementById('baseline-alert').classList.add('hidden');
+            document.getElementById('btn-tambah-detail').disabled = true;
+            document.getElementById('btn-tambah-detail').textContent = 'Tambah';
+        }
+
+        function editDetailRow(index) {
+            const detail = details[index];
+            editingIndex = index;
+            document.getElementById('input-produk').value = detail.produk_id;
+            document.getElementById('input-bahan').value = detail.bahan_baku_id;
+            document.getElementById('input-qty').value = detail.qty_roll_pakai;
+
+            const produkOpt = document.querySelector('#input-produk-dropdown .dropdown-option[data-value="' + detail.produk_id + '"]');
+            if (produkOpt) {
+                document.getElementById('input-produk-search').value = produkOpt.dataset.text;
+                document.getElementById('input-produk-search').classList.add('font-medium', 'text-gray-900');
+                document.querySelectorAll('#input-produk-dropdown .dropdown-option').forEach(o => {
+                    o.classList.remove('bg-gray-100');
+                    o.querySelector('.check-icon')?.classList.add('hidden');
+                });
+                produkOpt.classList.add('bg-gray-100');
+                produkOpt.querySelector('.check-icon')?.classList.remove('hidden');
+            }
+
+            const bahanOpt = document.querySelector('#input-bahan-dropdown .dropdown-option[data-value="' + detail.bahan_baku_id + '"]');
+            if (bahanOpt) {
+                document.getElementById('input-bahan-search').value = bahanOpt.dataset.text;
+                document.getElementById('input-bahan-search').classList.add('font-medium', 'text-gray-900');
+                document.querySelectorAll('#input-bahan-dropdown .dropdown-option').forEach(o => {
+                    o.classList.remove('bg-gray-100');
+                    o.querySelector('.check-icon')?.classList.add('hidden');
+                });
+                bahanOpt.classList.add('bg-gray-100');
+                bahanOpt.querySelector('.check-icon')?.classList.remove('hidden');
+            }
+
+            calculateEstimasi();
+            document.getElementById('btn-tambah-detail').textContent = 'Simpan';
+            document.getElementById('input-qty').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function removeDetailRow(index) {
+            details.splice(index, 1);
+            if (editingIndex === index) resetDetailForm();
+            renderTable();
+        }
         const tglMulaiInput = document.getElementById('tgl_mulai');
         const tglSelesaiInput = document.getElementById('tgl_selesai');
 
@@ -161,61 +214,44 @@
             const bahanId = document.getElementById('input-bahan').value;
             const qty = parseInt(document.getElementById('input-qty').value) || 0;
 
-            // Validasi
             if (!produkId || !bahanId || qty < 1) {
                 alert('Mohon lengkapi semua field dan pastikan jumlah roll minimal 1');
                 return;
             }
 
-            // Cari baseline
             const baseline = baselines.find(b => b.produk_id == produkId && b.bahan_baku_id == bahanId);
             if (!baseline) {
                 alert('Kombinasi produk dan bahan baku tidak memiliki standar baseline. Silakan hubungi administrator.');
                 return;
             }
 
-            // Cek duplikat
-            const exists = details.some(d => d.produk_id == produkId && d.bahan_baku_id == bahanId);
+            const exists = details.some((d, idx) => idx !== editingIndex && d.produk_id == produkId && d.bahan_baku_id == bahanId);
             if (exists) {
                 alert('Kombinasi produk dan bahan baku ini sudah ditambahkan. Silakan edit atau hapus yang sudah ada.');
                 return;
             }
 
-            // Cari nama produk dan bahan baku
             const produk = produksData.find(p => p.id == produkId);
             const bahan = bahanBakusData.find(b => b.id == bahanId);
-
-            // Hitung estimasi
             const estimasi = qty * baseline.pcs_per_roll;
 
-            // Tambah ke array
-            details.push({
+            const newItem = {
                 produk_id: produkId,
                 bahan_baku_id: bahanId,
                 qty_roll_pakai: qty,
                 estimasi_pcs: estimasi,
                 produk_nama: produk.nama_produk,
                 bahan_nama: bahan.nama_bahan
-            });
+            };
 
-            // Render ulang tabel
-            renderTable();
-
-            // Reset form input
-            resetSearchableDropdown('input-produk');
-            resetSearchableDropdown('input-bahan');
-            document.getElementById('input-qty').value = '';
-            document.getElementById('input-estimasi').value = '-';
-            document.getElementById('baseline-alert').classList.add('hidden');
-            document.getElementById('btn-tambah-detail').disabled = true;
-        }
-
-        // Hapus detail dari tabel
-        function removeDetailRow(index) {
-            if (confirm('Hapus detail ini?')) {
-                details.splice(index, 1);
-                renderTable();
+            if (editingIndex === null) {
+                details.push(newItem);
+            } else {
+                details[editingIndex] = newItem;
             }
+
+            renderTable();
+            resetDetailForm();
         }
 
         // Render tabel detail
@@ -249,12 +285,16 @@
                     <td class="py-3 px-4 text-center">${detail.qty_roll_pakai}</td>
                     <td class="py-3 px-4 text-center font-semibold text-green-600">${detail.estimasi_pcs} pcs</td>
                     <td class="py-3 px-4 text-center">
-                        <button type="button" onclick="removeDetailRow(${index})"
-                            class="text-red-600 hover:text-red-700 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
+                        <div class="flex justify-center gap-1">
+                            <button type="button" onclick="editDetailRow(${index})"
+                                class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="Edit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button type="button" onclick="removeDetailRow(${index})"
+                                class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
                     </td>
                     <input type="hidden" name="details[${index}][produk_id]" value="${detail.produk_id}">
                     <input type="hidden" name="details[${index}][bahan_baku_id]" value="${detail.bahan_baku_id}">
@@ -271,4 +311,5 @@
 
 
 window.removeDetailRow = removeDetailRow;
+window.editDetailRow = editDetailRow;
 document.querySelector('[data-add-detail]')?.addEventListener('click', addDetailRow);

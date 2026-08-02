@@ -389,4 +389,36 @@ window.addEventListener('DOMContentLoaded', () => {
             } catch (e) { /* ignore */ }
         });
     }
+
+    // ========== MUTASI DETAIL SLIDE PANEL ==========
+    const mutasiModal = document.getElementById('mutasiDetailModal');
+
+    document.querySelectorAll('[data-open-mutasi-detail]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const d = this.dataset;
+            document.getElementById('detail_nama_item').textContent = d.nama || '-';
+            document.getElementById('detail_nama').textContent = d.nama || '-';
+            document.getElementById('detail_kode').textContent = d.kode || '-';
+            document.getElementById('detail_tipe').textContent = d.jenisItem === 'bahan_baku' ? 'Bahan Baku' : 'Produk Jadi';
+            document.getElementById('detail_pergerakan').textContent = (d.pergerakan || '-').charAt(0).toUpperCase() + (d.pergerakan || '').slice(1);
+            document.getElementById('detail_jumlah').textContent = parseInt(d.jumlah || 0).toLocaleString('id-ID');
+            document.getElementById('detail_stok_sebelum').textContent = parseInt(d.stokSebelum || 0).toLocaleString('id-ID');
+            document.getElementById('detail_stok_sesudah').textContent = parseInt(d.stokSesudah || 0).toLocaleString('id-ID');
+            document.getElementById('detail_waktu').textContent = d.waktu || '-';
+            document.getElementById('detail_pic').textContent = d.pic || '-';
+            document.getElementById('detail_keterangan').textContent = d.keterangan || '-';
+
+            mutasiModal.classList.remove('hidden');
+            mutasiModal.classList.add('is-open');
+            setTimeout(() => mutasiModal.classList.remove('opacity-0'), 10);
+        });
+    });
+
+    document.querySelectorAll('[data-close-mutasi-detail]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            mutasiModal.classList.add('opacity-0');
+            mutasiModal.classList.remove('is-open');
+            setTimeout(() => mutasiModal.classList.add('hidden'), 300);
+        });
+    });
 });

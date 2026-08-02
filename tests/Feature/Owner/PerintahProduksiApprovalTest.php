@@ -147,4 +147,93 @@ class PerintahProduksiApprovalTest extends TestCase
         $response->assertSee('PROD-20260622-001')
             ->assertDontSee('PROD-20260622-002');
     }
+
+    // ============================================
+    // NEGATIVE CASES
+    // ============================================
+
+    public function test_owner_tidak_bisa_menyetujui_wo_yang_sudah_disetujui()
+    {
+        $wo = PerintahProduksi::factory()->disetujui()->create();
+
+        // Service throws exception when not pending → redirect with error
+        $response = $this->actingAs($this->owner)
+            ->post("/owner/perintah-produksi/{$wo->id}/approve");
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error');
+    }
+
+    public function test_owner_tidak_bisa_menyetujui_wo_yang_sudah_ditolak()
+    {
+        $wo = PerintahProduksi::factory()->create(['status_produksi' => 'ditolak']);
+
+        $response = $this->actingAs($this->owner)
+            ->post("/owner/perintah-produksi/{$wo->id}/approve");
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error');
+    }
+
+    public function test_reject_wo_wajib_menyertakan_alasan_penolakan()
+    {
+        $wo = PerintahProduksi::factory()->pending()->create();
+
+        $response = $this->actingAs($this->owner)
+            ->post("/owner/perintah-produksi/{$wo->id}/reject", [
+                'alasan_penolakan' => '',
+            ]);
+
+        $response->assertSessionHasErrors('alasan_penolakan');
+    }
+
+    public function test_owner_tidak_bisa_menolak_wo_yang_sudah_ditolak()
+    {
+        $wo = PerintahProduksi::factory()->create(['status_produksi' => 'ditolak']);
+
+        $response = $this->actingAs($this->owner)
+            ->post("/owner/perintah-produksi/{$wo->id}/reject", [
+                'alasan_penolakan' => 'Alasan kedua',
+            ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_owner_tidak_bisa_menolak_wo_yang_sudah_disetujui()
+    {
+        $wo = PerintahProduksi::factory()->disetujui()->create();
+
+        $response = $this->actingAs($this->owner)
+            ->post("/owner/perintah-produksi/{$wo->id}/reject", [
+                'alasan_penolakan' => 'Berubah pikiran',
+            ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_approval_stok_tidak_bisa_negatif()
+    {
+        $wo = PerintahProduksi::factory()->pending()->create();
+        $bahanBaku = BahanBaku::factory()->create([
+            'kategori' => 'kain',
+            'stok' => 2,
+        ]);
+
+        DetailPerintahProduksi::factory()->create([
+            'perintah_produksi_id' => $wo->id,
+            'bahan_baku_id' => $bahanBaku->id,
+            'qty_roll_pakai' => 5, // Minta 5, stok cuma 2
+        ]);
+
+        // Service throws exception → redirect with error
+        $response = $this->actingAs($this->owner)
+            ->post("/owner/perintah-produksi/{$wo->id}/approve");
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error');
+
+        // WO tetap pending
+        $wo->refresh();
+        $this->assertEquals('pending', $wo->status_produksi);
+    }
 }

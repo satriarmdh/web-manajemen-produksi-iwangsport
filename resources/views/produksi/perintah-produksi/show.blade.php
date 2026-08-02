@@ -10,29 +10,6 @@
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="mb-4 rounded-2xl bg-green-50 border border-green-100 p-4 flex items-start gap-3 shadow-sm">
-            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <div>
-                <p class="text-sm font-bold text-green-800">Berhasil</p>
-                <p class="text-xs text-green-700 mt-0.5">{{ session('success') }}</p>
-            </div>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="mb-4 rounded-2xl bg-red-50 border border-red-100 p-4 shadow-sm">
-            <p class="text-sm font-bold text-red-700">Input belum bisa disimpan</p>
-            <ul class="mt-2 space-y-1 text-xs text-red-600 list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="rounded-3xl bg-gradient-to-br from-[#0F034D] to-[#24116f] p-5 text-white shadow-xl shadow-[#0F034D]/20 mb-5">
         <div class="flex items-start justify-between gap-3">
             <div>
@@ -162,11 +139,16 @@
                             </div>
                         </div>
                     @else
-                        <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3">
+                        <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3"
+                            data-swal-confirm
+                            data-confirm-title="Simpan Hasil Potong?"
+                            data-confirm-message="Pastikan jumlah hasil yang diinput sudah benar. Data ini akan mempengaruhi stok virtual."
+                            data-confirm-button="Ya, Simpan">
                             @csrf
                             <input type="hidden" name="detail_perintah_produksi_id" value="{{ $detail->id }}">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai <span class="text-xs font-normal text-gray-400">(Barang Baik / Tidak Cacat)</span></label>
+                                <p class="text-[11px] text-gray-400 -mt-0.5 mb-1.5">Inputkan jumlah barang yang selesai dengan kondisi <strong>baik (tidak cacat)</strong>. Barang cacat diinputkan terpisah di kolom bawah.</p>
                                 <input type="number" name="qty_selesai" min="0" max="{{ $sisaEstimasi }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, $sisaEstimasi) }}">
                             </div> 
                             <div>
@@ -223,11 +205,16 @@
                             </div>
                         </div>
                     @else
-                        <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3">
+                        <form action="{{ route('produksi.input-hasil.store') }}" method="POST" class="space-y-3"
+                            data-swal-confirm
+                            data-confirm-title="Simpan Hasil Pekerjaan?"
+                            data-confirm-message="Pastikan jumlah hasil yang diinput sudah benar. Data ini akan mempengaruhi stok virtual Anda."
+                            data-confirm-button="Ya, Simpan">
                             @csrf
                             <input type="hidden" name="stok_virtual_id" value="{{ $stokVirtualSaya->id }}">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Hasil Selesai <span class="text-xs font-normal text-gray-400">(Barang Baik / Tidak Cacat)</span></label>
+                                <p class="text-[11px] text-gray-400 -mt-0.5 mb-1.5">Inputkan jumlah barang yang selesai dengan kondisi <strong>baik (tidak cacat)</strong>. Barang cacat diinputkan terpisah di kolom bawah.</p>
                                 <input type="number" name="qty_selesai" min="0" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, (int) $stokVirtualSaya->qty_hold) }}">
                             </div>
                             <div>

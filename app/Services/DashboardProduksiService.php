@@ -11,63 +11,51 @@ class DashboardProduksiService
 {
     public function getStats(User $user): array
     {
-        $ajuanMasuk = $this->getAjuanMasuk($user);
+        $role = $user->role;
+        $data = [
+            'role' => $role,
+            'jumlahPerintahKerja' => 0,
+            'jumlahAjuanMasuk' => 0,
+            'jumlahBarangReady' => 0,
+            'jumlahPekerjaanAktif' => 0,
+            'selesaiHariIni' => 0,
+        ];
 
-        return $user->role === 'potong'
-            ? array_merge($this->getPotongStats($user), ['ajuanMasuk' => $ajuanMasuk])
-            : array_merge($this->getNonPotongStats($user), ['ajuanMasuk' => $ajuanMasuk]);
-    }
-
-    private function getAjuanMasuk(User $user): int
-    {
-        return AjuanPengambilanProduksi::where('dari_karyawan_id', $user->id)
+        // 1. Ajuan Masuk pending yang harus direspon oleh karyawan ini (dari_karyawan_id = user->id)
+        $data['jumlahAjuanMasuk'] = AjuanPengambilanProduksi::where('dari_karyawan_id', $user->id)
             ->where('status', 'pending')
-            ->distinct('id_perintah')
-            ->count('id_perintah');
-    }
-
-    private function getPotongStats(User $user): array
-    {
-        $pekerjaanAktif = PerintahProduksi::whereIn('status_produksi', ['disetujui', 'dalam_produksi'])
-            ->whereHas('details', fn($q) => $q->whereNull('qty_pcs_potong'))
             ->count();
 
-        $selesaiHariIni = StokVirtual::where('id_karyawan', $user->id)
-            ->where('peran', 'potong')
+        // 2. Selesai Hari Ini (jumlah input stok virtual yang diselesaikan hari ini)
+        $data['selesaiHariIni'] = StokVirtual::where('id_karyawan', $user->id)
             ->where('is_selesai', true)
             ->whereDate('updated_at', today())
             ->count();
 
-        return [
-            'pekerjaanAktif' => $pekerjaanAktif,
-            'menungguInput' => $pekerjaanAktif,
-            'selesaiHariIni' => $selesaiHariIni,
-        ];
-    }
+        if ($role === 'potong') {
+            // Perintah kerja baru/aktif yang menunggu dipotong oleh potong (status disetujui / dalam_produksi dan belum input potong sama sekali)
+            $data['jumlahPerintahKerja'] = PerintahProduksi::whereIn('status_produksi', ['disetujui', 'dalam_produksi'])
+                ->whereHas('details', fn($q) => $q->whereNull('qty_pcs_potong'))
+                ->count();
+        } else {
+            // Pekerjaan aktif (di-hold oleh jahit / finishing) yang belum diselesaikan
+            $data['jumlahPekerjaanAktif'] = StokVirtual::where('id_karyawan', $user->id)
+                ->where('is_selesai', false)
+                ->where('qty_hold', '>', 0)
+                ->count();
 
-    private function getNonPotongStats(User $user): array
-    {
-        $pekerjaanAktif = StokVirtual::where('id_karyawan', $user->id)
-            ->where('is_selesai', false)
-            ->distinct('id_perintah')
-            ->count('id_perintah');
+            // Barang yang selesai di role sebelumnya dan siap diambil (source role)
+            $sourceRole = $role === 'jahit' ? 'potong' : 'jahit';
+            $data['jumlahBarangReady'] = StokVirtual::where('peran', $sourceRole)
+                ->whereRaw('total_selesai - total_dikeluarkan > 0')
+                ->count();
+        }
 
-        $menungguInput = StokVirtual::where('id_karyawan', $user->id)
-            ->where('is_selesai', false)
-            ->where('qty_hold', '>', 0)
-            ->where('total_selesai', 0)
-            ->distinct('id_perintah')
-            ->count('id_perintah');
+        // ponytail: fallback keys for backward compatibility, even though we removed the cards
+        $data['pekerjaanAktif'] = $data['jumlahPekerjaanAktif'] ?: $data['jumlahPerintahKerja'];
+        $data['menungguInput'] = $data['pekerjaanAktif'];
+        $data['ajuanMasuk'] = $data['jumlahAjuanMasuk'];
 
-        $selesaiHariIni = StokVirtual::where('id_karyawan', $user->id)
-            ->where('is_selesai', true)
-            ->whereDate('updated_at', today())
-            ->count();
-
-        return [
-            'pekerjaanAktif' => $pekerjaanAktif,
-            'menungguInput' => $menungguInput,
-            'selesaiHariIni' => $selesaiHariIni,
-        ];
+        return $data;
     }
 }

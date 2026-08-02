@@ -250,14 +250,10 @@
                                                 Edit Baseline
                                             </button>
                                             <div class="border-t border-gray-100 my-1"></div>
-                                            <form action="{{ route('admin.standard-baseline-produksi.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus baseline ini? Data terkait mungkin akan terpengaruh.');" class="w-full">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                                    Hapus Baseline
-                                                </button>
-                                            </form>
+                                            <button type="button" data-swal-delete data-url="{{ route('admin.standard-baseline-produksi.destroy', $item->id) }}" data-method="DELETE" data-message="Baseline ini akan dihapus. Data terkait mungkin akan terpengaruh." class="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                                Hapus Baseline
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

@@ -20,7 +20,7 @@ class BahanBakuSeeder extends Seeder
                 'warna' => 'hitam',
                 'kategori' => 'kain',
                 'satuan' => 'roll',
-                'stok' => 200,
+                'stok' => 10,
             ],
             [
                 'kode_bahan' => 'KAIN-002',
@@ -28,7 +28,7 @@ class BahanBakuSeeder extends Seeder
                 'warna' => 'navy',
                 'kategori' => 'kain',
                 'satuan' => 'roll',
-                'stok' => 150,
+                'stok' => 5,
             ],
             [
                 'kode_bahan' => 'KAIN-003',
@@ -36,7 +36,7 @@ class BahanBakuSeeder extends Seeder
                 'warna' => 'abu-abu',
                 'kategori' => 'kain',
                 'satuan' => 'roll',
-                'stok' => 120,
+                'stok' => 5,
             ],
             // Benang
             [

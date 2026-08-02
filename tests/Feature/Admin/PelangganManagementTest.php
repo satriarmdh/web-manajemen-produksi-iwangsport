@@ -382,9 +382,9 @@ class PelangganManagementTest extends TestCase
 
     public function test_admin_dapat_menggabungkan_filter_dan_search()
     {
-        Pelanggan::factory()->create(['nama_pelanggan' => 'Budi Aktif', 'is_aktif' => true]);
-        Pelanggan::factory()->create(['nama_pelanggan' => 'Budi Nonaktif', 'is_aktif' => false]);
-        Pelanggan::factory()->create(['nama_pelanggan' => 'Ani Aktif', 'is_aktif' => true]);
+        Pelanggan::factory()->create(['nama_pelanggan' => 'Budi Aktif', 'email' => 'budi.aktif@example.com', 'is_aktif' => true]);
+        Pelanggan::factory()->create(['nama_pelanggan' => 'Budi Nonaktif', 'email' => 'budi.nonaktif@example.com', 'is_aktif' => false]);
+        Pelanggan::factory()->create(['nama_pelanggan' => 'Ani Aktif', 'email' => 'ani.aktif@example.com', 'is_aktif' => true]);
 
         $response = $this->actingAs($this->admin)
             ->get('/admin/pelanggan?search=Budi&status=aktif');

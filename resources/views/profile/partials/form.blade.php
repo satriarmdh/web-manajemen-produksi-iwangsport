@@ -174,24 +174,4 @@
         </button>
     </div>
 </form>
-
-<script>
-    function togglePasswordVisibility(inputId, btn) {
-        const input = document.getElementById(inputId);
-        if (!input) return;
-
-        const isPassword = input.getAttribute('type') === 'password';
-        input.setAttribute('type', isPassword ? 'text' : 'password');
-
-        const eyeOpen = btn.querySelector('.eye-open');
-        const eyeClosed = btn.querySelector('.eye-closed');
-
-        if (isPassword) { // now text (visible)
-            eyeOpen.classList.add('hidden');
-            eyeClosed.classList.remove('hidden');
-        } else { // now password (hidden)
-            eyeOpen.classList.remove('hidden');
-            eyeClosed.classList.add('hidden');
-        }
-    }
-</script>
+@vite('resources/js/utils/toggle-password.js')

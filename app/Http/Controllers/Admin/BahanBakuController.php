@@ -23,13 +23,7 @@ class BahanBakuController extends Controller
         // Panggil service dengan parameter filters
         $bahanBaku = $this->bahanBakuService->getAllPaginated($filters);
         $nextNumbers = $this->bahanBakuService->getNextNumbers();
-
-        $stats = [
-            'total_items' => BahanBaku::count(),
-            'stok_menipis' => BahanBaku::where('stok', '<', 10)->count(),
-            'stok_habis' => BahanBaku::where('stok', '=', 0)->count(),
-            'total_kategori' => BahanBaku::distinct('kategori')->count('kategori'),
-        ];
+        $stats = $this->bahanBakuService->getStats();
 
         return view('admin.bahan-baku.index', compact('bahanBaku', 'nextNumbers', 'stats'));
     }

@@ -39,8 +39,8 @@ class DashboardOwnerService
         // "Menipis" = masih ada stok namun di bawah ambang batas.
         // Barang dengan stok 0 masuk kategori "habis", bukan "menipis",
         // agar konsisten dengan getInventoryStats() di halaman inventori.
-        $bahanMenipis = (int) BahanBaku::where('stok', '>', 0)->where('stok', '<', 10)->count();
-        $produkMenipis = (int) Produk::where('stok', '>', 0)->where('stok', '<', 100)->count();
+        $bahanMenipis = (int) BahanBaku::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count();
+        $produkMenipis = (int) Produk::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count();
 
         return [
             'stats' => [
@@ -84,8 +84,8 @@ class DashboardOwnerService
     public function getInventoryStats(): array
     {
         return [
-            'bahan_menipis_count' => (int) BahanBaku::where('stok', '>', 0)->where('stok', '<', 10)->count(),
-            'produk_menipis_count' => (int) Produk::where('stok', '>', 0)->where('stok', '<', 100)->count(),
+            'bahan_menipis_count' => (int) BahanBaku::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count(),
+            'produk_menipis_count' => (int) Produk::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count(),
             'bahan_habis_count' => (int) BahanBaku::where('stok', 0)->count(),
             'produk_habis_count' => (int) Produk::where('stok', 0)->count(),
         ];
@@ -102,7 +102,7 @@ class DashboardOwnerService
         $query = BahanBaku::query();
 
         if (!empty($filters['stok']) && $filters['stok'] === 'menipis') {
-            $query->where('stok', '<', 10);
+            $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
         }
 
         return $query->orderBy('stok', 'asc')->get();
@@ -119,7 +119,7 @@ class DashboardOwnerService
         $query = Produk::query();
 
         if (!empty($filters['stok']) && $filters['stok'] === 'menipis') {
-            $query->where('stok', '<', 100);
+            $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
         }
 
         return $query->orderBy('stok', 'asc')->get();

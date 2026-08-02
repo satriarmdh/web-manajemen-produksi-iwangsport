@@ -1,10 +1,6 @@
 <x-layouts.produksi>
     <x-slot:header>Ajuan Masuk</x-slot:header>
 
-    @if(session('success'))
-        <div class="mb-4 rounded-2xl bg-green-50 border border-green-100 p-4 text-sm font-semibold text-green-700">{{ session('success') }}</div>
-    @endif
-
     <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mb-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -32,40 +28,53 @@
                     $perintah = $ajuanDalamPerintah->first()->perintahProduksi;
                     $totalQty = $ajuanDalamPerintah->sum('qty_ajuan');
                 @endphp
-                <details class="group rounded-2xl border border-gray-100 overflow-hidden" open>
-                    <summary class="list-none cursor-pointer bg-gray-50/80 p-4">
+                <details class="group rounded-2xl border border-gray-100 overflow-hidden shadow-sm" open>
+                    <summary class="list-none cursor-pointer bg-[#0F034D] p-4 text-white">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <p class="text-sm font-bold text-[#0F034D]">{{ $perintah->nomor_wo ?? 'Perintah Produksi' }}</p>
-                                    <span class="rounded-full bg-[#0F034D]/5 px-2.5 py-1 text-xs font-bold text-[#0F034D]">Prioritas #{{ $fifoIndex }}</span>
+                                    <p class="text-sm font-bold text-white">{{ $perintah->nomor_wo ?? 'Perintah Produksi' }}</p>
+                                    <span class="rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold text-white">Prioritas #{{ $fifoIndex }}</span>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1">Periode: {{ $perintah?->tgl_mulai ? \Carbon\Carbon::parse($perintah->tgl_mulai)->format('d M Y') : '-' }} - {{ $perintah?->tgl_selesai ? \Carbon\Carbon::parse($perintah->tgl_selesai)->format('d M Y') : '-' }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ $ajuanDalamPerintah->count() }} ajuan  -  {{ number_format($totalQty, 0, ',', '.') }} pcs diajukan</p>
+                                <p class="text-xs text-blue-200 mt-1">Periode: {{ $perintah?->tgl_mulai ? \Carbon\Carbon::parse($perintah->tgl_mulai)->format('d M Y') : '-' }} - {{ $perintah?->tgl_selesai ? \Carbon\Carbon::parse($perintah->tgl_selesai)->format('d M Y') : '-' }}</p>
+                                <p class="text-xs text-blue-200 mt-1">{{ $ajuanDalamPerintah->count() }} ajuan  -  <span class="text-amber-300 font-bold bg-white/10 px-2 py-0.5 rounded-lg">{{ number_format($totalQty, 0, ',', '.') }} pcs</span> diajukan</p>
                             </div>
-                            <svg class="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"></path></svg>
+                            <svg class="w-5 h-5 text-blue-200 transition-transform group-open:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"></path></svg>
                         </div>
                     </summary>
 
                     <div class="divide-y divide-gray-100 bg-white">
                         @foreach($ajuanDalamPerintah as $ajuan)
                             <div class="p-4">
-                                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                                    <div>
-                                        <p class="text-sm font-bold text-[#0F034D]">{{ $ajuan->produk->nama_produk ?? '-' }} - {{ ucfirst($ajuan->produk->warna ?? '-') }}</p>
-                                        <p class="text-xs text-gray-500 mt-1">Dari {{ $ajuan->keKaryawan->name ?? '-' }} - {{ ucfirst($ajuan->ke_tahapan) }}  -  {{ number_format($ajuan->qty_ajuan, 0, ',', '.') }} pcs</p>
-                                        <p class="mt-1 inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-500">Diajukan {{ $ajuan->created_at?->format('d M Y H:i') }}</p>
-                                        @if($ajuan->catatan_pengaju)
-                                            <p class="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">Catatan pengaju: {{ $ajuan->catatan_pengaju }}</p>
-                                        @endif
-                                        <span class="inline-flex mt-2 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">Menunggu konfirmasi</span>
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div class="flex items-start gap-4">
+                                        <!-- Large Qty Badge -->
+                                        <div class="flex h-12 w-20 shrink-0 flex-col items-center justify-center rounded-xl bg-blue-50 border border-blue-100 text-[#0F034D]">
+                                            <span class="text-[9px] uppercase font-semibold text-blue-500/80">Jumlah</span>
+                                            <span class="text-sm font-black mt-0.5">{{ number_format($ajuan->qty_ajuan, 0, ',', '.') }} <span class="text-[9px] font-normal text-blue-600/80">pcs</span></span>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold text-gray-900">{{ $ajuan->produk->nama_produk ?? '-' }} - {{ ucfirst($ajuan->produk->warna ?? '-') }}</p>
+                                            <p class="text-xs text-gray-500 mt-1">Dari {{ $ajuan->keKaryawan->name ?? '-' }} - <span class="font-semibold text-gray-700">{{ ucfirst($ajuan->ke_tahapan) }}</span></p>
+                                            <div class="flex flex-wrap items-center gap-2 mt-2">
+                                                <span class="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-0.5 text-[10px] font-medium text-gray-400">Diajukan {{ $ajuan->created_at?->format('d M Y H:i') }}</span>
+                                                <span class="inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">Menunggu konfirmasi</span>
+                                            </div>
+                                            @if($ajuan->catatan_pengaju)
+                                                <p class="mt-2.5 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600 border border-gray-100">Catatan: {{ $ajuan->catatan_pengaju }}</p>
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2 sm:w-56">
-                                        <form action="{{ route('produksi.ajuan-pengambilan.approve', $ajuan) }}" method="POST">
+                                        <form action="{{ route('produksi.ajuan-pengambilan.approve', $ajuan) }}" method="POST"
+                                            data-swal-confirm
+                                            data-confirm-title="Setujui Ajuan Ini?"
+                                            data-confirm-message="Barang akan dialihkan ke karyawan yang mengajukan. Pastikan stok ready mencukupi."
+                                            data-confirm-button="Ya, Setujui">
                                             @csrf
-                                            <button class="w-full rounded-xl bg-green-600 py-2.5 text-xs font-bold text-white hover:bg-green-700 transition-colors">Setujui</button>
+                                            <button class="w-full rounded-xl bg-green-600 py-2.5 text-xs font-bold text-white hover:bg-green-700 transition-colors shadow-sm shadow-green-600/10 cursor-pointer">Setujui</button>
                                         </form>
-                                        <button type="button" data-open-reject-modal data-reject-action="{{ route('produksi.ajuan-pengambilan.reject', $ajuan) }}" class="w-full rounded-xl bg-red-50 py-2.5 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors">Tolak</button>
+                                        <button type="button" data-open-reject-modal data-reject-action="{{ route('produksi.ajuan-pengambilan.reject', $ajuan) }}" class="w-full rounded-xl bg-red-50 py-2.5 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors cursor-pointer">Tolak</button>
                                     </div>
                                 </div>
                             </div>

@@ -28,11 +28,17 @@ tabButtons.forEach((button) => {
 });
 
 let searchTimer;
-document.getElementById('ajuan-search')?.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => filterForm?.submit(), 450);
+const searchInput = document.getElementById('ajuan-search');
+if (searchInput) {
+    searchInput.closest('form')?.querySelector('input[name="search"]');
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => searchInput.closest('form')?.submit(), 450);
+    });
+}
+document.getElementById('ajuan-date-filter')?.addEventListener('change', () => {
+    document.getElementById('filter-ajuan-form')?.submit();
 });
-document.getElementById('ajuan-date-filter')?.addEventListener('change', () => filterForm?.submit());
 
 document.querySelectorAll('[data-custom-dropdown-button]').forEach((button) => {
     button.addEventListener('click', (event) => {
@@ -48,11 +54,72 @@ document.querySelectorAll('[data-custom-dropdown-button]').forEach((button) => {
 
 document.querySelectorAll('[data-custom-dropdown-option]').forEach((option) => {
     option.addEventListener('click', () => {
-        const input = document.querySelector(`[data-custom-dropdown-input="${option.dataset.customDropdownOption}"]`);
-        if (!input) return;
-        input.value = option.dataset.value ?? '';
+        const key = option.dataset.customDropdownOption;
+        const value = option.dataset.value ?? '';
+        // Update hidden input in filter form
+        if (filterForm) {
+            const hiddenInput = filterForm.querySelector(`input[name="${key}"]`);
+            if (hiddenInput) hiddenInput.value = value;
+        }
+        // Also update standalone hidden inputs (backwards compat)
+        const standaloneInput = document.querySelector(`[data-custom-dropdown-input="${key}"]`);
+        if (standaloneInput) standaloneInput.value = value;
         filterForm?.submit();
     });
 });
 
 document.addEventListener('click', () => closeDropdowns());
+
+// --- Riwayat Ajuan Status Filter (client-side) ---
+const riwayatFilterBtns = document.querySelectorAll('[data-riwayat-status]');
+const riwayatList = document.querySelector('[data-riwayat-list]');
+
+if (riwayatFilterBtns.length && riwayatList) {
+    riwayatFilterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const status = btn.dataset.riwayatStatus;
+
+            // Toggle active styles
+            riwayatFilterBtns.forEach((b) => {
+                const isActive = b.dataset.riwayatStatus === status;
+                b.classList.toggle('bg-[#0F034D]', isActive);
+                b.classList.toggle('text-white', isActive);
+                b.classList.toggle('border-[#0F034D]', isActive);
+                b.classList.toggle('bg-white', !isActive);
+                b.classList.toggle('text-gray-600', !isActive);
+                b.classList.toggle('border-gray-200', !isActive);
+                b.classList.toggle('hover:bg-gray-50', !isActive);
+            });
+
+            // Filter items
+            const items = riwayatList.querySelectorAll('[data-riwayat-ajuan-status]');
+            const groups = riwayatList.querySelectorAll('details');
+            groups.forEach((group) => {
+                const childItems = group.querySelectorAll('[data-riwayat-ajuan-status]');
+                let hasVisible = false;
+                childItems.forEach((item) => {
+                    const match = status === '' || item.dataset.riwayatAjuanStatus === status;
+                    item.style.display = match ? '' : 'none';
+                    if (match) hasVisible = true;
+                });
+                group.style.display = hasVisible ? '' : 'none';
+            });
+
+            // Show/hide empty state
+            let emptyMsg = riwayatList.querySelector('[data-riwayat-empty]');
+            const anyVisible = riwayatList.querySelectorAll('details[style=""], details:not([style])');
+            let visibleCount = 0;
+            groups.forEach((g) => { if (g.style.display !== 'none') visibleCount++; });
+
+            if (visibleCount === 0 && !emptyMsg) {
+                emptyMsg = document.createElement('div');
+                emptyMsg.dataset.riwayatEmpty = '';
+                emptyMsg.className = 'rounded-xl bg-gray-50 border border-gray-100 p-6 text-center';
+                emptyMsg.innerHTML = '<p class="text-sm font-semibold text-gray-600">Tidak ada ajuan dengan status ini.</p>';
+                riwayatList.appendChild(emptyMsg);
+            } else if (visibleCount > 0 && emptyMsg) {
+                emptyMsg.remove();
+            }
+        });
+    });
+}

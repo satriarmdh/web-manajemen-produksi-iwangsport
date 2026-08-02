@@ -16,7 +16,7 @@
         <div onclick="filterBahanFromCard('menipis')" class="relative bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer select-none">
             <div class="min-w-0">
                 <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Bahan Baku Menipis</p>
-                <h3 class="text-2xl font-bold text-amber-600 mt-1 leading-none tabular-nums">{{ $stats['bahan_menipis_count'] }} <span class="text-xs font-normal text-gray-400">item &lt; 10</span></h3>
+                <h3 class="text-2xl font-bold text-amber-600 mt-1 leading-none tabular-nums">{{ $stats['bahan_menipis_count'] }} <span class="text-xs font-normal text-gray-400">item</span></h3>
                 <span class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1 font-medium group-hover:text-amber-600 transition-colors">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
                     Klik untuk lihat item
@@ -31,7 +31,7 @@
         <div onclick="filterProdukFromCard('menipis')" class="relative bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer select-none">
             <div class="min-w-0">
                 <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Produk Jadi Menipis</p>
-                <h3 class="text-2xl font-bold text-amber-600 mt-1 leading-none tabular-nums">{{ $stats['produk_menipis_count'] }} <span class="text-xs font-normal text-gray-400">item &lt; 100</span></h3>
+                <h3 class="text-2xl font-bold text-amber-600 mt-1 leading-none tabular-nums">{{ $stats['produk_menipis_count'] }} <span class="text-xs font-normal text-gray-400">item</span></h3>
                 <span class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1 font-medium group-hover:text-amber-600 transition-colors">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
                     Klik untuk lihat item
@@ -183,6 +183,7 @@
                             <th scope="col" class="px-6 py-3.5 font-semibold text-center">Pergerakan</th>
                             <th scope="col" class="px-6 py-3.5 font-semibold text-right">Mutasi</th>
                             <th scope="col" class="px-6 py-3.5 font-semibold text-right">Stok Akhir</th>
+                            <th scope="col" class="px-6 py-3.5 font-semibold text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-mutasi-body" class="divide-y divide-gray-100">
@@ -235,10 +236,30 @@
                                 <td class="px-6 py-4 text-right font-bold text-gray-900 text-sm tabular-nums">
                                     {{ number_format($mutasi->stok_sesudah, 0, ',', '.') }}
                                 </td>
+                                <td class="px-6 py-4 text-center">
+                                    <button type="button"
+                                        data-open-mutasi-detail
+                                        data-id="{{ $mutasi->id }}"
+                                        data-nama="{{ $mutasiName }}"
+                                        data-kode="{{ $mutasiKode }}"
+                                        data-jenis-item="{{ $mutasi->jenis_item }}"
+                                        data-pergerakan="{{ $mutasi->jenis_pergerakan }}"
+                                        data-jumlah="{{ $mutasi->jumlah }}"
+                                        data-stok-sebelum="{{ $mutasi->stok_sebelum }}"
+                                        data-stok-sesudah="{{ $mutasi->stok_sesudah }}"
+                                        data-waktu="{{ $mutasi->created_at->translatedFormat('d M Y, H:i') }}"
+                                        data-pic="{{ $mutasi->user->name ?? 'Sistem' }}"
+                                        data-keterangan="{{ $mutasi->keterangan ?? '-' }}"
+                                        data-referensi-type="{{ class_basename($mutasi->referensi_type ?? '-') }}"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-[#0F034D] bg-[#0F034D]/5 hover:bg-[#0F034D]/10 rounded-lg transition-colors cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        Detail
+                                    </button>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-16 text-center">
+                                <td colspan="7" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center justify-center gap-3">
                                         <div class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center">
                                             <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -590,6 +611,98 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Detail Riwayat Stok Slide Panel -->
+    <div id="mutasiDetailModal" class="slide-panel">
+        <div class="slide-panel-backdrop" data-close-mutasi-detail></div>
+        <div class="slide-panel-body">
+            <div class="slide-panel-header">
+                <div class="slide-panel-header-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="slide-panel-header-title">Detail Aktivitas Stok</h2>
+                    <p class="text-xs text-gray-500 mt-0.5" id="detail_nama_item">-</p>
+                </div>
+                <button type="button" class="slide-panel-close" data-close-mutasi-detail>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="slide-panel-content">
+                <div class="space-y-5">
+                    <!-- Info Item -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-xs text-gray-500 mb-0.5">Nama Item</p>
+                            <p class="text-sm font-bold text-gray-900" id="detail_nama">-</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-xs text-gray-500 mb-0.5">Kode Item</p>
+                            <p class="text-sm font-bold text-gray-900" id="detail_kode">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Info Pergerakan -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-xs text-gray-500 mb-0.5">Tipe Item</p>
+                            <p class="text-sm font-bold text-gray-900" id="detail_tipe">-</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-xs text-gray-500 mb-0.5">Jenis Pergerakan</p>
+                            <p class="text-sm font-bold text-gray-900" id="detail_pergerakan">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Stok Before/After -->
+                    <div class="p-4 bg-gradient-to-br from-[#0F034D]/5 to-purple-50 rounded-xl border border-[#0F034D]/10">
+                        <p class="text-xs font-semibold text-[#0F034D] mb-3 uppercase tracking-wide">Perubahan Stok</p>
+                        <div class="flex items-center justify-between">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500 mb-1">Sebelum</p>
+                                <p class="text-xl font-bold text-gray-700" id="detail_stok_sebelum">0</p>
+                            </div>
+                            <div class="flex-1 flex items-center justify-center px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-0.5 w-8 bg-gray-300"></div>
+                                    <svg class="w-5 h-5 text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                                    <div class="h-0.5 w-8 bg-gray-300"></div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500 mb-1">Sesudah</p>
+                                <p class="text-xl font-bold text-[#0F034D]" id="detail_stok_sesudah">0</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <p class="text-xs text-gray-500">Jumlah Mutasi: <span class="font-bold" id="detail_jumlah">0</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Info Tambahan -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Waktu</span>
+                            <span class="text-sm font-semibold text-gray-900" id="detail_waktu">-</span>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">PIC</span>
+                            <span class="text-sm font-semibold text-gray-900" id="detail_pic">-</span>
+                        </div>
+                        <div class="py-2">
+                            <p class="text-sm text-gray-500 mb-1">Keterangan</p>
+                            <p class="text-sm font-semibold text-gray-900 bg-gray-50 p-3 rounded-xl" id="detail_keterangan">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Script JS Tab Switcher & Filter -->

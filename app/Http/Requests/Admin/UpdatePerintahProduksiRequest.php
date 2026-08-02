@@ -10,9 +10,7 @@ class UpdatePerintahProduksiRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $perintahProduksi = $this->route('perintah_produksi');
-
-        return auth()->user()->role === 'admin' && $perintahProduksi->status_produksi === 'pending';
+        return auth()->user()->role === 'admin';
     }
 
     public function rules(): array

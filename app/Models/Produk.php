@@ -20,14 +20,24 @@ class Produk extends Model
         'harga_satuan',
         'satuan',
         'stok',
+        'stok_minimal',
         'is_aktif',
     ];
 
     protected $casts = [
         'harga_satuan' => 'integer',
         'stok' => 'integer',
+        'stok_minimal' => 'integer',
         'is_aktif' => 'boolean',
     ];
+
+    /**
+     * Cek apakah stok di bawah ambang stok minimal.
+     */
+    public function isStokMenipis(): bool
+    {
+        return $this->stok > 0 && $this->stok_minimal > 0 && $this->stok < $this->stok_minimal;
+    }
 
     public function riwayatStokTerakhir()
     {

@@ -104,4 +104,46 @@ class PerintahProduksiKaryawanTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_karyawan_dapat_mengurutkan_perintah_produksi_berdasarkan_nomor_wo()
+    {
+        PerintahProduksi::factory()->disetujui()->create(['nomor_wo' => 'WO-ZZZ']);
+        PerintahProduksi::factory()->disetujui()->create(['nomor_wo' => 'WO-AAA']);
+
+        $response = $this->actingAs($this->karyawan)->get('/produksi/perintah-produksi?sort=wo_asc');
+
+        $response->assertStatus(200);
+        $content = $response->getContent();
+        $posAAA = strpos($content, 'WO-AAA');
+        $posZZZ = strpos($content, 'WO-ZZZ');
+        $this->assertLessThan($posZZZ, $posAAA);
+    }
+
+    public function test_halaman_perintah_produksi_kosong_ketika_tidak_ada_wo()
+    {
+        $response = $this->actingAs($this->karyawan)->get('/produksi/perintah-produksi');
+
+        $response->assertStatus(200)
+            ->assertSee('Belum ada pekerjaan');
+    }
+
+    public function test_semua_role_produksi_dapat_mengakses_halaman_perintah_produksi()
+    {
+        $wo = PerintahProduksi::factory()->disetujui()->create();
+
+        foreach (['potong', 'jahit', 'finishing'] as $role) {
+            $karyawan = User::factory()->create(['role' => $role]);
+            $response = $this->actingAs($karyawan)->get('/produksi/perintah-produksi');
+            $response->assertStatus(200);
+        }
+    }
+
+    public function test_owner_tidak_dapat_mengakses_halaman_produksi()
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        $response = $this->actingAs($owner)->get('/produksi/perintah-produksi');
+
+        $response->assertStatus(403);
+    }
 }

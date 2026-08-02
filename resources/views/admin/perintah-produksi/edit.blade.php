@@ -14,7 +14,11 @@
         Edit Perintah Produksi
     </x-slot:header>
 
-    <form action="{{ route('admin.perintah-produksi.update', $perintahProduksi) }}" method="POST">
+    <form action="{{ route('admin.perintah-produksi.update', $perintahProduksi) }}" method="POST"
+        data-swal-confirm
+        data-confirm-title="Update Perintah Produksi?"
+        data-confirm-message="Perubahan pada perintah produksi akan disimpan. Pastikan semua data sudah benar."
+        data-confirm-button="Ya, Update">
         @csrf
         @method('PUT')
 

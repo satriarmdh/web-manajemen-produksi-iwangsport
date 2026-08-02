@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Database\Eloquent\Relations\Relation::enforceMorphMap([
             'bahan_baku' => \App\Models\BahanBaku::class,
             'produk' => \App\Models\Produk::class,
+            'user' => \App\Models\User::class,
         ]);
     }
 }

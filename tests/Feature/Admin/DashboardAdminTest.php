@@ -68,10 +68,10 @@ class DashboardAdminTest extends TestCase
         PerintahProduksi::factory()->dalamProduksi()->create(['nomor_wo' => 'WO-AKTIF-2']);
         PerintahProduksi::factory()->pending()->create(['nomor_wo' => 'WO-PENDING']); // tidak dihitung aktif
 
-        // 2. Buat stok menipis
-        BahanBaku::factory()->create(['stok' => 5]); // menipis (<10)
-        BahanBaku::factory()->create(['stok' => 0]); // habis / menipis (<10)
-        Produk::factory()->create(['stok' => 50]); // menipis (<100)
+        // 2. Buat stok menipis (stok_minimal > 0, stok > 0, dan stok < stok_minimal)
+        BahanBaku::factory()->create(['stok' => 5, 'stok_minimal' => 10]); // menipis
+        BahanBaku::factory()->create(['stok' => 0, 'stok_minimal' => 5]);  // habis (bukan menipis)
+        Produk::factory()->create(['stok' => 50, 'stok_minimal' => 100]); // menipis
 
         // 3. Buat supplier dan pelanggan
         Supplier::factory()->create();
@@ -97,7 +97,7 @@ class DashboardAdminTest extends TestCase
         // Uji asersi data stat
         $response->assertViewHas('stats', function ($stats) {
             return $stats['active_wo'] === 2 
-                && $stats['low_stock'] === 3
+                && $stats['low_stock'] === 2
                 && $stats['partners'] === 2
                 && $stats['today_transactions'] === 2;
         });
