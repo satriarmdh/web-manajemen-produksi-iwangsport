@@ -106,7 +106,7 @@
 
                 <div class="flex items-center gap-1.5 ml-auto mr-2">
                     <span class="text-[9px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-semibold shrink-0">
-                        {{ number_format($item['total_selesai']) }} selesai
+                        {{ number_format($item['total_selesai'] + $item['total_reject']) }} selesai
                     </span>
                 </div>
             </div>
@@ -118,7 +118,7 @@
                 data-karyawan-name="{{ $item['karyawan_name'] }}"
                 data-peran="{{ $item['peran'] }}"
                 data-qty-hold="{{ $wipInput }}"
-                data-total-selesai="{{ $item['total_selesai'] }}"
+                data-total-selesai="{{ $item['total_selesai'] + $item['total_reject'] }}"
                 data-total-dikeluarkan="{{ $item['total_dikeluarkan'] }}"
                 data-total-reject="{{ $item['total_reject'] }}"
                 data-ready-qty="{{ $readyToTransfer }}"

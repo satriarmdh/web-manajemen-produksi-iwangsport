@@ -89,18 +89,6 @@
                     </div>
                 </div>
 
-                @if($detail->status_validasi_potong === 'flag')
-                    @php
-                        $potongReject = (int) (\App\Models\StokVirtual::where('id_detail_perintah', $detail->id)->where('peran', 'potong')->value('total_reject') ?? 0);
-                        $batasBawahPotong = (int) $detail->estimasi_pcs - (int) $detail->toleransi_minus;
-                        $totalInputPotong = (int) $detail->qty_pcs_potong + $potongReject;
-                        $selisihPotong = max(0, $batasBawahPotong - $totalInputPotong);
-                    @endphp
-                    <div class="mt-3 rounded-xl bg-red-50 border border-red-100 p-3">
-                        <p class="text-xs text-red-500 mb-1">Flag Selisih Tukang Potong</p>
-                        <p class="text-sm text-red-700 font-medium">{{ number_format($selisihPotong, 0, ',', '.') }} pcs selisih</p>
-                    </div>
-                @endif
             </div>
         </div>
 

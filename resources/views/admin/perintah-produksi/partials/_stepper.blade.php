@@ -2,33 +2,88 @@
     $stokVirtualAll = $perintahProduksi->stokVirtual->where('id_detail_perintah', $detail->id);
     $isFinished = $perintahProduksi->status_produksi === 'selesai';
 
-    // Potong: progress = diteruskan / total hasil potong
+    // Potong
     $potongStok = $stokVirtualAll->where('peran', 'potong');
-    $potongTotalMasuk = (int) ($detail->qty_pcs_potong ?? 0);
-    $potongDiteruskan = (int) $potongStok->sum('total_dikeluarkan');
-    $potongProgress = $potongTotalMasuk > 0 ? min(100, (int) round($potongDiteruskan / $potongTotalMasuk * 100)) : 0;
+    $potongSelesai = (int) ($detail->qty_pcs_potong ?? 0);
+    $potongDiserahkan = (int) $potongStok->sum('total_dikeluarkan');
+    $potongIsSelesai = $potongStok->where('is_selesai', 1)->isNotEmpty() || ($detail->status_validasi_potong !== 'pending' && $potongSelesai > 0);
+    $potongProgress = $detail->estimasi_pcs > 0 ? min(100, (int) round($potongSelesai / $detail->estimasi_pcs * 100)) : 0;
+    $potongComplete = $potongIsSelesai || $isFinished;
 
-    // Jahit: progress = selesai / total masuk
+    // Jahit
     $jahitStok = $stokVirtualAll->where('peran', 'jahit');
-    $jahitTotalMasuk = (int) $jahitStok->sum(fn($s) => (int) $s->qty_hold + (int) $s->total_selesai);
+    $jahitTotalMasuk = (int) $jahitStok->sum(fn($s) => (int) $s->qty_hold + (int) $s->total_selesai + (int) $s->total_reject);
     $jahitSelesai = (int) $jahitStok->sum('total_selesai');
-    $jahitProgress = $jahitTotalMasuk > 0 ? min(100, (int) round($jahitSelesai / $jahitTotalMasuk * 100)) : 0;
+    $jahitDiserahkan = (int) $jahitStok->sum('total_dikeluarkan');
+    $jahitIsSelesai = $jahitStok->count() > 0 && $jahitStok->where('is_selesai', 0)->count() === 0;
+    $jahitProgress = $jahitTotalMasuk > 0 ? min(100, (int) round(($jahitSelesai + $jahitStok->sum('total_reject')) / $jahitTotalMasuk * 100)) : 0;
+    $jahitComplete = $jahitIsSelesai || $isFinished;
 
-    // Finishing: progress = selesai / total masuk
+    // Finishing
     $finishingStok = $stokVirtualAll->where('peran', 'finishing');
-    $finishingTotalMasuk = (int) $finishingStok->sum(fn($s) => (int) $s->qty_hold + (int) $s->total_selesai);
+    $finishingTotalMasuk = (int) $finishingStok->sum(fn($s) => (int) $s->qty_hold + (int) $s->total_selesai + (int) $s->total_reject);
     $finishingSelesai = (int) $finishingStok->sum('total_selesai');
-    $finishingProgress = $finishingTotalMasuk > 0 ? min(100, (int) round($finishingSelesai / $finishingTotalMasuk * 100)) : 0;
+    $finishingDiserahkan = (int) $finishingStok->sum('total_dikeluarkan');
+    $finishingIsSelesai = $finishingStok->count() > 0 && $finishingStok->where('is_selesai', 0)->count() === 0;
+    $finishingProgress = $finishingTotalMasuk > 0 ? min(100, (int) round(($finishingSelesai + $finishingStok->sum('total_reject')) / $finishingTotalMasuk * 100)) : 0;
+    $finishingComplete = $finishingIsSelesai || $isFinished;
 
-    // Ready: qty siap diterima dari finishing
-    $readyQty = (int) $finishingStok->sum(fn($s) => max(0, (int) $s->total_selesai - (int) $s->total_dikeluarkan));
+    // Selesai (Penerimaan Admin)
+    $diterimaAdmin = (int) ($detail->qty_diterima_admin ?? $finishingDiserahkan);
+    $readyComplete = $isFinished || ($diterimaAdmin >= $detail->estimasi_pcs && $detail->estimasi_pcs > 0);
 
     $steps = [
-        ['key' => 'wo', 'label' => 'Work Order', 'sub' => number_format($detail->estimasi_pcs, 0, ',', '.') . ' pcs estimasi', 'progress' => 100, 'started' => true],
-        ['key' => 'potong', 'label' => 'Potong', 'sub' => $potongTotalMasuk > 0 ? number_format($potongDiteruskan, 0, ',', '.') . '/' . number_format($potongTotalMasuk, 0, ',', '.') . ' diteruskan' : 'Menunggu hasil potong', 'progress' => $isFinished ? 100 : $potongProgress, 'started' => $potongTotalMasuk > 0],
-        ['key' => 'jahit', 'label' => 'Jahit', 'sub' => $jahitTotalMasuk > 0 ? number_format($jahitSelesai, 0, ',', '.') . '/' . number_format($jahitTotalMasuk, 0, ',', '.') . ' pcs' : 'Menunggu transfer dari potong', 'progress' => $isFinished ? 100 : $jahitProgress, 'started' => $jahitTotalMasuk > 0],
-        ['key' => 'finishing', 'label' => 'Finishing', 'sub' => $finishingTotalMasuk > 0 ? number_format($finishingSelesai, 0, ',', '.') . '/' . number_format($finishingTotalMasuk, 0, ',', '.') . ' pcs' : 'Menunggu transfer dari jahit', 'progress' => $isFinished ? 100 : $finishingProgress, 'started' => $finishingTotalMasuk > 0],
-        ['key' => 'ready', 'label' => 'Siap Diterima', 'sub' => $readyQty > 0 ? number_format($readyQty, 0, ',', '.') . ' pcs ready' : ($isFinished ? 'Selesai' : 'Belum ada'), 'progress' => $readyQty > 0 || $isFinished ? 100 : 0, 'started' => $readyQty > 0 || $isFinished],
+        [
+            'key' => 'wo',
+            'label' => 'Work Order',
+            'lines' => [number_format($detail->estimasi_pcs, 0, ',', '.') . ' pcs estimasi'],
+            'progress' => 100,
+            'isComplete' => true,
+            'started' => true,
+        ],
+        [
+            'key' => 'potong',
+            'label' => 'Potong',
+            'lines' => [
+                'Selesai: ' . number_format($potongSelesai, 0, ',', '.') . ' pcs',
+                'Diserahkan: ' . number_format($potongDiserahkan, 0, ',', '.') . ' pcs',
+            ],
+            'progress' => $potongComplete ? 100 : $potongProgress,
+            'isComplete' => $potongComplete,
+            'started' => $potongSelesai > 0 || $potongIsSelesai,
+        ],
+        [
+            'key' => 'jahit',
+            'label' => 'Jahit',
+            'lines' => [
+                'Selesai: ' . number_format($jahitSelesai, 0, ',', '.') . ' pcs',
+                'Diserahkan: ' . number_format($jahitDiserahkan, 0, ',', '.') . ' pcs',
+            ],
+            'progress' => $jahitComplete ? 100 : $jahitProgress,
+            'isComplete' => $jahitComplete,
+            'started' => $jahitTotalMasuk > 0 || $jahitSelesai > 0 || $jahitIsSelesai,
+        ],
+        [
+            'key' => 'finishing',
+            'label' => 'Finishing',
+            'lines' => [
+                'Selesai: ' . number_format($finishingSelesai, 0, ',', '.') . ' pcs',
+                'Diserahkan: ' . number_format($finishingDiserahkan, 0, ',', '.') . ' pcs',
+            ],
+            'progress' => $finishingComplete ? 100 : $finishingProgress,
+            'isComplete' => $finishingComplete,
+            'started' => $finishingTotalMasuk > 0 || $finishingSelesai > 0 || $finishingIsSelesai,
+        ],
+        [
+            'key' => 'selesai',
+            'label' => 'Selesai',
+            'lines' => [
+                number_format($diterimaAdmin, 0, ',', '.') . ' pcs diterima admin',
+            ],
+            'progress' => $readyComplete ? 100 : ($diterimaAdmin > 0 && $detail->estimasi_pcs > 0 ? min(100, (int) round($diterimaAdmin / $detail->estimasi_pcs * 100)) : 0),
+            'isComplete' => $readyComplete,
+            'started' => $diterimaAdmin > 0 || $isFinished,
+        ],
     ];
 @endphp
 <!-- Alur Produksi (Vertical Timeline) -->
@@ -37,7 +92,7 @@
         @php
             $circumference = 100.5;
             $dashOffset = $circumference * (1 - $step['progress'] / 100);
-            $isComplete = $step['progress'] >= 100;
+            $isComplete = $step['isComplete'];
             $isActive = $step['started'] && !$isComplete;
             $ringColor = $isComplete ? '#22c55e' : ($isActive ? '#0F034D' : '#e5e7eb');
             $labelColor = $step['started'] ? 'text-[#0F034D]' : 'text-gray-400';
@@ -66,7 +121,7 @@
                 @if(!$isLast)
                     @php
                         $nextStep = $steps[$index + 1];
-                        $lineClass = $nextStep['progress'] >= 100 ? 'bg-green-400' : ($nextStep['started'] ? 'bg-[#0F034D]/40' : 'bg-gray-200');
+                        $lineClass = $nextStep['isComplete'] ? 'bg-green-400' : ($nextStep['started'] ? 'bg-[#0F034D]/40' : 'bg-gray-200');
                     @endphp
                     <div class="w-0.5 grow {{ $lineClass }} mt-1 transition-all duration-500" style="min-height: 1rem;"></div>
                 @endif
@@ -75,7 +130,9 @@
             {{-- Right: Label + Sub-info --}}
             <div class="pt-1 pb-0.5 min-w-0 flex-1">
                 <p class="text-xs font-bold {{ $labelColor }} leading-tight">{{ $step['label'] }}</p>
-                <p class="text-[11px] text-gray-400 leading-tight mt-0.5">{{ $step['sub'] }}</p>
+                @foreach($step['lines'] as $line)
+                    <p class="text-[11px] text-gray-500 leading-tight mt-0.5">{{ $line }}</p>
+                @endforeach
             </div>
         </div>
     @endforeach

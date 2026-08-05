@@ -83,10 +83,17 @@ class AjuanPengambilanProduksiController extends Controller
         $this->service->approve($ajuan, $request->user());
 
         // Notifikasi -> karyawan pengaju
+        $ajuan->loadMissing(['produk', 'keKaryawan']);
         if ($ajuan->keKaryawan) {
+            $namaProduk = $ajuan->produk ? ($ajuan->produk->nama_produk . ' - ' . ucfirst($ajuan->produk->warna ?? '-')) : 'produk';
+            $approverName = $request->user()->name . ' (' . ucfirst($request->user()->role) . ')';
+            $qty = (int) $ajuan->qty_ajuan;
+
             app(NotificationService::class)->ajuanDisetujui(
                 $ajuan->keKaryawan,
-                $ajuan->id
+                $namaProduk,
+                $qty,
+                $approverName
             );
         }
 
@@ -99,17 +106,26 @@ class AjuanPengambilanProduksiController extends Controller
         RespondAjuanPengambilanProduksiRequest $request,
         AjuanPengambilanProduksi $ajuan
     ) {
+        $catatanRespon = $request->validated('catatan_respon');
         $this->service->reject(
             $ajuan,
             $request->user(),
-            $request->validated('catatan_respon')
+            $catatanRespon
         );
 
         // Notifikasi -> karyawan pengaju
+        $ajuan->loadMissing(['produk', 'keKaryawan']);
         if ($ajuan->keKaryawan) {
+            $namaProduk = $ajuan->produk ? ($ajuan->produk->nama_produk . ' - ' . ucfirst($ajuan->produk->warna ?? '-')) : 'produk';
+            $approverName = $request->user()->name . ' (' . ucfirst($request->user()->role) . ')';
+            $qty = (int) $ajuan->qty_ajuan;
+
             app(NotificationService::class)->ajuanDitolak(
                 $ajuan->keKaryawan,
-                $ajuan->id
+                $namaProduk,
+                $qty,
+                $approverName,
+                $catatanRespon
             );
         }
 

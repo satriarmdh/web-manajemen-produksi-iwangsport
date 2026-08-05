@@ -228,8 +228,8 @@
                 'bahan_baku_id' => (string) $detail->bahan_baku_id,
                 'qty_roll_pakai' => (int) $detail->qty_roll_pakai,
                 'estimasi_pcs' => (int) $detail->estimasi_pcs,
-                'produk_nama' => $detail->produk->nama_produk ?? '-',
-                'bahan_nama' => $detail->bahanBaku->nama_bahan ?? '-',
+                'produk_nama' => isset($detail->produk) ? ($detail->produk->nama_produk . ' - ' . ucfirst($detail->produk->warna ?? '-')) : '-',
+                'bahan_nama' => isset($detail->bahanBaku) ? ($detail->bahanBaku->nama_bahan . ' - ' . ucfirst($detail->bahanBaku->warna ?? '-')) : '-',
             ];
         })->values();
     @endphp

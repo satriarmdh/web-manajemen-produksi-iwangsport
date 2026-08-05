@@ -55,9 +55,7 @@
                 $inputSelesai = (bool) ($stokVirtualSaya?->is_selesai ?? false) || ($targetInput > 0 && $sudahDiinput >= $targetInput);
                 $perluPengajuan = $role !== 'potong' && (! $stokVirtualSaya || $targetInput <= 0);
                 $stokReady = $stokVirtualSaya
-                    ? ($stokVirtualSaya->peran === 'potong'
-                        ? (int) $stokVirtualSaya->qty_hold
-                        : max(0, (int) $stokVirtualSaya->total_selesai - (int) $stokVirtualSaya->total_dikeluarkan))
+                    ? max(0, (int) $stokVirtualSaya->total_selesai - (int) $stokVirtualSaya->total_dikeluarkan)
                     : 0;
             @endphp
 
@@ -68,7 +66,7 @@
                             <h3 class="text-md font-bold text-[#0F034D] truncate">{{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}</h3>
                             <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}"></span>
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Bahan: {{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ $detail->bahanBaku->nama_bahan ?? '-' }} - {{ ucfirst($detail->bahanBaku->warna ?? '-') }} - {{ number_format($detail->qty_roll_pakai ?? 0) }} Roll</p>
                     </div>
                 </div>
 
@@ -117,9 +115,9 @@
                             <p class="text-[10px] uppercase tracking-wide text-green-600/70 font-semibold">Stok ready</p>
                             <p class="text-sm font-bold text-green-700">{{ number_format($stokReady, 0, ',', '.') }} pcs</p>
                         </div>
-                        <div class="rounded-xl bg-orange-50/80 border border-orange-100 p-2.5">
-                            <p class="text-[10px] uppercase tracking-wide text-orange-600/70 font-semibold">Sudah diserahkan</p>
-                            <p class="text-sm font-bold text-orange-600">{{ number_format($totalDikeluarkan, 0, ',', '.') }} pcs</p>
+                        <div class="rounded-xl bg-blue-50/80 border border-blue-100 p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-blue-600/70 font-semibold">Sudah diserahkan</p>
+                            <p class="text-sm font-bold text-blue-700">{{ number_format($totalDikeluarkan, 0, ',', '.') }} pcs</p>
                         </div>
                     </div>
                     @endif

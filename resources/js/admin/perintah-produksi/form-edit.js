@@ -235,13 +235,17 @@
             const bahan = bahanBakusData.find(b => b.id == bahanId);
             const estimasi = qty * baseline.pcs_per_roll;
 
+            const formatWarna = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+            const produkNamaDisplay = produk.warna ? `${produk.nama_produk} - ${formatWarna(produk.warna)}` : produk.nama_produk;
+            const bahanNamaDisplay = bahan.warna ? `${bahan.nama_bahan} - ${formatWarna(bahan.warna)}` : bahan.nama_bahan;
+
             const newItem = {
                 produk_id: produkId,
                 bahan_baku_id: bahanId,
                 qty_roll_pakai: qty,
                 estimasi_pcs: estimasi,
-                produk_nama: produk.nama_produk,
-                bahan_nama: bahan.nama_bahan
+                produk_nama: produkNamaDisplay,
+                bahan_nama: bahanNamaDisplay
             };
 
             if (editingIndex === null) {

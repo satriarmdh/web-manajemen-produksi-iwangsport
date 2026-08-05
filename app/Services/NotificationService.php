@@ -18,6 +18,9 @@ class NotificationService
     public const TYPE_AJUAN_REJECTED = 'ajuan_rejected';
     public const TYPE_HARGA_CHANGED = 'harga_changed';
     public const TYPE_STOK_MANUAL = 'stok_manual';
+    public const TYPE_STOK_READY_POTONG = 'stok_ready_potong';
+    public const TYPE_STOK_READY_JAHIT = 'stok_ready_jahit';
+    public const TYPE_STOK_READY_FINISHING = 'stok_ready_finishing';
 
     public function notifyRoles(array $roles, string $title, string $message, string $type, ?string $url = null): void
     {
@@ -156,32 +159,79 @@ class NotificationService
     }
 
     /**
-     * Ajuan disetujui → notif ke karyawan pengaju.
+     * Ajuan disetujui → notif ke karyawan pengaju dengan pesan detail produk, qty, dan approver.
      * URL: /produksi/ajuan-pengambilan
      */
-    public function ajuanDisetujui(User $karyawan, string $nomorAjuan): void
+    public function ajuanDisetujui(User $karyawan, string $namaProduk, int $qty, string $approverName): void
     {
         $this->notifyUser(
             $karyawan,
             'Ajuan Disetujui',
-            "Ajuan pengambilan Anda (#{$nomorAjuan}) telah disetujui.",
+            "Ajuan Anda untuk produk {$namaProduk} dengan jumlah {$qty} pcs telah disetujui oleh {$approverName}.",
             self::TYPE_AJUAN_APPROVED,
             '/produksi/ajuan-pengambilan'
         );
     }
 
     /**
-     * Ajuan ditolak → notif ke karyawan pengaju.
+     * Ajuan ditolak → notif ke karyawan pengaju dengan pesan detail produk, qty, dan approver.
      * URL: /produksi/ajuan-pengambilan
      */
-    public function ajuanDitolak(User $karyawan, string $nomorAjuan): void
+    public function ajuanDitolak(User $karyawan, string $namaProduk, int $qty, string $approverName, ?string $alasan = null): void
     {
+        $message = "Ajuan Anda untuk produk {$namaProduk} dengan jumlah {$qty} pcs telah ditolak oleh {$approverName}.";
+        if ($alasan) {
+            $message .= " Catatan: {$alasan}";
+        }
+
         $this->notifyUser(
             $karyawan,
             'Ajuan Ditolak',
-            "Ajuan pengambilan Anda (#{$nomorAjuan}) telah ditolak.",
+            $message,
             self::TYPE_AJUAN_REJECTED,
             '/produksi/ajuan-pengambilan'
+        );
+    }
+
+    /**
+     * Potong input hasil selesai -> notif ke role jahit.
+     */
+    public function stokReadyPotong(string $namaProduk, int $qty): void
+    {
+        $this->notifyRoles(
+            ['jahit'],
+            'Stok Ready dari Potong',
+            "Terdapat {$qty} pcs produk {$namaProduk} ready di tukang potong, siap untuk diambil.",
+            self::TYPE_STOK_READY_POTONG,
+            '/produksi/ajuan-pengambilan'
+        );
+    }
+
+    /**
+     * Jahit input hasil selesai -> notif ke role finishing.
+     */
+    public function stokReadyJahit(string $namaProduk, int $qty): void
+    {
+        $this->notifyRoles(
+            ['finishing'],
+            'Stok Ready dari Penjahit',
+            "Terdapat {$qty} pcs produk {$namaProduk} ready di penjahit, siap untuk diambil.",
+            self::TYPE_STOK_READY_JAHIT,
+            '/produksi/ajuan-pengambilan'
+        );
+    }
+
+    /**
+     * Finishing input hasil selesai -> notif ke admin (routing langsung ke detail WO).
+     */
+    public function stokReadyFinishing(int $perintahProduksiId, string $namaProduk, int $qty): void
+    {
+        $this->notifyRoles(
+            ['admin'],
+            'Stok Ready di Finishing',
+            "Terdapat {$qty} pcs produk {$namaProduk} ready di finishing, siap untuk diterima admin.",
+            self::TYPE_STOK_READY_FINISHING,
+            "/admin/perintah-produksi/{$perintahProduksiId}"
         );
     }
 

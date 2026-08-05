@@ -35,7 +35,7 @@ class InputHasilPekerjaanService
      */
     private function storeHasilPotong(array $data, User $user): void
     {
-        $detail = DetailPerintahProduksi::with('perintahProduksi')
+        $detail = DetailPerintahProduksi::with(['perintahProduksi', 'produk'])
             ->lockForUpdate()
             ->findOrFail($data['detail_perintah_produksi_id']);
 
@@ -101,11 +101,16 @@ class InputHasilPekerjaanService
         $stokVirtual->status_barang = 'Ready';
         $stokVirtual->is_selesai = $ditandaiSelesai || (bool) $stokVirtual->is_selesai;
         $stokVirtual->save();
+
+        if ($qtySelesai > 0) {
+            $namaProduk = $detail->produk ? ($detail->produk->nama_produk . ' - ' . ucfirst($detail->produk->warna ?? '-')) : 'produk';
+            app(NotificationService::class)->stokReadyPotong($namaProduk, $qtySelesai);
+        }
     }
 
     private function storeHasilDariStokVirtual(array $data, User $user): void
     {
-        $stokVirtual = StokVirtual::lockForUpdate()->findOrFail($data['stok_virtual_id']);
+        $stokVirtual = StokVirtual::with('produk')->lockForUpdate()->findOrFail($data['stok_virtual_id']);
         $qtySelesai = (int) $data['qty_selesai'];
         $qtyReject = (int) ($data['qty_reject'] ?? 0);
 
@@ -138,5 +143,14 @@ class InputHasilPekerjaanService
             $stokVirtual->selisih_dicatat_at = $statusValidasi === 'flag' ? now() : null;
         }
         $stokVirtual->save();
+
+        if ($qtySelesai > 0) {
+            $namaProduk = $stokVirtual->produk ? ($stokVirtual->produk->nama_produk . ' - ' . ucfirst($stokVirtual->produk->warna ?? '-')) : 'produk';
+            if ($user->role === 'jahit') {
+                app(NotificationService::class)->stokReadyJahit($namaProduk, $qtySelesai);
+            } elseif ($user->role === 'finishing') {
+                app(NotificationService::class)->stokReadyFinishing($stokVirtual->id_perintah, $namaProduk, $qtySelesai);
+            }
+        }
     }
 }

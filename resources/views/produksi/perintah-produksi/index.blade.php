@@ -65,7 +65,7 @@
                             @if($search) <input type="hidden" name="search" value="{{ $search }}"> @endif
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Pilih Tanggal</label>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Pilih Tanggal Mulai</label>
                                     <input type="date" name="tanggal" value="{{ $filterTanggal }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors">
                                 </div>
                                 <div class="flex gap-2 pt-1">

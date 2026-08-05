@@ -375,7 +375,10 @@
                             <span id="modal-status-barang-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0">-</span>
                         </div>
                         <div class="flex justify-between items-center gap-3 px-4 py-2.5">
-                            <span class="text-xs font-bold text-gray-700">Total Hasil Selesai</span>
+                            <div>
+                                <span class="text-xs font-bold text-gray-700 block">Total Hasil Selesai</span>
+                                <span class="text-[10px] text-gray-400 font-medium block mt-0.5">(Hasil Baik + Barang Cacat)</span>
+                            </div>
                             <span class="text-xs font-bold text-gray-700 shrink-0"><span id="modal-total-selesai">0</span> pcs</span>
                         </div>
                         <div class="flex justify-between items-center gap-3 px-4 py-2.5">
