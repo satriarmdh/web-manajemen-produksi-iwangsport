@@ -4,7 +4,7 @@
 
     // Potong
     $potongStok = $stokVirtualAll->where('peran', 'potong');
-    $potongSelesai = (int) ($detail->qty_pcs_potong ?? 0);
+    $potongSelesai = (int) ($detail->qty_pcs_potong ?? 0) + (int) $potongStok->sum('total_reject');
     $potongDiserahkan = (int) $potongStok->sum('total_dikeluarkan');
     $potongIsSelesai = $potongStok->where('is_selesai', 1)->isNotEmpty() || ($detail->status_validasi_potong !== 'pending' && $potongSelesai > 0);
     $potongProgress = $detail->estimasi_pcs > 0 ? min(100, (int) round($potongSelesai / $detail->estimasi_pcs * 100)) : 0;
@@ -13,19 +13,19 @@
     // Jahit
     $jahitStok = $stokVirtualAll->where('peran', 'jahit');
     $jahitTotalMasuk = (int) $jahitStok->sum(fn($s) => (int) $s->qty_hold + (int) $s->total_selesai + (int) $s->total_reject);
-    $jahitSelesai = (int) $jahitStok->sum('total_selesai');
+    $jahitSelesai = (int) $jahitStok->sum('total_selesai') + (int) $jahitStok->sum('total_reject');
     $jahitDiserahkan = (int) $jahitStok->sum('total_dikeluarkan');
     $jahitIsSelesai = $jahitStok->count() > 0 && $jahitStok->where('is_selesai', 0)->count() === 0;
-    $jahitProgress = $jahitTotalMasuk > 0 ? min(100, (int) round(($jahitSelesai + $jahitStok->sum('total_reject')) / $jahitTotalMasuk * 100)) : 0;
+    $jahitProgress = $jahitTotalMasuk > 0 ? min(100, (int) round($jahitSelesai / $jahitTotalMasuk * 100)) : 0;
     $jahitComplete = $jahitIsSelesai || $isFinished;
 
     // Finishing
     $finishingStok = $stokVirtualAll->where('peran', 'finishing');
     $finishingTotalMasuk = (int) $finishingStok->sum(fn($s) => (int) $s->qty_hold + (int) $s->total_selesai + (int) $s->total_reject);
-    $finishingSelesai = (int) $finishingStok->sum('total_selesai');
+    $finishingSelesai = (int) $finishingStok->sum('total_selesai') + (int) $finishingStok->sum('total_reject');
     $finishingDiserahkan = (int) $finishingStok->sum('total_dikeluarkan');
     $finishingIsSelesai = $finishingStok->count() > 0 && $finishingStok->where('is_selesai', 0)->count() === 0;
-    $finishingProgress = $finishingTotalMasuk > 0 ? min(100, (int) round(($finishingSelesai + $finishingStok->sum('total_reject')) / $finishingTotalMasuk * 100)) : 0;
+    $finishingProgress = $finishingTotalMasuk > 0 ? min(100, (int) round($finishingSelesai / $finishingTotalMasuk * 100)) : 0;
     $finishingComplete = $finishingIsSelesai || $isFinished;
 
     // Selesai (Penerimaan Admin)
@@ -46,7 +46,6 @@
             'label' => 'Potong',
             'lines' => [
                 'Selesai: ' . number_format($potongSelesai, 0, ',', '.') . ' pcs',
-                'Diserahkan: ' . number_format($potongDiserahkan, 0, ',', '.') . ' pcs',
             ],
             'progress' => $potongComplete ? 100 : $potongProgress,
             'isComplete' => $potongComplete,
@@ -57,7 +56,6 @@
             'label' => 'Jahit',
             'lines' => [
                 'Selesai: ' . number_format($jahitSelesai, 0, ',', '.') . ' pcs',
-                'Diserahkan: ' . number_format($jahitDiserahkan, 0, ',', '.') . ' pcs',
             ],
             'progress' => $jahitComplete ? 100 : $jahitProgress,
             'isComplete' => $jahitComplete,
@@ -68,7 +66,6 @@
             'label' => 'Finishing',
             'lines' => [
                 'Selesai: ' . number_format($finishingSelesai, 0, ',', '.') . ' pcs',
-                'Diserahkan: ' . number_format($finishingDiserahkan, 0, ',', '.') . ' pcs',
             ],
             'progress' => $finishingComplete ? 100 : $finishingProgress,
             'isComplete' => $finishingComplete,

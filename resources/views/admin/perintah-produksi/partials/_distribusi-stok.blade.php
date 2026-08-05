@@ -25,12 +25,14 @@
         $selisihAlasan = $stok->alasan;
         $isSelisih = $stok->status_validasi === 'flag';
         $selisihQty = (int) $stok->qty_hold;
+        $selisihTgl = $stok->selisih_dicatat_at ?? $detail->updated_at;
         if ($stok->peran === 'potong' && $detail->status_validasi_potong === 'flag') {
             $isSelisih = true;
             $selisihAlasan = $detail->alasan;
             $batasBawahPotong = (int) $detail->estimasi_pcs - (int) $detail->toleransi_minus;
             $totalInputPotong = (int) $detail->qty_pcs_potong + (int) $stok->total_reject;
             $selisihQty = max(0, $batasBawahPotong - $totalInputPotong);
+            $selisihTgl = $stok->selisih_dicatat_at ?? $detail->updated_at;
         }
 
         $selisihRecord = null;
@@ -39,7 +41,7 @@
                 'qty' => $selisihQty,
                 'keterangan' => $selisihAlasan,
                 'tahapan' => ucfirst($stok->peran),
-                'tgl' => $stok->selisih_dicatat_at ? $stok->selisih_dicatat_at->format('d M Y, H:i') : '-',
+                'tgl' => $selisihTgl ? $selisihTgl->format('d M Y, H:i') : '-',
                 'jenis' => 'selisih',
             ];
         }

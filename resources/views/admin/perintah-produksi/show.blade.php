@@ -106,16 +106,11 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                 <div class="bg-[#0F034D]/5 rounded-xl p-4 border border-[#0F034D]/10">
                     <p class="text-xs text-gray-500 mb-1">Disetujui Oleh</p>
                     <p class="font-semibold text-sm text-[#0F034D]">{{ $perintahProduksi->approver->name ?? '-' }}</p>
                     <p class="text-xs text-gray-400 mt-1">{{ $perintahProduksi->approved_at ? $perintahProduksi->approved_at->format('d M Y, H:i') : 'Menunggu persetujuan owner' }}</p>
-                </div>
-                <div class="bg-green-50 rounded-xl p-4 border border-green-100">
-                    <p class="text-xs text-gray-500 mb-1">Hasil Potong Tercatat</p>
-                    <p class="font-semibold text-sm text-green-700">{{ number_format($totalPotong, 0, ',', '.') }} pcs</p>
-                    <p class="text-xs text-gray-400 mt-1">Akumulasi dari input hasil produksi saat ini</p>
                 </div>
                 <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
                     <p class="text-xs text-gray-500 mb-1">Progress Administratif</p>

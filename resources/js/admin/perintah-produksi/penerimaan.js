@@ -38,10 +38,10 @@
 
             // Set form data
             inputDetailId.value = detailId;
-            inputProdukNama.textContent = produkNama;
-            inputEstimasi.textContent = estimasi;
-            inputDiterima.textContent = diterima;
-            inputSisa.textContent = sisa;
+            if (inputProdukNama) inputProdukNama.textContent = produkNama;
+            if (inputEstimasi) inputEstimasi.textContent = estimasi;
+            if (inputDiterima) inputDiterima.textContent = diterima;
+            if (inputSisa) inputSisa.textContent = sisa;
 
             // Reset form
             formInput.reset();

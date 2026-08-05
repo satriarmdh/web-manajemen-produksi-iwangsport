@@ -26,22 +26,6 @@
             <input type="hidden" name="perintah_produksi_detail_id" id="input_detail_id">
 
             <div class="space-y-5">
-                {{-- Summary Info Produk --}}
-                <div class="grid grid-cols-3 gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                    <div>
-                        <p class="text-xs text-gray-500 mb-0.5">Estimasi</p>
-                        <p class="text-sm font-bold text-gray-700"><span id="input_estimasi">0</span> pcs</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 mb-0.5">Sudah Diterima</p>
-                        <p class="text-sm font-bold text-green-600"><span id="input_diterima">0</span> pcs</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 mb-0.5">Sisa</p>
-                        <p class="text-sm font-bold text-amber-600"><span id="input_sisa">0</span> pcs</p>
-                    </div>
-                </div>
-
                 {{-- Pilih Karyawan (PALING ATAS) --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
