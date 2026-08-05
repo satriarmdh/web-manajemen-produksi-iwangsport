@@ -75,12 +75,15 @@
     @forelse($karyawanStok as $index => $item)
         @php
             $readyToTransfer = max(0, $item['total_selesai'] - $item['total_dikeluarkan']);
-            $wipInput = (int) $item['qty_hold'];
+
+            // When selisih recorded, qty_hold is already resolved → treat as 0
+            $hasSelisih = $item['selisih_flag'];
+            $wipInput = $hasSelisih ? 0 : (int) $item['qty_hold'];
 
             $statusBadge = '';
             $statusClass = '';
-            if ($item['status_barang'] === 'Proses') {
-                $statusBadge = 'Dalam Proses';
+            if ($wipInput > 0) {
+                $statusBadge = 'Diproses';
                 $statusClass = 'bg-amber-50 text-amber-700 border-amber-100';
             } elseif ($item['status_barang'] === 'Ready' && $readyToTransfer > 0) {
                 $statusBadge = 'Siap Diserahkan';
@@ -89,9 +92,6 @@
                 $statusBadge = 'Selesai';
                 $statusClass = 'bg-gray-50 text-gray-600 border-gray-100';
             }
-
-            $hasSelisih = $item['selisih_flag'];
-            $selisihQty = (int) $item['selisih_qty'];
         @endphp
         <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
             <div class="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
@@ -106,18 +106,6 @@
                     <span class="text-[9px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-semibold shrink-0">
                         {{ number_format($item['total_selesai']) }} selesai
                     </span>
-
-                    @if($item['total_reject'] > 0)
-                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold shrink-0">
-                            {{ number_format($item['total_reject']) }} reject
-                        </span>
-                    @endif
-
-                    @if($hasSelisih)
-                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-semibold shrink-0">
-                            {{ number_format($selisihQty) }} selisih
-                        </span>
-                    @endif
                 </div>
             </div>
 
@@ -127,7 +115,7 @@
                 data-stok-key="{{ $item['stok_key'] }}"
                 data-karyawan-name="{{ $item['karyawan_name'] }}"
                 data-peran="{{ $item['peran'] }}"
-                data-qty-hold="{{ $item['qty_hold'] }}"
+                data-qty-hold="{{ $wipInput }}"
                 data-total-selesai="{{ $item['total_selesai'] }}"
                 data-total-dikeluarkan="{{ $item['total_dikeluarkan'] }}"
                 data-total-reject="{{ $item['total_reject'] }}"

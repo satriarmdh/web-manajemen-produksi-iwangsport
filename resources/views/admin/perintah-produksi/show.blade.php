@@ -260,9 +260,9 @@
                 <div class="space-y-5">
                     {{-- Stat Cards --}}
                     <div class="grid grid-cols-3 gap-2.5">
-                        <div class="bg-indigo-50 rounded-xl p-3 border border-indigo-100">
-                            <p class="text-[11px] text-indigo-600 mb-1 font-medium">Dipegang</p>
-                            <p class="text-xl font-bold text-indigo-700"><span id="modal-qty-hold">0</span> <span class="text-xs">pcs</span></p>
+                        <div class="bg-amber-50 rounded-xl p-3 border border-amber-100">
+                            <p class="text-[11px] text-amber-600 mb-1 font-medium">Diproses</p>
+                            <p class="text-xl font-bold text-amber-700"><span id="modal-qty-hold">0</span> <span class="text-xs">pcs</span></p>
                         </div>
                         <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
                             <p class="text-[11px] text-emerald-600 mb-1 font-medium">Hasil Selesai</p>
