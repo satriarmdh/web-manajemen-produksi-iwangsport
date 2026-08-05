@@ -28,7 +28,9 @@
         if ($stok->peran === 'potong' && $detail->status_validasi_potong === 'flag') {
             $isSelisih = true;
             $selisihAlasan = $detail->alasan;
-            $selisihQty = max(0, (int) $detail->estimasi_pcs - (int) $detail->qty_pcs_potong);
+            $batasBawahPotong = (int) $detail->estimasi_pcs - (int) $detail->toleransi_minus;
+            $totalInputPotong = (int) $detail->qty_pcs_potong + (int) $stok->total_reject;
+            $selisihQty = max(0, $batasBawahPotong - $totalInputPotong);
         }
 
         $selisihRecord = null;

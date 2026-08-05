@@ -371,11 +371,16 @@ class PerintahProduksiService
      */
     public function inputHasilPotong(DetailPerintahProduksi $detail, int $qtyPcsPotong, ?string $alasan = null): DetailPerintahProduksi
     {
+        // Hitung total reject milik karyawan potong jika ada
+        $totalReject = (int) (\App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
+            ->where('peran', 'potong')
+            ->value('total_reject') ?? 0);
+
         // Hitung batas bawah toleransi
         $batasBawah = $detail->estimasi_pcs - $detail->toleransi_minus;
 
-        // Tentukan status validasi
-        $statusValidasi = $qtyPcsPotong >= $batasBawah ? 'normal' : 'flag';
+        // Tentukan status validasi (termasuk barang cacat)
+        $statusValidasi = ($qtyPcsPotong + $totalReject) >= $batasBawah ? 'normal' : 'flag';
 
         // Jika flag, alasan wajib diisi
         if ($statusValidasi === 'flag' && empty($alasan)) {

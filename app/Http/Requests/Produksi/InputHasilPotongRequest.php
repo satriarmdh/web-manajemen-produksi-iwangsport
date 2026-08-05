@@ -47,11 +47,14 @@ class InputHasilPotongRequest extends FormRequest
         $validator->after(function ($validator) {
             $detail = $this->route('detail');
             $batasBawah = $detail->estimasi_pcs - $detail->toleransi_minus;
-            $qty = $this->input('qty_pcs_potong');
+            $qty = (int) $this->input('qty_pcs_potong');
             $alasan = $this->input('alasan');
+            $totalReject = (int) (\App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
+                ->where('peran', 'potong')
+                ->value('total_reject') ?? 0);
 
-            // Jika di bawah toleransi, alasan wajib diisi
-            if ($qty < $batasBawah && empty($alasan)) {
+            // Jika total hasil + barang cacat di bawah batas toleransi, alasan wajib diisi
+            if (($qty + $totalReject) < $batasBawah && empty($alasan)) {
                 $validator->errors()->add('alasan', 'Alasan wajib diisi jika hasil potong di bawah batas toleransi (' . $batasBawah . ' PCS)');
             }
         });

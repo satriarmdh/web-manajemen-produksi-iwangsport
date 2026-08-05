@@ -360,8 +360,8 @@
                             <p class="text-xl font-bold text-amber-700"><span id="modal-qty-hold">0</span> <span class="text-xs">pcs</span></p>
                         </div>
                         <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-                            <p class="text-[11px] text-emerald-600 mb-1 font-medium">Hasil Selesai</p>
-                            <p class="text-xl font-bold text-emerald-700"><span id="modal-total-selesai">0</span> <span class="text-xs">pcs</span></p>
+                            <p class="text-[11px] text-emerald-600 mb-1 font-medium">Siap Diserahkan</p>
+                            <p class="text-xl font-bold text-emerald-700"><span id="modal-ready-qty">0</span> <span class="text-xs">pcs</span></p>
                         </div>
                         <div class="bg-blue-50 rounded-xl p-3 border border-blue-100">
                             <p class="text-[11px] text-blue-600 mb-1 font-medium">Sudah Diserahkan</p>
@@ -375,8 +375,8 @@
                             <span id="modal-status-barang-badge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0">-</span>
                         </div>
                         <div class="flex justify-between items-center gap-3 px-4 py-2.5">
-                            <span class="text-xs font-bold text-gray-700">Barang Siap Diserahkan</span>
-                            <span class="text-xs font-bold text-emerald-700 shrink-0"><span id="modal-ready-qty">0</span> pcs</span>
+                            <span class="text-xs font-bold text-gray-700">Total Hasil Selesai</span>
+                            <span class="text-xs font-bold text-gray-700 shrink-0"><span id="modal-total-selesai">0</span> pcs</span>
                         </div>
                         <div class="flex justify-between items-center gap-3 px-4 py-2.5">
                             <span class="text-xs font-bold text-gray-700">Status Pengerjaan</span>
