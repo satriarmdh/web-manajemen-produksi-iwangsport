@@ -123,80 +123,160 @@
                     $fifoIndex = $loop->iteration + (($perintahProduksi->currentPage() - 1) * $perintahProduksi->perPage());
                     $totalRoll = $wo->details->sum('qty_roll_pakai');
                     $totalEstimasi = $wo->details->sum('estimasi_pcs');
-                    $displayDetails = $wo->details->take(2);
-                    $remainingDetails = max(0, $wo->details->count() - $displayDetails->count());
+                    $displayDetails = $wo->details;
+
+                    // Hitung progres WO level
+                    $countDetails = $wo->details->count();
+                    $doneDetails = 0;
+                    $inProgressDetails = 0;
+
+                    foreach($wo->details as $d) {
+                        $sv = $wo->stokVirtual->where('id_detail_perintah', $d->id)->first();
+                        $isDone = (bool) ($sv?->is_selesai);
+                        if ($role === 'potong') {
+                            $isStarted = (int)$d->qty_pcs_potong > 0;
+                        } else {
+                            $isStarted = $sv && (((int)$sv->total_selesai + (int)$sv->total_reject > 0) || (int)$sv->qty_hold > 0);
+                        }
+                        if ($isDone) $doneDetails++;
+                        elseif ($isStarted) $inProgressDetails++;
+                    }
+
+                    $woDone = $countDetails > 0 && $doneDetails === $countDetails;
+                    $woInProgress = $doneDetails > 0 || $inProgressDetails > 0;
                 @endphp
                 <div class="bg-white rounded-2xl border border-[#0F034D]/10 p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,3,77,0.08)] h-full flex flex-col">
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <h4 class="font-bold text-[#0F034D]">{{ $wo->nomor_wo }}</h4>
+                                <h4 class="font-bold text-[#0F034D] text-base">{{ $wo->nomor_wo }}</h4>
                                 <span class="rounded-full bg-[#0F034D]/5 px-2.5 py-1 text-xs font-bold text-[#0F034D]">Prioritas Pengerjaan #{{ $fifoIndex }}</span>
+
+                                @if($woDone)
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        Selesai ({{ $doneDetails }}/{{ $countDetails }})
+                                    </span>
+                                @elseif($woInProgress)
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-700">
+                                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                        Diproses ({{ $doneDetails }}/{{ $countDetails }} produk selesai)
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600">
+                                        Belum Dikerjakan
+                                    </span>
+                                @endif
                             </div>
                             <p class="text-xs text-gray-400 mt-1">Periode: {{ \Carbon\Carbon::parse($wo->tgl_mulai)->format('d M Y') }} - {{ $wo->tgl_selesai ? \Carbon\Carbon::parse($wo->tgl_selesai)->format('d M Y') : '-' }}</p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">{{ ucfirst(str_replace('_', ' ', $wo->status_produksi)) }}</span>
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 shrink-0">{{ ucfirst(str_replace('_', ' ', $wo->status_produksi)) }}</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 mb-3">
-                        <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60">Jenis Produk</p><p class="font-bold text-sm text-[#0F034D]">{{ $wo->details->count() }}</p></div>
-                        <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60">Total Roll</p><p class="font-bold text-sm text-[#0F034D]">{{ number_format($totalRoll, 0, ',', '.') }}</p></div>
+                        <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60 mb-0.5">Jenis Produk</p><p class="font-bold text-sm text-[#0F034D]">{{ $wo->details->count() }} Produk</p></div>
+                        <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60 mb-0.5">Total Roll</p><p class="font-bold text-sm text-[#0F034D]">{{ number_format($totalRoll, 0, ',', '.') }} Roll</p></div>
                     </div>
 
-                    <div class="space-y-2 mb-4 flex-1">
+                    <div class="space-y-3 mb-4 flex-1">
                         @foreach($displayDetails as $detail)
-                            <div class="rounded-xl bg-white border border-gray-200 px-3 py-3 shadow-sm">
-                                <div class="flex items-start justify-between gap-3 mb-3">
-                                    <div class="min-w-0">
-                                        @php
-                                            $warnaProduk = strtolower($detail->produk->warna ?? '-');
-                                            $warnaDotMap = [
-                                                'hitam' => '#111827',
-                                                'navy' => '#061952',
-                                                'abu-abu' => '#9CA3AF',
-                                                'abu' => '#9CA3AF',
-                                                'putih' => '#FFFFFF',
-                                            ];
-                                            $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
-                                            $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
-                                        @endphp
+                            @php
+                                $warnaProduk = strtolower($detail->produk->warna ?? '-');
+                                $warnaDotMap = [
+                                    'hitam' => '#111827',
+                                    'navy' => '#061952',
+                                    'abu-abu' => '#9CA3AF',
+                                    'abu' => '#9CA3AF',
+                                    'putih' => '#FFFFFF',
+                                ];
+                                $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
+                                $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+
+                                $stokV = $wo->stokVirtual->where('id_detail_perintah', $detail->id)->first();
+                                $isDetDone = (bool) ($stokV?->is_selesai);
+
+                                if ($role === 'potong') {
+                                    $detSelesai = (int) ($detail->qty_pcs_potong ?? 0);
+                                    $detTarget = (int) $detail->estimasi_pcs;
+                                    $detProg = $detTarget > 0 ? min(100, (int) round($detSelesai / $detTarget * 100)) : 0;
+                                    $progText = number_format($detSelesai, 0, ',', '.') . ' / ' . number_format($detTarget, 0, ',', '.') . ' pcs';
+                                    $hasStarted = $detSelesai > 0;
+                                } else {
+                                    $detHold = (int) ($stokV?->qty_hold ?? 0);
+                                    $detDoneCount = (int) ($stokV?->total_selesai ?? 0);
+                                    $detRejCount = (int) ($stokV?->total_reject ?? 0);
+                                    $detTarget = $detHold + $detDoneCount + $detRejCount;
+                                    $detSelesai = $detDoneCount + $detRejCount;
+                                    $detProg = $detTarget > 0 ? min(100, (int) round($detSelesai / $detTarget * 100)) : 0;
+                                    $progText = $detTarget > 0 ? (number_format($detSelesai, 0, ',', '.') . ' / ' . number_format($detTarget, 0, ',', '.') . ' pcs') : 'Belum dipegang';
+                                    $hasStarted = $stokV && ($detSelesai > 0 || $detHold > 0);
+                                }
+                            @endphp
+
+                            <div class="rounded-xl bg-white border border-gray-200 p-3 shadow-sm hover:border-[#0F034D]/30 transition-all">
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <div class="min-w-0 flex-1">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <p class="text-sm font-bold text-[#0F034D] truncate">
                                                 {{ $detail->produk->nama_produk ?? '-' }} - {{ ucfirst($detail->produk->warna ?? '-') }}
                                             </p>
-                                            <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}" title="Warna {{ ucfirst($detail->produk->warna ?? '-') }}"></span>
+                                            <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}" title="Warna {{ ucfirst($detail->produk->warna ?? '-') }}"></span>
                                         </div>
-                                        <p class="text-xs text-gray-500 truncate mt-0.5">Bahan: {{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
+                                        <p class="text-xs text-gray-500 truncate mt-0.5">{{ $detail->bahanBaku->nama_bahan ?? '-' }} - {{ ucfirst($detail->bahanBaku->warna ?? '-') }} - {{ number_format($detail->qty_roll_pakai ?? 0) }} Roll</p>
                                     </div>
+
+                                    {{-- Status Badge per Produk (Hanya: Selesai [Hijau], Diproses [Amber], Belum Input [Abu-abu]) --}}
+                                    @if($isDetDone)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                                            <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            Selesai
+                                        </span>
+                                    @elseif($hasStarted)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                                            Diproses
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-200 shrink-0">
+                                            Belum Input
+                                        </span>
+                                    @endif
                                 </div>
-                                <div class="rounded-lg bg-[#0F034D]/5 border border-[#0F034D]/10 px-3 py-2">
-                                    <p class="text-[10px] text-[#0F034D] uppercase tracking-wide">Roll produk ini</p>
-                                    <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->qty_roll_pakai, 0, ',', '.') }} roll</p>
+
+                                {{-- Progress bar per produk --}}
+                                <div class="mt-2 pt-2 border-t border-gray-100">
+                                    <div class="flex items-center justify-between text-[11px] mb-1">
+                                        <span class="font-medium text-gray-500">Progres Input Pekerjaan</span>
+                                        <span class="font-bold text-[#0F034D]">{{ $progText }} ({{ $detProg }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                        <div class="h-1.5 rounded-full transition-all duration-300 {{ $isDetDone ? 'bg-emerald-500' : ($hasStarted ? 'bg-amber-500' : 'bg-gray-200') }}" style="width: {{ $detProg }}%"></div>
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
-                        @if($remainingDetails > 0)
-                            <div class="rounded-xl bg-[#0F034D]/5 border border-dashed border-[#0F034D]/20 px-3 py-3 text-center">
-                                <p class="text-sm font-bold text-[#0F034D]">+{{ $remainingDetails }} produk lainnya</p>
-                                <p class="text-xs text-gray-500 mt-0.5">Lihat detail pekerjaan untuk melihat daftar lengkapnya.</p>
-                            </div>
-                        @endif
                     </div>
 
-                    <a href="{{ route('produksi.perintah-produksi.show', $wo) }}" class="block w-full text-center py-2.5 rounded-xl bg-[#0F034D] text-white text-sm font-semibold shadow-md shadow-[#0F034D]/20 hover:bg-[#24116f] transition-colors mt-auto">Detail pekerjaan & input hasil</a>
+                    <div class="pt-3 border-t border-gray-100 mt-auto">
+                        <a href="{{ route('produksi.perintah-produksi.show', $wo) }}" class="block w-full text-center py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer shadow-md shadow-[#0F034D]/10">
+                            {{ $woDone ? 'Lihat Detail Pekerjaan' : 'Input Hasil Pekerjaan' }}
+                        </a>
+                    </div>
                 </div>
             @endforeach
         </div>
-        <div class="mt-5"><x-pagination.custom-global-pagination :paginator="$perintahProduksi" /></div>
+
+        <div class="mt-6"><x-pagination.custom-global-pagination :paginator="$perintahProduksi" /></div>
     @else
-        <div class="bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
             <div class="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"></path></svg>
+                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
             </div>
-            <p class="font-semibold text-[#0F034D]">Belum ada pekerjaan</p>
-            <p class="text-sm text-gray-500 mt-1">WO yang sudah disetujui owner akan muncul di sini.</p>
+            <p class="text-[#0F034D] font-semibold text-sm">Belum ada pekerjaan</p>
+            <p class="text-gray-500 text-sm mt-1">Daftar perintah produksi akan muncul ketika disetujui owner.</p>
         </div>
     @endif
-    @vite('resources/js/produksi/perintah-produksi/index.js')
-</x-layouts.produksi>
 
+    @vite([
+        'resources/js/admin/filter-dropdown.js',
+    ])
+</x-layouts.produksi>
