@@ -150,14 +150,18 @@
                                 <input type="number" name="qty_selesai" min="0" max="{{ $sisaEstimasi }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, $sisaEstimasi) }}">
                             </div> 
                             <div class="pt-2 border-t border-gray-100">
-                                <label class="block text-sm font-semibold text-red-700 mb-1">Jumlah Hasil Cacat / Reject <span class="text-xs font-normal text-red-500/70">(Opsional)</span></label>
-                                <input type="number" name="qty_reject" min="1" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Isi jika ada produk reject">
+                                <label class="block text-sm font-semibold text-amber-700 mb-1">Jumlah Hasil Cacat / Reject <span class="text-xs font-normal text-amber-500/70">(Opsional)</span></label>
+                                <input type="number" name="qty_reject" min="1" class="w-full px-4 py-3 rounded-xl border border-amber-100 bg-amber-50/30 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-200" placeholder="Isi jika ada produk reject">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-red-700 mb-1">Keterangan Cacat</label>
-                                <textarea name="keterangan_cacat" rows="2" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
+                                <label class="block text-sm font-semibold text-amber-700 mb-1">Keterangan Cacat</label>
+                                <textarea name="keterangan_cacat" rows="2" class="w-full px-4 py-3 rounded-xl border border-amber-100 bg-amber-50/30 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
                             </div>
-
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Dibawah Batas Normal</label>
+                                <p class="text-[10px] text-gray-400 mt-0.5 mb-1.5">*Hasil Final = Hasil Baik + Hasil Cacat/Reject</p>
+                                <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi total hasil masih dibawah batas normal"></textarea>
+                            </div>
                             <label class="group mt-2 mb-4 flex items-start gap-4 rounded-xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
                                 <input type="checkbox" name="tandai_selesai" value="1" class="sr-only peer">
                                 <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
@@ -168,10 +172,6 @@
                                     <span class="block text-xs text-gray-500 mt-1 leading-relaxed">Centang sekali jika seluruh pekerjaan untuk produk ini sudah diselesaikan.</span>
                                 </span>
                             </label>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Dibawah Batas Normal</label>
-                                <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi totalnya kurang dari batas normal"></textarea>
-                            </div>
 
                             <button type="submit" class="w-full py-3 rounded-xl bg-[#0F034D] text-white text-sm font-semibold shadow-md shadow-[#0F034D]/20 hover:bg-[#24116f] transition-colors">Simpan Hasil Pekerjaan</button>
                         </form>
@@ -214,20 +214,19 @@
                                 <p class="text-[11px] text-gray-400 -mt-0.5 mb-1.5">Inputkan jumlah barang yang selesai dengan kondisi <strong>baik (tidak cacat)</strong>. Barang cacat diinputkan terpisah di kolom bawah.</p>
                                 <input type="number" name="qty_selesai" min="0" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Contoh: {{ max(1, (int) $stokVirtualSaya->qty_hold) }}">
                             </div>
+                            <div class="pt-2 border-t border-gray-100">
+                                <label class="block text-sm font-semibold text-amber-700 mb-1">Jumlah Hasil Cacat / Reject <span class="text-xs font-normal text-amber-500/70">(Opsional)</span></label>
+                                <input type="number" name="qty_reject" min="1" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-amber-100 bg-amber-50/30 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-200" placeholder="Isi jika ada produk reject">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-amber-700 mb-1">Keterangan Cacat</label>
+                                <textarea name="keterangan_cacat" rows="2" class="w-full px-4 py-3 rounded-xl border border-amber-100 bg-amber-50/30 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
+                            </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Alasan Jika Hasil Final Kurang Dari Target</label>
-                                <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi total hasil masih kurang dari target barang diterima"></textarea>
+                                <p class="text-[10px] text-gray-400 mt-0.5 mb-1.5">*Hasil Final = Hasil Baik + Hasil Cacat/Reject</p>
+                                <textarea name="alasan" rows="2" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20" placeholder="Isi jika produk ditandai selesai tetapi total hasil masih dibawah batas normal"></textarea>
                             </div>
-
-                            <div class="pt-2 border-t border-gray-100">
-                                <label class="block text-sm font-semibold text-red-700 mb-1">Jumlah Barang Cacat <span class="text-xs font-normal text-red-500/70">(Opsional)</span></label>
-                                <input type="number" name="qty_reject" min="1" max="{{ $stokVirtualSaya->qty_hold }}" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Isi jika ada produk reject">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-red-700 mb-1">Keterangan Cacat</label>
-                                <textarea name="keterangan_cacat" rows="2" class="w-full px-4 py-3 rounded-xl border border-red-100 bg-red-50/30 text-sm focus:border-red-400 focus:ring-1 focus:ring-red-200" placeholder="Contoh: Kain berlubang, jahitan rusak, noda, dll"></textarea>
-                            </div>
-
                             <label class="group mt-2 mb-4 flex items-start gap-4 rounded-xl bg-[#0F034D]/5 border-2 border-[#0F034D]/20 p-4 cursor-pointer transition-all hover:border-[#0F034D]/40 has-[:checked]:border-[#0F034D] has-[:checked]:bg-[#0F034D]/5">
                                 <input type="checkbox" name="tandai_selesai" value="1" class="sr-only peer">
                                 <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-[#0F034D] bg-white text-transparent transition-all peer-checked:bg-white peer-checked:text-[#0F034D]">
