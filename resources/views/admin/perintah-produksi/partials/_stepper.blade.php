@@ -6,7 +6,7 @@
     $potongStok = $stokVirtualAll->where('peran', 'potong');
     $potongSelesai = (int) ($detail->qty_pcs_potong ?? 0) + (int) $potongStok->sum('total_reject');
     $potongDiserahkan = (int) $potongStok->sum('total_dikeluarkan');
-    $potongIsSelesai = $potongStok->where('is_selesai', 1)->isNotEmpty() || ($detail->status_validasi_potong !== 'pending' && $potongSelesai > 0);
+    $potongIsSelesai = $potongStok->where('is_selesai', 1)->isNotEmpty();
     $potongProgress = $detail->estimasi_pcs > 0 ? min(100, (int) round($potongSelesai / $detail->estimasi_pcs * 100)) : 0;
     $potongComplete = $potongIsSelesai || $isFinished;
 
