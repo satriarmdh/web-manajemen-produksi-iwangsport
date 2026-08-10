@@ -266,10 +266,6 @@
                                                 <p class="text-[10px] text-gray-400 mb-0.5">Toleransi -</p>
                                                 <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->toleransi_minus ?? 0) }} Pcs</p>
                                             </div>
-                                            <div class="rounded-lg bg-gray-50 px-3 py-2">
-                                                <p class="text-[10px] text-gray-400 mb-0.5">Hasil Potong Pcs</p>
-                                                <p class="text-sm font-bold text-[#0F034D]">{{ $detail->qty_pcs_potong ? number_format($detail->qty_pcs_potong) : '-' }} Pcs</p>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

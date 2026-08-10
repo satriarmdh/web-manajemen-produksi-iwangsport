@@ -422,10 +422,10 @@ class PerintahProduksiService
             // 1. Completion Gate: cek apakah masih ada stok ready yang belum diserahkan ke admin
             foreach ($perintahProduksi->details as $detail) {
                 $unreceivedReady = \App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
-                    ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
-                    ->exists();
+                ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
+                ->exists();
 
-                if ($unreceivedReady) {
+            if ($unreceivedReady) {
                     throw new \Exception(
                         'Tidak dapat menyelesaikan WO. Masih ada barang ready di tangan karyawan finishing ' .
                         'yang belum diserahkan ke admin untuk produk: ' .
