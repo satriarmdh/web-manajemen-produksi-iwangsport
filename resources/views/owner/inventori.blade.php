@@ -189,7 +189,9 @@
                     <tbody id="table-mutasi-body" class="divide-y divide-gray-100">
                         @forelse($mutasiStok as $mutasi)
                             @php
-                                $mutasiName = ($mutasi->jenis_item === 'bahan_baku') ? ($mutasi->item->nama_bahan ?? '') : ($mutasi->item->nama_produk ?? '');
+                                $baseName = ($mutasi->jenis_item === 'bahan_baku') ? ($mutasi->item->nama_bahan ?? '') : ($mutasi->item->nama_produk ?? '');
+                                $warna = $mutasi->item->warna ?? '';
+                                $mutasiName = $baseName ? ($baseName . ($warna ? ' - ' . ucfirst($warna) : '')) : '';
                                 $mutasiKode = ($mutasi->jenis_item === 'bahan_baku') ? ($mutasi->item->kode_bahan ?? '') : ($mutasi->item->kode_produk ?? '');
                             @endphp
                             <tr class="mutasi-row hover:bg-gray-50/50 transition-colors" data-nama="{{ strtolower($mutasiName) }}" data-kode="{{ strtolower($mutasiKode) }}" data-jenis-item="{{ $mutasi->jenis_item }}" data-pergerakan="{{ $mutasi->jenis_pergerakan }}">

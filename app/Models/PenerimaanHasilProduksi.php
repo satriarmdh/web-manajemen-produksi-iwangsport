@@ -18,6 +18,7 @@ class PenerimaanHasilProduksi extends Model
         'dari_karyawan_id',
         'tanggal_terima',
         'qty_diterima',
+        'jenis_penerimaan',
         'catatan',
         'bukti_foto',
     ];

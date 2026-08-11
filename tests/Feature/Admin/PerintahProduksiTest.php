@@ -63,6 +63,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -106,6 +107,7 @@ class PerintahProduksiTest extends TestCase
 
         $this->actingAs($this->admin)->post('/admin/perintah-produksi', [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -137,6 +139,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -161,13 +164,14 @@ class PerintahProduksiTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->post('/admin/perintah-produksi', []);
 
-        $response->assertSessionHasErrors(['tgl_mulai', 'details']);
+        $response->assertSessionHasErrors(['tgl_mulai', 'tgl_selesai', 'details']);
     }
 
     public function test_validasi_detail_wajib_memiliki_produk_dan_bahan_baku()
     {
         $data = [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => null,
@@ -189,6 +193,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -214,6 +219,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->subDay()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -261,6 +267,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -286,6 +293,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -415,6 +423,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->addDay()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,
@@ -514,22 +523,75 @@ class PerintahProduksiTest extends TestCase
         ]);
     }
 
-    public function test_admin_tidak_dapat_menandai_perintah_produksi_selesai_jika_status_bukan_dalam_produksi()
+    public function test_admin_tidak_dapat_menandai_selesai_jika_masih_ada_stok_ready()
     {
-        $woPending = PerintahProduksi::factory()->pending()->create();
+        $wo = PerintahProduksi::factory()->dalamProduksi()->create();
+        $detail = DetailPerintahProduksi::factory()->create(['perintah_produksi_id' => $wo->id]);
+        
+        // Simulasikan stok ready di tangan karyawan (total_selesai > total_dikeluarkan)
+        \App\Models\StokVirtual::create([
+            'id_perintah' => $wo->id,
+            'id_detail_perintah' => $detail->id,
+            'id_produk' => $detail->produk_id,
+            'id_karyawan' => $this->admin->id,
+            'peran' => 'finishing',
+            'total_selesai' => 50,
+            'total_dikeluarkan' => 10,
+        ]);
 
         $response = $this->actingAs($this->admin)
-            ->post("/admin/perintah-produksi/{$woPending->id}/selesai", [
+            ->post("/admin/perintah-produksi/{$wo->id}/selesai", [
                 'tgl_selesai' => now()->format('Y-m-d'),
             ]);
 
         $response->assertStatus(302);
-        $response->assertSessionHas('error');
+        $response->assertSessionHas('error', 'Tidak dapat menyelesaikan WO. Masih ada stok/barang ready di salah satu karyawan/tahapan.');
+    }
 
-        $this->assertDatabaseHas('perintah_produksi', [
-            'id' => $woPending->id,
-            'status_produksi' => 'pending',
+    public function test_admin_tidak_dapat_menandai_selesai_jika_masih_ada_barang_cacat_belum_diserahkan()
+    {
+        $wo = PerintahProduksi::factory()->dalamProduksi()->create();
+        $detail = DetailPerintahProduksi::factory()->create(['perintah_produksi_id' => $wo->id]);
+
+        // Simulasikan barang cacat di tangan karyawan (total_reject > delivered)
+        \App\Models\StokVirtual::create([
+            'id_perintah' => $wo->id,
+            'id_detail_perintah' => $detail->id,
+            'id_produk' => $detail->produk_id,
+            'id_karyawan' => $this->admin->id,
+            'peran' => 'jahit',
+            'total_selesai' => 10,
+            'total_dikeluarkan' => 10,
+            'total_reject' => 5,
         ]);
+
+        $response = $this->actingAs($this->admin)
+            ->post("/admin/perintah-produksi/{$wo->id}/selesai", [
+                'tgl_selesai' => now()->format('Y-m-d'),
+            ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error', 'Tidak dapat menyelesaikan WO. Masih ada barang cacat yang belum diserahkan ke admin.');
+    }
+
+    public function test_selesai_dengan_flag_jika_total_diterima_dibawah_batas_normal()
+    {
+        $wo = PerintahProduksi::factory()->dalamProduksi()->create();
+        $detail = DetailPerintahProduksi::factory()->create([
+            'perintah_produksi_id' => $wo->id,
+            'estimasi_pcs' => 100,
+            'toleransi_minus' => 10, // Batas min normal = 90
+            'total_qty_diterima' => 80, // Total diterima = 80 (< 90)
+            'total_qty_cacat_diterima' => 0,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->post("/admin/perintah-produksi/{$wo->id}/selesai", [
+                'tgl_selesai' => now()->format('Y-m-d'),
+            ]);
+
+        $response->assertRedirect('/admin/perintah-produksi');
+        $this->assertEquals('selisih_kurang', $detail->fresh()->status_penerimaan);
     }
 
     // ============================================
@@ -547,6 +609,7 @@ class PerintahProduksiTest extends TestCase
 
         $data = [
             'tgl_mulai' => now()->format('Y-m-d'),
+            'tgl_selesai' => now()->addDays(7)->format('Y-m-d'),
             'details' => [
                 [
                     'produk_id' => $produk->id,

@@ -347,8 +347,13 @@
                             </svg>
                         </div>
                         <div class="min-w-0 flex-1">
+                            @php
+                                $rawName = $mutasi->item->nama_bahan ?? $mutasi->item->nama_produk ?? '';
+                                $warnaItem = $mutasi->item->warna ?? '';
+                                $namaItemTampil = $rawName ? ($rawName . ($warnaItem ? ' - ' . ucfirst($warnaItem) : '')) : 'Item dihapus';
+                            @endphp
                             <p class="text-xs font-semibold text-gray-700 truncate">
-                                {{ $mutasi->item->nama_bahan ?? $mutasi->item->nama_produk ?? 'Item dihapus' }}
+                                {{ $namaItemTampil }}
                             </p>
                             <p class="text-[11px] text-gray-400 mt-0.5">
                                 <span class="{{ $warnaTeks }} font-semibold tabular-nums">

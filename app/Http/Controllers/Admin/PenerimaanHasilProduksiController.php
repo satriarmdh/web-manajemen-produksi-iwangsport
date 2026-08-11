@@ -30,9 +30,13 @@ class PenerimaanHasilProduksiController extends Controller
                 $request->validated()
             );
 
+            $msg = $penerimaan->jenis_penerimaan === 'cacat'
+                ? "Penerimaan hasil cacat/reject berhasil dicatat ({$penerimaan->qty_diterima} pcs)."
+                : "Penerimaan hasil produksi berhasil dicatat. Stok produk bertambah {$penerimaan->qty_diterima} pcs.";
+
             return redirect()
                 ->back()
-                ->with('success', "Penerimaan hasil produksi berhasil dicatat. Stok produk bertambah {$penerimaan->qty_diterima} pcs.");
+                ->with('success', $msg);
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -62,6 +66,7 @@ class PenerimaanHasilProduksiController extends Controller
                 'id' => $item->id,
                 'tanggal_terima' => $item->tanggal_terima->format('d M Y'),
                 'qty_diterima' => $item->qty_diterima,
+                'jenis_penerimaan' => $item->jenis_penerimaan ?? 'baik',
                 'admin_name' => $item->admin->name,
                 'dari_karyawan_name' => $item->dariKaryawan->name,
                 'catatan' => $item->catatan,
@@ -93,10 +98,11 @@ class PenerimaanHasilProduksiController extends Controller
     /**
      * Get available karyawan for detail (AJAX for dropdown)
      */
-    public function availableKaryawan(int $detailId)
+    public function availableKaryawan(Request $request, int $detailId)
     {
         $detail = DetailPerintahProduksi::findOrFail($detailId);
-        $karyawan = $this->service->getAvailableKaryawanForDetail($detail);
+        $type = $request->query('type', 'baik');
+        $karyawan = $this->service->getAvailableKaryawanForDetail($detail, $type);
 
         return response()->json([
             'karyawan' => $karyawan

@@ -46,9 +46,40 @@
             ];
         }
 
+        // Mutasi records milik karyawan current pada detail ini (sebagai pengirim atau penerima)
+        $mutasiRecords = [];
+        foreach ($detail->mutasiProduksi->sortByDesc('created_at') as $mutasi) {
+            if ($mutasi->dari_karyawan_id == $stok->id_karyawan || $mutasi->ke_karyawan_id == $stok->id_karyawan) {
+                $qtyPindah = (int) $mutasi->qty_pindah;
+                $tgl = $mutasi->tgl_transaksi ? $mutasi->tgl_transaksi->format('d M Y, H:i') : $mutasi->created_at->format('d M Y, H:i');
+                
+                if ($mutasi->ke_karyawan_id == $stok->id_karyawan) {
+                    $arah = 'masuk';
+                    $keterangan = "Menerima dari " . ($mutasi->dariKaryawan->name ?? 'Sistem') . " (" . ucfirst($mutasi->dari_tahapan ?? 'awal') . ")";
+                } else {
+                    $arah = 'keluar';
+                    $keterangan = "Menyerahkan ke " . ($mutasi->keKaryawan->name ?? '-') . " (" . ucfirst($mutasi->ke_tahapan) . ")";
+                }
+
+                $mutasiRecords[] = [
+                    'qty' => $qtyPindah,
+                    'arah' => $arah,
+                    'keterangan' => $keterangan,
+                    'tgl' => $tgl,
+                    'jenis' => 'mutasi',
+                ];
+            }
+        }
+
+        $cacatDiserahkan = (int) $detail->penerimaanHasilProduksi
+            ->where('dari_karyawan_id', $stok->id_karyawan)
+            ->where('jenis_penerimaan', 'cacat')
+            ->sum('qty_diterima');
+
         $stokRecordsRegistry[$key] = [
             'cacat' => $cacatRecords,
             'selisih' => $selisihRecord,
+            'mutasi' => $mutasiRecords,
         ];
 
         $karyawanStok->push([
@@ -60,6 +91,8 @@
             'total_selesai' => (int) $stok->total_selesai,
             'total_dikeluarkan' => (int) $stok->total_dikeluarkan,
             'total_reject' => (int) $stok->total_reject,
+            'cacat_diserahkan' => $cacatDiserahkan,
+            'cacat_sisa' => max(0, (int) $stok->total_reject - $cacatDiserahkan),
             'is_selesai' => $stok->is_selesai,
             'status_barang' => $stok->status_barang,
             'selisih_qty' => $selisihQty,
@@ -107,7 +140,7 @@
                 @endif
 
                 <div class="flex items-center gap-1.5 ml-auto mr-2">
-                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-semibold shrink-0">
+                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-semibold shrink-0 border border-green-100">
                         {{ number_format($item['total_selesai'] + $item['total_reject']) }} selesai
                     </span>
                 </div>
@@ -123,6 +156,8 @@
                 data-total-selesai="{{ $item['total_selesai'] + $item['total_reject'] }}"
                 data-total-dikeluarkan="{{ $item['total_dikeluarkan'] }}"
                 data-total-reject="{{ $item['total_reject'] }}"
+                data-cacat-diserahkan="{{ $item['cacat_diserahkan'] }}"
+                data-cacat-sisa="{{ $item['cacat_sisa'] }}"
                 data-ready-qty="{{ $readyToTransfer }}"
                 data-status-barang="{{ $item['status_barang'] }}"
                 data-is-selesai="{{ $item['is_selesai'] ? '1' : '0' }}"

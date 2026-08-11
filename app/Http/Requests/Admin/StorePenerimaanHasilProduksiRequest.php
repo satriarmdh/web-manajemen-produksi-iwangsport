@@ -22,39 +22,62 @@ class StorePenerimaanHasilProduksiRequest extends FormRequest
                 'integer',
                 Rule::exists('detail_perintah_produksi', 'id')
             ],
+            'jenis_penerimaan' => [
+                'nullable',
+                'string',
+                'in:baik,cacat'
+            ],
             'dari_karyawan_id' => [
                 'required',
                 'integer',
                 Rule::exists('users', 'id'),
                 function ($attribute, $value, $fail) {
-                    // Opsi A: ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap).
-                    // Filter status_barang='Ready' tidak dijamin akurat; pakai whereColumn yang lebih presisi.
                     $detailId = $this->input('perintah_produksi_detail_id');
+                    $jenisPenerimaan = $this->input('jenis_penerimaan', 'baik');
                     
                     $stokVirtual = StokVirtual::where([
                         'id_detail_perintah' => $detailId,
                         'id_karyawan' => $value,
-                    ])
-                    ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
-                    ->first();
+                    ])->first();
 
                     if (!$stokVirtual) {
-                        $fail('Karyawan tidak memiliki stok ready untuk produk ini.');
+                        $fail('Karyawan tidak memiliki catatan stok untuk produk ini.');
                         return;
                     }
 
-                    // Hitung sisa yang belum diserahkan: total_selesai - total_dikeluarkan
-                    $qtySisa = (int) $stokVirtual->total_selesai - (int) $stokVirtual->total_dikeluarkan;
-
-                    if ($qtySisa <= 0) {
-                        $fail('Karyawan tidak memiliki stok yang tersedia untuk diserahkan. Semua stok sudah diserahkan.');
-                        return;
-                    }
-
-                    // Validate: qty_diterima tidak melebihi sisa yang belum diserahkan
                     $qtyDiterima = (int) $this->input('qty_diterima');
-                    if ($qtyDiterima && $qtyDiterima > $qtySisa) {
-                        $fail("Qty diterima ({$qtyDiterima}) melebihi stok yang belum diserahkan ({$qtySisa}). Total selesai: {$stokVirtual->total_selesai}, sudah diserahkan: {$stokVirtual->total_dikeluarkan}.");
+
+                    if ($jenisPenerimaan === 'cacat') {
+                        // Hitung sisa reject yang belum diserahkan
+                        $deliveredReject = (int) \App\Models\PenerimaanHasilProduksi::where([
+                            'perintah_produksi_detail_id' => $detailId,
+                            'dari_karyawan_id' => $value,
+                            'jenis_penerimaan' => 'cacat',
+                        ])->sum('qty_diterima');
+
+                        $qtySisa = (int) $stokVirtual->total_reject - $deliveredReject;
+
+                        if ($qtySisa <= 0) {
+                            $fail('Karyawan tidak memiliki barang cacat/reject yang belum diserahkan.');
+                            return;
+                        }
+
+                        if ($qtyDiterima && $qtyDiterima > $qtySisa) {
+                            $fail("Qty cacat diterima ({$qtyDiterima}) melebihi barang cacat yang belum diserahkan ({$qtySisa}).");
+                        }
+                    } else {
+                        // Hitung sisa yang belum diserahkan: total_selesai - total_dikeluarkan
+                        $qtySisa = (int) $stokVirtual->total_selesai - (int) $stokVirtual->total_dikeluarkan;
+
+                        if ($qtySisa <= 0) {
+                            $fail('Karyawan tidak memiliki stok yang tersedia untuk diserahkan. Semua stok sudah diserahkan.');
+                            return;
+                        }
+
+                        // Validate: qty_diterima tidak melebihi sisa yang belum diserahkan
+                        if ($qtyDiterima && $qtyDiterima > $qtySisa) {
+                            $fail("Qty diterima ({$qtyDiterima}) melebihi stok yang belum diserahkan ({$qtySisa}). Total selesai: {$stokVirtual->total_selesai}, sudah diserahkan: {$stokVirtual->total_dikeluarkan}.");
+                        }
                     }
                 }
             ],

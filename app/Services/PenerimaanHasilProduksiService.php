@@ -23,16 +23,52 @@ class PenerimaanHasilProduksiService
         array $data
     ): PenerimaanHasilProduksi {
         return DB::transaction(function () use ($detail, $admin, $data) {
-            // Opsi A: ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap).
-            // Filter status_barang='Ready' dihapus karena tidak menjamin masih ada barang yang belum diserahkan.
+            $jenisPenerimaan = $data['jenis_penerimaan'] ?? 'baik';
+
             $stokVirtual = StokVirtual::where([
                 'id_detail_perintah' => $detail->id,
                 'id_karyawan' => $data['dari_karyawan_id'],
-            ])
-            ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
-            ->lockForUpdate()
-            ->firstOrFail();
+            ])->lockForUpdate()->firstOrFail();
 
+            if ($jenisPenerimaan === 'cacat') {
+                // hitung sisa reject yang belum diserahkan
+                $deliveredReject = (int) PenerimaanHasilProduksi::where([
+                    'perintah_produksi_detail_id' => $detail->id,
+                    'dari_karyawan_id' => $data['dari_karyawan_id'],
+                    'jenis_penerimaan' => 'cacat',
+                ])->sum('qty_diterima');
+
+                $qtySisa = (int) $stokVirtual->total_reject - $deliveredReject;
+
+                if ($qtySisa < $data['qty_diterima']) {
+                    throw new \Exception(
+                        "Qty cacat diterima ({$data['qty_diterima']}) melebihi sisa reject karyawan ({$qtySisa}). " .
+                        "Total reject: {$stokVirtual->total_reject}, Sudah diserahkan: {$deliveredReject}"
+                    );
+                }
+
+                // 2. Handle photo upload
+                $buktiPath = $data['bukti_foto']->store('penerimaan-hasil-produksi', 'public');
+
+                // 3. Create penerimaan record
+                $penerimaan = PenerimaanHasilProduksi::create([
+                    'perintah_produksi_detail_id' => $detail->id,
+                    'admin_user_id' => $admin->id,
+                    'dari_karyawan_id' => $data['dari_karyawan_id'],
+                    'tanggal_terima' => $data['tanggal_terima'],
+                    'qty_diterima' => $data['qty_diterima'],
+                    'jenis_penerimaan' => 'cacat',
+                    'catatan' => $data['catatan'] ?? null,
+                    'bukti_foto' => $buktiPath,
+                ]);
+
+                // 4. Update detail total_qty_cacat_diterima
+                $detail->increment('total_qty_cacat_diterima', $data['qty_diterima']);
+
+                return $penerimaan->load(['admin', 'dariKaryawan']);
+            }
+
+            // Opsi A: ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap).
             // Qty yang tersedia untuk diserahkan = total_selesai - total_dikeluarkan
             $qtySisa = (int) $stokVirtual->total_selesai - (int) $stokVirtual->total_dikeluarkan;
             
@@ -53,11 +89,12 @@ class PenerimaanHasilProduksiService
                 'dari_karyawan_id' => $data['dari_karyawan_id'],
                 'tanggal_terima' => $data['tanggal_terima'],
                 'qty_diterima' => $data['qty_diterima'],
+                'jenis_penerimaan' => 'baik',
                 'catatan' => $data['catatan'] ?? null,
                 'bukti_foto' => $buktiPath,
             ]);
 
-            // 4. INCREMENT total_dikeluarkan (stok karyawan yang diserahkan ke tahap berikutnya)
+            // 4. INCREMENT total_dikeluarkan
             $stokVirtual->increment('total_dikeluarkan', $data['qty_diterima']);
 
             // 5. Increase produk stock
@@ -68,7 +105,7 @@ class PenerimaanHasilProduksiService
             });
             $stokSesudah = $produk->fresh()->stok;
 
-            // 6. Update detail totals dan hitung status penerimaan (otomatis cek stok_virtual untuk selisih_kurang)
+            // 6. Update detail totals
             $detail->increment('total_qty_diterima', $data['qty_diterima']);
             $this->calculateAndSetStatus($detail->fresh());
 
@@ -81,6 +118,7 @@ class PenerimaanHasilProduksiService
                 'stok_sebelum' => $stokSebelum,
                 'stok_sesudah' => $stokSesudah,
                 'keterangan' => "Penerimaan hasil produksi dari {$penerimaan->dariKaryawan->name}: " . ($data['catatan'] ?? ''),
+                'referencing_type' => 'penerimaan_hasil_produksi',
                 'referensi_type' => 'penerimaan_hasil_produksi',
                 'referensi_id' => $penerimaan->id,
             ]);
@@ -97,10 +135,30 @@ class PenerimaanHasilProduksiService
         User $admin,
         string $catatan
     ): PenerimaanHasilProduksi {
-        // For reversal, we reverse the qty but need to add back to stok_virtual
         $detail = $original->detail;
         
         return DB::transaction(function () use ($original, $admin, $catatan, $detail) {
+            $jenisPenerimaan = $original->jenis_penerimaan ?? 'baik';
+
+            if ($jenisPenerimaan === 'cacat') {
+                // 1. Create reversal penerimaan (negative qty)
+                $penerimaan = PenerimaanHasilProduksi::create([
+                    'perintah_produksi_detail_id' => $detail->id,
+                    'admin_user_id' => $admin->id,
+                    'dari_karyawan_id' => $original->dari_karyawan_id,
+                    'tanggal_terima' => today(),
+                    'qty_diterima' => -1 * $original->qty_diterima, // NEGATIVE
+                    'jenis_penerimaan' => 'cacat',
+                    'catatan' => "REVERSAL: {$catatan}",
+                    'bukti_foto' => $original->bukti_foto, // Reuse original photo
+                ]);
+
+                // 2. Decrement detail total_qty_cacat_diterima
+                $detail->decrement('total_qty_cacat_diterima', $original->qty_diterima);
+
+                return $penerimaan;
+            }
+
             // 1. Find the stok_virtual record to return stock to
             $stokVirtual = StokVirtual::where([
                 'id_detail_perintah' => $detail->id,
@@ -114,11 +172,12 @@ class PenerimaanHasilProduksiService
                 'dari_karyawan_id' => $original->dari_karyawan_id,
                 'tanggal_terima' => today(),
                 'qty_diterima' => -1 * $original->qty_diterima, // NEGATIVE
+                'jenis_penerimaan' => 'baik',
                 'catatan' => "REVERSAL: {$catatan}",
                 'bukti_foto' => $original->bukti_foto, // Reuse original photo
             ]);
 
-            // 3. DECREMENT total_dikeluarkan (batalkan stok yang sudah diserahkan)
+            // 3. DECREMENT total_dikeluarkan
             $stokVirtual->decrement('total_dikeluarkan', $original->qty_diterima);
 
             // 4. Decrease produk stock (reverse the increase)
@@ -129,7 +188,7 @@ class PenerimaanHasilProduksiService
             });
             $stokSesudah = $produk->fresh()->stok;
 
-            // 5. Update detail totals dan hitung status penerimaan (otomatis cek stok_virtual untuk selisih_kurang)
+            // 5. Update detail totals
             $detail->decrement('total_qty_diterima', $original->qty_diterima);
             $this->calculateAndSetStatus($detail->fresh());
 
@@ -142,6 +201,7 @@ class PenerimaanHasilProduksiService
                 'stok_sebelum' => $stokSebelum,
                 'stok_sesudah' => $stokSesudah,
                 'keterangan' => "REVERSAL penerimaan #{$original->id}: {$catatan}",
+                'referencing_type' => 'penerimaan_hasil_produksi',
                 'referensi_type' => 'penerimaan_hasil_produksi',
                 'referensi_id' => $penerimaan->id,
             ]);
@@ -157,30 +217,56 @@ class PenerimaanHasilProduksiService
      */
     public function calculateStatus(DetailPerintahProduksi $detail): string
     {
-        $estimasi = $detail->estimasi_pcs;
-        $diterima = (int) $detail->total_qty_diterima;
+        $estimasi = (int) $detail->estimasi_pcs;
+        $toleransi = (int) $detail->toleransi_minus;
+        $batasMinNormal = $estimasi - $toleransi;
 
-        if ($diterima == 0) {
+        // Total akumulasi diterima (baik + cacat)
+        $totalDiterima = (int) $detail->total_qty_diterima + (int) $detail->total_qty_cacat_diterima;
+
+        if ($totalDiterima == 0) {
             return 'belum_diterima';
         }
 
-        if ($diterima == $estimasi) {
-            return 'sesuai';
-        }
-
-        if ($diterima > $estimasi) {
+        if ($totalDiterima > $estimasi) {
             return 'selisih_lebih';
         }
 
-        // diterima < estimasi: tentukan apakah sebagian atau selisih_kurang
-        // Cek apakah masih ada stok ready yang belum diserahkan ke admin
-        $unreceivedReady = StokVirtual::where('id_detail_perintah', $detail->id)
+        // Cek apakah masih ada stok ready (baik/cacat) yang belum diserahkan ke admin
+        $hasUnreceivedReady = StokVirtual::where('id_detail_perintah', $detail->id)
             ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
             ->exists();
 
-        // Jika masih ada stok ready belum diserahkan → sebagian (masih bisa diterima lagi)
-        // Jika semua sudah diserahkan tapi diterima < estimasi → selisih_kurang (final)
-        return $unreceivedReady ? 'sebagian' : 'selisih_kurang';
+        $stokVirtuaList = StokVirtual::where('id_detail_perintah', $detail->id)
+            ->where('total_reject', '>', 0)
+            ->get();
+
+        $hasUnreceivedDefect = false;
+        foreach ($stokVirtuaList as $stok) {
+            $deliveredReject = (int) PenerimaanHasilProduksi::where([
+                'perintah_produksi_detail_id' => $detail->id,
+                'dari_karyawan_id' => $stok->id_karyawan,
+                'jenis_penerimaan' => 'cacat',
+            ])->sum('qty_diterima');
+
+            if ($stok->total_reject > $deliveredReject) {
+                $hasUnreceivedDefect = true;
+                break;
+            }
+        }
+
+        // Jika masih ada stok belum diserahkan -> sebagian
+        if ($hasUnreceivedReady || $hasUnreceivedDefect) {
+            return 'sebagian';
+        }
+
+        // Jika semua stok telah diserahkan / WO diselesaikan:
+        // Cek apakah total diterima memenuhi batas min normal
+        if ($totalDiterima < $batasMinNormal) {
+            return 'selisih_kurang'; // Flagged
+        }
+
+        return 'sesuai';
     }
 
     /**
@@ -234,22 +320,46 @@ class PenerimaanHasilProduksiService
      * - total_dikeluarkan = qty yang sudah diserahkan ke tahap berikutnya
      * - Sisa = total_selesai - total_dikeluarkan (yang belum diserahkan)
      */
-    public function getAvailableKaryawanForDetail(DetailPerintahProduksi $detail): Collection
+    public function getAvailableKaryawanForDetail(DetailPerintahProduksi $detail, string $type = 'baik'): Collection
     {
-        // Opsi A: ready_to_transfer = total_selesai - total_dikeluarkan (untuk SEMUA tahap).
-        // Filter status_barang='Ready' dihapus karena tidak menjamin masih ada yang belum diserahkan.
+        if ($type === 'cacat') {
+            return StokVirtual::where('id_detail_perintah', $detail->id)
+                ->where('total_reject', '>', 0)
+                ->with('karyawan')
+                ->get()
+                ->map(function ($stok) use ($detail) {
+                    $deliveredReject = (int) PenerimaanHasilProduksi::where([
+                        'perintah_produksi_detail_id' => $detail->id,
+                        'dari_karyawan_id' => $stok->id_karyawan,
+                        'jenis_penerimaan' => 'cacat',
+                    ])->sum('qty_diterima');
+
+                    $qtyReady = (int) $stok->total_reject - $deliveredReject;
+
+                    return [
+                        'karyawan_id' => $stok->id_karyawan,
+                        'karyawan_name' => $stok->karyawan->name . ' (' . ucfirst($stok->peran) . ')',
+                        'qty_ready' => $qtyReady,
+                        'qty_total' => (int) $stok->total_reject,
+                        'qty_diserahkan' => $deliveredReject,
+                    ];
+                })
+                ->filter(fn($item) => $item['qty_ready'] > 0)
+                ->values();
+        }
+
         return StokVirtual::where('id_detail_perintah', $detail->id)
             ->where('peran', 'finishing')
-            ->whereColumn('total_selesai', '>', 'total_dikeluarkan') // Masih ada yang belum diserahkan
+            ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
             ->with('karyawan')
             ->get()
             ->map(function ($stok) {
                 return [
                     'karyawan_id' => $stok->id_karyawan,
                     'karyawan_name' => $stok->karyawan->name,
-                    'qty_ready' => (int) $stok->total_selesai - (int) $stok->total_dikeluarkan, // Sisa yang belum diserahkan
-                    'qty_selesai' => (int) $stok->total_selesai, // Total yang sudah selesai dikerjakan
-                    'qty_diserahkan' => (int) $stok->total_dikeluarkan, // Total yang sudah diserahkan
+                    'qty_ready' => (int) $stok->total_selesai - (int) $stok->total_dikeluarkan,
+                    'qty_total' => (int) $stok->total_selesai,
+                    'qty_diserahkan' => (int) $stok->total_dikeluarkan,
                 ];
             });
     }

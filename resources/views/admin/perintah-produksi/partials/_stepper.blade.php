@@ -29,8 +29,10 @@
     $finishingComplete = $finishingIsSelesai || $isFinished;
 
     // Selesai (Penerimaan Admin)
-    $diterimaAdmin = (int) ($detail->qty_diterima_admin ?? $finishingDiserahkan);
-    $readyComplete = $isFinished || ($diterimaAdmin >= $detail->estimasi_pcs && $detail->estimasi_pcs > 0);
+    $diterimaBaik = (int) ($detail->total_qty_diterima ?? 0);
+    $diterimaCacat = (int) ($detail->total_qty_cacat_diterima ?? 0);
+    $diterimaAdminTotal = $diterimaBaik + $diterimaCacat;
+    $readyComplete = $isFinished || ($diterimaAdminTotal >= $detail->estimasi_pcs && $detail->estimasi_pcs > 0);
 
     $steps = [
         [
@@ -75,11 +77,13 @@
             'key' => 'selesai',
             'label' => 'Selesai',
             'lines' => [
-                number_format($diterimaAdmin, 0, ',', '.') . ' pcs diterima admin',
+                $diterimaCacat > 0
+                    ? number_format($diterimaAdminTotal, 0, ',', '.') . ' pcs (' . number_format($diterimaBaik, 0, ',', '.') . ' baik, ' . number_format($diterimaCacat, 0, ',', '.') . ' cacat)'
+                    : number_format($diterimaAdminTotal, 0, ',', '.') . ' pcs diterima admin',
             ],
-            'progress' => $readyComplete ? 100 : ($diterimaAdmin > 0 && $detail->estimasi_pcs > 0 ? min(100, (int) round($diterimaAdmin / $detail->estimasi_pcs * 100)) : 0),
+            'progress' => $readyComplete ? 100 : ($diterimaAdminTotal > 0 && $detail->estimasi_pcs > 0 ? min(100, (int) round($diterimaAdminTotal / $detail->estimasi_pcs * 100)) : 0),
             'isComplete' => $readyComplete,
-            'started' => $diterimaAdmin > 0 || $isFinished,
+            'started' => $diterimaAdminTotal > 0 || $isFinished,
         ],
     ];
 @endphp

@@ -26,9 +26,33 @@
             <input type="hidden" name="perintah_produksi_detail_id" id="input_detail_id">
 
             <div class="space-y-5">
-                {{-- Pilih Karyawan (PALING ATAS) --}}
+                {{-- Custom Dropdown Jenis Penerimaan --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Jenis Hasil Penerimaan <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative" id="penerimaan_jenis_wrapper">
+                        <input type="text" id="penerimaan_jenis_input" placeholder="Pilih jenis penerimaan..." readonly autocomplete="off"
+                            class="w-full px-4 py-2.5 pr-10 rounded-xl border border-gray-300 focus:border-[#0F034D] focus:ring-1 focus:ring-[#0F034D]/20 outline-none transition-all text-sm text-gray-900 font-medium cursor-pointer"
+                            value="Hasil Baik (Finishing)">
+                        <input type="hidden" name="jenis_penerimaan" id="penerimaan_jenis_value" value="baik">
+                        <svg class="dropdown-arrow w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 transition-transform duration-200 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        <div id="penerimaan_jenis_dropdown" class="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 py-2 hidden z-[60]">
+                            <div class="dropdown-option flex items-center justify-between px-3 py-2.5 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm bg-[#0F034D]/5" data-value="baik" data-text="Hasil Baik (Finishing)">
+                                <span class="text-sm font-medium text-gray-800">Hasil Baik (Finishing)</span>
+                                <svg class="check-icon w-4 h-4 text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div class="dropdown-option flex items-center justify-between px-3 py-2.5 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" data-value="cacat" data-text="Barang Cacat / Reject (Semua Peran)">
+                                <span class="text-sm font-medium text-gray-800">Barang Cacat / Reject (Semua Peran)</span>
+                                <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1.5" id="jenis_penerimaan_help">Hanya menampilkan karyawan finishing yang memiliki stok ready baik</p>
+                </div>
+                {{-- Pilih Karyawan (PALING ATAS) --}}
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" id="karyawan_label">
                         Pilih Karyawan Finishing <span class="text-red-500">*</span>
                     </label>
                     <div class="relative" id="penerimaan_karyawan_wrapper">
@@ -60,15 +84,15 @@
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="bg-white/60 rounded-lg p-2.5 border border-white">
-                                <p class="text-xs text-gray-500 mb-0.5">Barang Ready</p>
+                                <p class="text-xs text-gray-500 mb-0.5" id="stat_label_ready">Barang Ready</p>
                                 <p class="text-lg font-bold text-blue-600" id="stat_qty_ready">0</p>
                             </div>
                             <div class="bg-white/60 rounded-lg p-2.5 border border-white">
-                                <p class="text-xs text-gray-500 mb-0.5">Diserahkan</p>
+                                <p class="text-xs text-gray-500 mb-0.5" id="stat_label_diserahkan">Diserahkan</p>
                                 <p class="text-lg font-bold text-green-600" id="stat_qty_diserahkan">0</p>
                             </div>
                             <div class="bg-white/60 rounded-lg p-2.5 border border-white">
-                                <p class="text-xs text-gray-500 mb-0.5">Sisa</p>
+                                <p class="text-xs text-gray-500 mb-0.5" id="stat_label_sisa">Sisa</p>
                                 <p class="text-lg font-bold text-amber-600" id="stat_qty_sisa">0</p>
                             </div>
                         </div>

@@ -22,6 +22,7 @@ class DetailPerintahProduksi extends Model
         'status_validasi_potong',
         'alasan',
         'total_qty_diterima',
+        'total_qty_cacat_diterima',
         'status_penerimaan',
     ];
 
@@ -31,6 +32,7 @@ class DetailPerintahProduksi extends Model
         'toleransi_minus' => 'integer',
         'qty_pcs_potong' => 'integer',
         'total_qty_diterima' => 'integer',
+        'total_qty_cacat_diterima' => 'integer',
     ];
 
     public function perintahProduksi(): BelongsTo

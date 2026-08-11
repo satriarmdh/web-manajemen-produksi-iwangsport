@@ -52,12 +52,11 @@
                 {{-- Tanggal Selesai --}}
                 <div>
                     <label for="tgl_selesai" class="block text-sm font-medium text-[#0F034D] mb-2">
-                        Tanggal Selesai <span class="text-xs text-gray-500">(Opsional)</span>
+                        Tanggal Selesai <span class="text-red-500">*</span>
                     </label>
-                    <input type="date" name="tgl_selesai" id="tgl_selesai" value="{{ old('tgl_selesai', $perintahProduksi->tgl_selesai ? \Carbon\Carbon::parse($perintahProduksi->tgl_selesai)->format('Y-m-d') : '') }}"
+                    <input type="date" name="tgl_selesai" id="tgl_selesai" value="{{ old('tgl_selesai', $perintahProduksi->tgl_selesai ? \Carbon\Carbon::parse($perintahProduksi->tgl_selesai)->format('Y-m-d') : '') }}" required
                         min="{{ old('tgl_mulai', now()->format('Y-m-d')) }}"
                         class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D]/30 outline-none transition-all">
-                    <p class="text-xs text-gray-500 mt-1">Dapat diisi nanti saat perintah selesai</p>
                 </div>
             </div>
         </div>

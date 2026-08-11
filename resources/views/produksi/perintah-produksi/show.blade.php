@@ -91,7 +91,17 @@
                         <div class="h-full rounded-full {{ $inputSelesai ? 'bg-green-500' : 'bg-[#0F034D]' }} transition-all" style="width: {{ $progressPersen }}%"></div>
                     </div>
 
+                    @php
+                        $selisihKaryawan = (int) $sudahDiinput - (int) $targetInput;
+                        $selisihColorClass = $selisihKaryawan < 0 
+                            ? ($sudahDiinput < $batasBawah ? 'text-red-600' : 'text-amber-600') 
+                            : ($selisihKaryawan > 0 ? 'text-blue-600' : 'text-green-700');
+                    @endphp
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Batas normal</p>
+                            <p class="text-sm font-bold text-green-700">&ge; {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
+                        </div>
                         <div class="rounded-xl bg-white/80 border border-white p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Hasil baik</p>
                             <p class="text-sm font-bold text-blue-700">{{ number_format($hasilBaik, 0, ',', '.') }} pcs</p>
@@ -101,12 +111,10 @@
                             <p class="text-sm font-bold text-red-600">{{ number_format($totalReject, 0, ',', '.') }} pcs</p>
                         </div>
                         <div class="rounded-xl bg-white/80 border border-white p-2.5">
-                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Batas normal</p>
-                            <p class="text-sm font-bold text-green-700">&ge; {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
-                        </div>
-                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
-                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Progress</p>
-                            <p class="text-sm font-bold text-[#0F034D]">{{ $progressPersen }}%</p>
+                            <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Selisih</p>
+                            <p class="text-sm font-bold {{ $selisihColorClass }}">
+                                {{ $selisihKaryawan > 0 ? '+' : '' }}{{ number_format($selisihKaryawan, 0, ',', '.') }} pcs
+                            </p>
                         </div>
                     </div>
                     @if($stokReady > 0 || $totalDikeluarkan > 0)

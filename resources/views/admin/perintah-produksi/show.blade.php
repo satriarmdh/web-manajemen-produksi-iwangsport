@@ -112,9 +112,31 @@
                     <p class="font-semibold text-sm text-[#0F034D]">{{ $perintahProduksi->approver->name ?? '-' }}</p>
                     <p class="text-xs text-gray-400 mt-1">{{ $perintahProduksi->approved_at ? $perintahProduksi->approved_at->format('d M Y, H:i') : 'Menunggu persetujuan owner' }}</p>
                 </div>
-                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                @php
+                    $isWOFinished = $perintahProduksi->status_produksi === 'selesai';
+                    $hasWOFlag = $isWOFinished && $perintahProduksi->details->contains(function($d) {
+                        return ((int)$d->total_qty_diterima + (int)$d->total_qty_cacat_diterima) < ((int)$d->estimasi_pcs - (int)$d->toleransi_minus);
+                    });
+                    
+                    $progAdminBg = 'bg-blue-50 border-blue-100';
+                    $progAdminTextClass = 'text-blue-700';
+                    $progAdminLabel = $statusLabels[$perintahProduksi->status_produksi] ?? $perintahProduksi->status_produksi;
+
+                    if ($isWOFinished) {
+                        if ($hasWOFlag) {
+                            $progAdminBg = 'bg-amber-50 border-amber-200';
+                            $progAdminTextClass = 'text-amber-800 font-bold';
+                            $progAdminLabel = 'Selesai - Flag/Selisih';
+                        } else {
+                            $progAdminBg = 'bg-green-50 border-green-200';
+                            $progAdminTextClass = 'text-green-800 font-bold';
+                            $progAdminLabel = 'Selesai';
+                        }
+                    }
+                @endphp
+                <div class="{{ $progAdminBg }} rounded-xl p-4 border">
                     <p class="text-xs text-gray-500 mb-1">Progress Administratif</p>
-                    <p class="font-semibold text-sm text-blue-700">{{ $statusLabels[$perintahProduksi->status_produksi] ?? $perintahProduksi->status_produksi }}</p>
+                    <p class="font-semibold text-sm {{ $progAdminTextClass }}">{{ $progAdminLabel }}</p>
                     <p class="text-xs text-gray-400 mt-1">Status utama perintah produksi</p>
                 </div>
             </div>
@@ -250,14 +272,27 @@
                 </button>
             </div>
 
+            {{-- Top-Level Tabs --}}
+            <div class="px-5 py-3 border-b border-gray-200 shrink-0 bg-white">
+                <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 max-w-max">
+                    <button type="button" data-modal-tab="info" id="modal-tab-btn-info" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-[#0F034D] text-white shadow-sm transition-all">
+                        Informasi Stok
+                    </button>
+                    <button type="button" data-modal-tab="serah-terima" id="modal-tab-btn-serah" class="px-3 py-1.5 text-xs font-semibold rounded-md text-gray-500 hover:text-[#0F034D] transition-all">
+                        Riwayat Serah Terima
+                    </button>
+                </div>
+            </div>
+
             {{-- Content --}}
             <div class="slide-panel-content">
-                <div class="space-y-5">
+                {{-- Panel 1: Informasi Stok (Default) --}}
+                <div id="modal-tab-content-info" class="space-y-5">
                     {{-- Stat Cards --}}
                     <div class="grid grid-cols-3 gap-2.5">
-                        <div class="bg-amber-50 rounded-xl p-3 border border-amber-100">
-                            <p class="text-[11px] text-amber-600 mb-1 font-medium">Diproses</p>
-                            <p class="text-xl font-bold text-amber-700"><span id="modal-qty-hold">0</span> <span class="text-xs">pcs</span></p>
+                        <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                            <p class="text-[11px] text-gray-500 mb-1 font-medium">Diproses</p>
+                            <p class="text-xl font-bold text-gray-700"><span id="modal-qty-hold">0</span> <span class="text-xs">pcs</span></p>
                         </div>
                         <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
                             <p class="text-[11px] text-emerald-600 mb-1 font-medium">Siap Diserahkan</p>
@@ -291,16 +326,26 @@
                     {{-- Ringkasan catatan --}}
                     <div id="recordsSummarySection" class="hidden">
                         <h3 class="text-sm font-bold text-[#0F034D] mb-2">Ringkasan Catatan</h3>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
-                                <p class="text-[11px] text-amber-700 font-semibold">Total Cacat</p>
-                                <p class="text-lg font-bold text-amber-700 mt-1"><span id="summary-total-cacat">0</span> <span class="text-xs">pcs</span></p>
-                                <p class="text-[10px] text-amber-600 mt-0.5"><span id="summary-count-cacat">0</span> laporan</p>
+                        <div class="space-y-2.5">
+                            {{-- Top Row: Side-by-side Cacat Cards --}}
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
+                                    <p class="text-[11px] text-amber-700 font-semibold">Total Cacat</p>
+                                    <p class="text-lg font-bold text-amber-700 mt-1"><span id="summary-total-cacat">0</span> <span class="text-xs">pcs</span></p>
+                                    <p class="text-[10px] text-amber-600 mt-0.5"><span id="summary-count-cacat">0</span> laporan</p>
+                                </div>
+                                <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
+                                    <p class="text-[11px] text-amber-700 font-semibold">Cacat Diserahkan</p>
+                                    <p class="text-lg font-bold text-amber-700 mt-1"><span id="summary-cacat-diserahkan">0</span> <span class="text-xs">pcs</span></p>
+                                </div>
                             </div>
-                            <div class="bg-red-50 rounded-xl p-3 border border-red-200">
-                                <p class="text-[11px] text-red-700 font-semibold">Total Selisih</p>
-                                <p class="text-lg font-bold text-red-700 mt-1"><span id="summary-total-selisih">0</span> <span class="text-xs">pcs</span></p>
-                                <p class="text-[10px] text-red-600 mt-0.5"><span id="summary-count-selisih">0</span> laporan</p>
+                            {{-- Bottom Row: Full-width Selisih Card --}}
+                            <div class="bg-red-50 rounded-xl p-3 border border-red-200 flex justify-between items-center">
+                                <div>
+                                    <p class="text-[11px] text-red-700 font-semibold">Total Selisih</p>
+                                    <p class="text-lg font-bold text-red-700 mt-1"><span id="summary-total-selisih">0</span> <span class="text-xs">pcs</span></p>
+                                </div>
+                                <p class="text-[10px] text-red-600 font-medium"><span id="summary-count-selisih">0</span> laporan</p>
                             </div>
                         </div>
                     </div>
@@ -311,9 +356,9 @@
                             <h3 class="text-sm font-bold text-[#0F034D]">Riwayat Catatan</h3>
                             <span class="text-[10px] text-gray-400" id="records-count-label">0 catatan</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-lg mb-2.5" role="tablist" aria-label="Jenis riwayat catatan">
-                            <button type="button" id="records-tab-cacat" data-record-type="cacat" role="tab" aria-selected="true" class="px-2 py-1.5 text-[11px] font-semibold rounded-md bg-[#0F034D] text-white shadow-sm transition-colors">Barang Cacat</button>
-                            <button type="button" id="records-tab-selisih" data-record-type="selisih" role="tab" aria-selected="false" class="px-2 py-1.5 text-[11px] font-semibold rounded-md text-gray-500 hover:text-[#0F034D] transition-colors">Selisih</button>
+                        <div class="flex border-b border-gray-100 pb-2 mb-3 mt-2" role="tablist" aria-label="Jenis riwayat catatan">
+                            <button type="button" id="records-tab-cacat" data-record-type="cacat" role="tab" aria-selected="true" class="flex-1 text-center pb-1.5 text-xs font-bold border-b-2 border-[#0F034D] text-[#0F034D] transition-all">Barang Cacat</button>
+                            <button type="button" id="records-tab-selisih" data-record-type="selisih" role="tab" aria-selected="false" class="flex-1 text-center pb-1.5 text-xs font-semibold border-b-2 border-transparent text-gray-500 hover:text-[#0F034D] transition-all">Selisih</button>
                         </div>
                         <div id="records-list" class="space-y-1.5"></div>
                         <div id="records-pagination" class="flex items-center justify-center gap-1.5 mt-3 hidden">
@@ -324,6 +369,23 @@
                         <div id="records-empty" class="hidden text-center py-5">
                             <p class="text-xs text-gray-500">Tidak ada catatan pada riwayat ini</p>
                         </div>
+                    </div>
+                </div>
+
+                {{-- Panel 2: Riwayat Serah Terima (Hidden) --}}
+                <div id="modal-tab-content-serah-terima" class="space-y-4 hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-bold text-[#0F034D]">Log Serah Terima Barang</h3>
+                        <span class="text-[10px] text-gray-400" id="mutasi-count-label">0 log</span>
+                    </div>
+                    <div id="mutasi-list" class="space-y-3"></div>
+                    <div id="mutasi-pagination" class="flex items-center justify-center gap-1.5 mt-4 hidden">
+                        <button type="button" id="mutasi-prev" class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">‹ Sebelumnya</button>
+                        <span id="mutasi-page-info" class="text-xs text-gray-500 px-2">1 / 1</span>
+                        <button type="button" id="mutasi-next" class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Berikutnya ›</button>
+                    </div>
+                    <div id="mutasi-empty" class="hidden text-center py-5">
+                        <p class="text-xs text-gray-500">Belum ada aktivitas serah terima</p>
                     </div>
                 </div>
             </div>

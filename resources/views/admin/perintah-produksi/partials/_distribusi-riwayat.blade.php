@@ -12,19 +12,40 @@
                 <div class="absolute left-2 top-4 bottom-0 w-0.5 bg-gray-200"></div>
             @endif
             {{-- Dot --}}
-            <div class="absolute left-0 top-1 w-4 h-4 rounded-full {{ $penerimaan->qty_diterima > 0 ? 'bg-emerald-500' : 'bg-red-500' }} ring-4 ring-white"></div>
+            @php
+                $dotColor = 'bg-emerald-500';
+                if ($penerimaan->qty_diterima < 0) {
+                    $dotColor = 'bg-red-500';
+                } elseif (($penerimaan->jenis_penerimaan ?? 'baik') === 'cacat') {
+                    $dotColor = 'bg-amber-500';
+                }
+            @endphp
+            <div class="absolute left-0 top-1 w-4 h-4 rounded-full {{ $dotColor }} ring-4 ring-white"></div>
 
             <div class="p-3 rounded-xl bg-gray-50 border border-gray-100 text-xs leading-snug">
                 <div class="flex items-center justify-between gap-2 mb-1">
-                    <span class="font-bold {{ $penerimaan->qty_diterima > 0 ? 'text-emerald-700' : 'text-red-700' }}">
-                        {{ $penerimaan->qty_diterima > 0 ? '+' : '' }}{{ number_format($penerimaan->qty_diterima) }} pcs
-                    </span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-bold {{ $penerimaan->qty_diterima > 0 ? 'text-emerald-700' : 'text-red-700' }}">
+                            {{ $penerimaan->qty_diterima > 0 ? '+' : '' }}{{ number_format($penerimaan->qty_diterima) }} pcs
+                        </span>
+                        @if(($penerimaan->jenis_penerimaan ?? 'baik') === 'cacat')
+                            <span class="px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[9px] rounded-md font-semibold">Cacat/Reject</span>
+                        @else
+                            <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] rounded-md font-semibold">Hasil Baik</span>
+                        @endif
+                    </div>
                     <span class="text-[10px] text-gray-500 font-medium">
                         {{ $penerimaan->tanggal_terima->format('d M Y') }}
                     </span>
                 </div>
                 <p class="text-gray-600 mb-1">
-                    Dari <span class="font-semibold text-gray-800">{{ $penerimaan->dariKaryawan->name ?? '-' }}</span> (finishing)
+                    Dari <span class="font-semibold text-gray-800">{{ $penerimaan->dariKaryawan->name ?? '-' }}</span> 
+                    @php
+                        $svRole = \App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
+                            ->where('id_karyawan', $penerimaan->dari_karyawan_id)
+                            ->value('peran');
+                    @endphp
+                    ({{ $svRole ?? 'karyawan' }})
                     → Admin: <span class="font-semibold text-gray-800">{{ $penerimaan->admin->name ?? '-' }}</span>
                 </p>
                 @if($penerimaan->catatan)
@@ -42,6 +63,6 @@
             </div>
         </div>
     @empty
-        <p class="text-xs text-gray-400 py-4 text-center">Belum ada penerimaan dari finishing.</p>
+        <p class="text-xs text-gray-400 py-4 text-center">Belum ada penerimaan dari karyawan.</p>
     @endforelse
 </div>

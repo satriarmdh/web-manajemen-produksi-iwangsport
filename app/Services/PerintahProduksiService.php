@@ -188,7 +188,7 @@ class PerintahProduksiService
             $perintahProduksi = PerintahProduksi::create([
                 'nomor_wo' => $nomorWO,
                 'tgl_mulai' => $data['tgl_mulai'],
-                'tgl_selesai' => $data['tgl_selesai'] ?? null,
+                'tgl_selesai' => $data['tgl_selesai'],
                 'status_produksi' => 'pending',
                 'user_id' => auth()->id(),
             ]);
@@ -239,7 +239,7 @@ class PerintahProduksiService
             // Update header
             $perintahProduksi->update([
                 'tgl_mulai' => $data['tgl_mulai'],
-                'tgl_selesai' => $data['tgl_selesai'] ?? null,
+                'tgl_selesai' => $data['tgl_selesai'],
             ]);
 
             // Hapus semua detail lama. Riwayat penggunaan kain belum dibuat selama status masih pending.
@@ -419,18 +419,32 @@ class PerintahProduksiService
         return DB::transaction(function () use ($perintahProduksi, $tglSelesai) {
             $perintahProduksi->loadMissing(['details']);
 
-            // 1. Completion Gate: cek apakah masih ada stok ready yang belum diserahkan ke admin
+            // 1. Completion Gate: cek apakah masih ada stok ready atau barang cacat yang belum diserahkan
             foreach ($perintahProduksi->details as $detail) {
-                $unreceivedReady = \App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
-                ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
-                ->exists();
+                // A. Cek stok ready (baik) di setiap tahapan
+                $hasUnreceivedReady = \App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
+                    ->whereColumn('total_selesai', '>', 'total_dikeluarkan')
+                    ->exists();
 
-            if ($unreceivedReady) {
-                    throw new \Exception(
-                        'Tidak dapat menyelesaikan WO. Masih ada barang ready di tangan karyawan finishing ' .
-                        'yang belum diserahkan ke admin untuk produk: ' .
-                        ($detail->produk->nama_produk ?? 'ID ' . $detail->id)
-                    );
+                if ($hasUnreceivedReady) {
+                    throw new \Exception('Tidak dapat menyelesaikan WO. Masih ada stok/barang ready di salah satu karyawan/tahapan.');
+                }
+
+                // B. Cek stok cacat/reject yang belum diserahkan ke admin
+                $stokVirtuaList = \App\Models\StokVirtual::where('id_detail_perintah', $detail->id)
+                    ->where('total_reject', '>', 0)
+                    ->get();
+
+                foreach ($stokVirtuaList as $stok) {
+                    $deliveredReject = (int) \App\Models\PenerimaanHasilProduksi::where([
+                        'perintah_produksi_detail_id' => $detail->id,
+                        'dari_karyawan_id' => $stok->id_karyawan,
+                        'jenis_penerimaan' => 'cacat',
+                    ])->sum('qty_diterima');
+
+                    if ($stok->total_reject > $deliveredReject) {
+                        throw new \Exception('Tidak dapat menyelesaikan WO. Masih ada barang cacat yang belum diserahkan ke admin.');
+                    }
                 }
             }
 

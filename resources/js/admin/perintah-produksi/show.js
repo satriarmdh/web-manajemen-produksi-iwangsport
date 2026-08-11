@@ -149,8 +149,9 @@ function getStokRegistry(registryId = currentStokRegistryId) {
 }
 
 function getCurrentStokRecords() {
-    const entry = getStokRegistry()[currentStokKey] || { cacat: [], selisih: null };
+    const entry = getStokRegistry()[currentStokKey] || { cacat: [], selisih: null, mutasi: [] };
     if (currentStokRecordType === 'selisih') return entry.selisih ? [entry.selisih] : [];
+    if (currentStokRecordType === 'mutasi') return Array.isArray(entry.mutasi) ? entry.mutasi : [];
     return Array.isArray(entry.cacat) ? entry.cacat : [];
 }
 
@@ -161,6 +162,21 @@ function escapeHtml(value) {
 }
 
 function renderStokRecordCard(rec) {
+    if (rec.jenis === 'mutasi' || rec.arah) {
+        const isMasuk = rec.arah === 'masuk';
+        const wrap = isMasuk ? 'bg-emerald-50 border-emerald-200' : 'bg-blue-50 border-blue-200';
+        const qtyColor = isMasuk ? 'text-emerald-700' : 'text-blue-700';
+        const sign = isMasuk ? '+' : '-';
+        return `
+            <article class="border rounded-lg px-3 py-2.5 ${wrap}">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold ${qtyColor}">${sign}${(rec.qty || 0).toLocaleString('id-ID')} pcs</span>
+                    <time class="text-[10px] text-gray-500">${escapeHtml(rec.tgl)}</time>
+                </div>
+                <p class="text-xs text-gray-700 leading-relaxed mt-1.5">${escapeHtml(rec.keterangan)}</p>
+            </article>
+        `;
+    }
     const isCacat = rec.jenis === 'cacat';
     const wrap = isCacat ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200';
     const qtyColor = isCacat ? 'text-amber-700' : 'text-red-700';
@@ -250,14 +266,13 @@ function openStokPanel(data) {
         pengerjaanEl.className = isSelesai
             ? 'text-xs font-semibold text-emerald-700 shrink-0'
             : 'text-xs font-semibold text-gray-700 shrink-0';
-    }
-
-    currentStokKey = data.stokKey;
+    }    currentStokKey = data.stokKey;
     currentStokRegistryId = data.registryId;
     currentStokRecordType = 'cacat';
     const registry = getStokRegistry();
-    const entry = registry[currentStokKey] || { cacat: [], selisih: null };
+    const entry = registry[currentStokKey] || { cacat: [], selisih: null, mutasi: [] };
     const cacatRecords = Array.isArray(entry.cacat) ? entry.cacat : [];
+    const mutasiRecords = Array.isArray(entry.mutasi) ? entry.mutasi : [];
     const allRecords = entry.selisih ? [entry.selisih, ...cacatRecords] : [...cacatRecords];
 
     // Summary section
@@ -266,22 +281,90 @@ function openStokPanel(data) {
     const totalCacat = cacatRecords.reduce((s, r) => s + (r.qty || 0), 0);
     const totalSelisih = entry.selisih ? (entry.selisih.qty || 0) : 0;
 
-    if (allRecords.length > 0) {
+    const hasCacatOrSelisih = allRecords.length > 0;
+    if (hasCacatOrSelisih) {
         summarySection.classList.remove('hidden');
-        listSection.classList.remove('hidden');
         document.getElementById('summary-total-cacat').textContent = totalCacat.toLocaleString('id-ID');
         document.getElementById('summary-count-cacat').textContent = cacatRecords.length;
+        document.getElementById('summary-cacat-diserahkan').textContent = parseInt(data.cacatDiserahkan || 0).toLocaleString('id-ID');
         document.getElementById('summary-total-selisih').textContent = totalSelisih.toLocaleString('id-ID');
         document.getElementById('summary-count-selisih').textContent = entry.selisih ? 1 : 0;
-        setStokRecordTab('cacat');
     } else {
         summarySection.classList.add('hidden');
-        listSection.classList.remove('hidden');
-        setStokRecordTab('cacat');
     }
+
+    listSection.classList.remove('hidden');
+
+    // Default tabs
+    setStokModalTab('info');
+    setStokRecordTab('cacat');
+    renderMutasiPage(mutasiRecords, 1);
 
     // Show panel
     stokPanel.classList.add('is-open');
+}
+
+let stokMutasiCurrentPage = 1;
+
+function setStokModalTab(tabType) {
+    const infoBtn = document.getElementById('modal-tab-btn-info');
+    const serahBtn = document.getElementById('modal-tab-btn-serah');
+    const infoContent = document.getElementById('modal-tab-content-info');
+    const serahContent = document.getElementById('modal-tab-content-serah-terima');
+
+    if (!infoBtn || !serahBtn) return;
+
+    if (tabType === 'info') {
+        infoBtn.className = 'px-3 py-1.5 text-xs font-semibold rounded-md bg-[#0F034D] text-white shadow-sm transition-all';
+        serahBtn.className = 'px-3 py-1.5 text-xs font-semibold rounded-md text-gray-500 hover:text-[#0F034D] transition-all';
+        infoContent.classList.remove('hidden');
+        serahContent.classList.add('hidden');
+    } else {
+        serahBtn.className = 'px-3 py-1.5 text-xs font-semibold rounded-md bg-[#0F034D] text-white shadow-sm transition-all';
+        infoBtn.className = 'px-3 py-1.5 text-xs font-semibold rounded-md text-gray-500 hover:text-[#0F034D] transition-all';
+        infoContent.classList.add('hidden');
+        serahContent.classList.remove('hidden');
+    }
+}
+
+function renderMutasiPage(records, page) {
+    const list = document.getElementById('mutasi-list');
+    const empty = document.getElementById('mutasi-empty');
+    const pagination = document.getElementById('mutasi-pagination');
+    const pageInfo = document.getElementById('mutasi-page-info');
+    const prevBtn = document.getElementById('mutasi-prev');
+    const nextBtn = document.getElementById('mutasi-next');
+    const countLabel = document.getElementById('mutasi-count-label');
+
+    if (!list) return;
+    const total = records.length;
+    countLabel.textContent = `${total} log`;
+
+    if (total === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        pagination.classList.add('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+
+    const totalPages = Math.ceil(total / STOK_RECORDS_PER_PAGE);
+    if (page > totalPages) page = totalPages;
+    if (page < 1) page = 1;
+    stokMutasiCurrentPage = page;
+
+    const start = (page - 1) * STOK_RECORDS_PER_PAGE;
+    const pageItems = records.slice(start, start + STOK_RECORDS_PER_PAGE);
+    list.innerHTML = pageItems.map(renderStokRecordCard).join('');
+
+    if (totalPages > 1) {
+        pagination.classList.remove('hidden');
+        pageInfo.textContent = `${page} / ${totalPages}`;
+        prevBtn.disabled = page === 1;
+        nextBtn.disabled = page === totalPages;
+    } else {
+        pagination.classList.add('hidden');
+    }
 }
 
 function setStokRecordTab(type) {
@@ -290,15 +373,23 @@ function setStokRecordTab(type) {
         const active = tab.dataset.recordType === type;
         tab.setAttribute('aria-selected', String(active));
         tab.className = active
-            ? 'px-2 py-1.5 text-[11px] font-semibold rounded-md bg-[#0F034D] text-white shadow-sm transition-colors'
-            : 'px-2 py-1.5 text-[11px] font-semibold rounded-md text-gray-500 hover:text-[#0F034D] transition-colors';
+            ? 'flex-1 text-center pb-1.5 text-xs font-bold border-b-2 border-[#0F034D] text-[#0F034D] transition-all'
+            : 'flex-1 text-center pb-1.5 text-xs font-semibold border-b-2 border-transparent text-gray-500 hover:text-[#0F034D] transition-all';
     });
     renderStokRecordsPage(getCurrentStokRecords(), 1);
 }
 
+function getCurrentStokMutasiRecords() {
+    const entry = getStokRegistry()[currentStokKey] || { mutasi: [] };
+    return Array.isArray(entry.mutasi) ? entry.mutasi : [];
+}
+
 document.addEventListener('click', function(e) {
-    const tab = e.target.closest('[data-record-type]');
-    if (tab) setStokRecordTab(tab.dataset.recordType);
+    const modalTab = e.target.closest('[data-modal-tab]');
+    if (modalTab) setStokModalTab(modalTab.dataset.modalTab);
+
+    const recordTab = e.target.closest('[data-record-type]');
+    if (recordTab) setStokRecordTab(recordTab.dataset.recordType);
 
     const btn = e.target.closest('[data-view-stok-detail]');
     if (btn) {
@@ -309,11 +400,18 @@ document.addEventListener('click', function(e) {
 });
 
 // Pagination handlers
- document.getElementById('records-prev')?.addEventListener('click', () => {
+document.getElementById('records-prev')?.addEventListener('click', () => {
     if (stokRecordsCurrentPage > 1) renderStokRecordsPage(getCurrentStokRecords(), stokRecordsCurrentPage - 1);
 });
 document.getElementById('records-next')?.addEventListener('click', () => {
     renderStokRecordsPage(getCurrentStokRecords(), stokRecordsCurrentPage + 1);
+});
+
+document.getElementById('mutasi-prev')?.addEventListener('click', () => {
+    if (stokMutasiCurrentPage > 1) renderMutasiPage(getCurrentStokMutasiRecords(), stokMutasiCurrentPage - 1);
+});
+document.getElementById('mutasi-next')?.addEventListener('click', () => {
+    renderMutasiPage(getCurrentStokMutasiRecords(), stokMutasiCurrentPage + 1);
 });
 
 // Close stok panel

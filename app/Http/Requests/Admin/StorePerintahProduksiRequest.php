@@ -17,7 +17,7 @@ class StorePerintahProduksiRequest extends FormRequest
     {
         return [
             'tgl_mulai' => 'required|date|after_or_equal:today',
-            'tgl_selesai' => 'nullable|date|after_or_equal:tgl_mulai',
+            'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
             'details' => 'required|array|min:1',
             'details.*.produk_id' => 'required|exists:produk,id',
             'details.*.bahan_baku_id' => 'required|exists:bahan_baku,id',
@@ -31,6 +31,7 @@ class StorePerintahProduksiRequest extends FormRequest
             'tgl_mulai.required' => 'Tanggal mulai wajib diisi',
             'tgl_mulai.date' => 'Tanggal mulai harus berupa tanggal yang valid',
             'tgl_mulai.after_or_equal' => 'Tanggal mulai tidak boleh kurang dari hari ini',
+            'tgl_selesai.required' => 'Tanggal selesai wajib diisi',
             'tgl_selesai.date' => 'Tanggal selesai harus berupa tanggal yang valid',
             'tgl_selesai.after_or_equal' => 'Tanggal selesai tidak boleh kurang dari tanggal mulai',
             'details.required' => 'Detail produk wajib diisi',

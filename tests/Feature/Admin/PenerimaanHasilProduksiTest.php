@@ -511,4 +511,88 @@ class PenerimaanHasilProduksiTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_admin_dapat_menginput_penerimaan_hasil_cacat()
+    {
+        $data = $this->createDetailWithReadyStok();
+        // Set total_reject to 10
+        $data['stokVirtual']->update(['total_reject' => 10]);
+
+        $response = $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 4,
+                'jenis_penerimaan' => 'cacat',
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'catatan' => 'Terima cacat jahit',
+                'bukti_foto' => UploadedFile::fake()->image('bukti_cacat.jpg'),
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        // Check database
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::where('jenis_penerimaan', 'cacat')->first();
+        $this->assertNotNull($penerimaan);
+        $this->assertEquals(4, $penerimaan->qty_diterima);
+
+        // Verify total_qty_cacat_diterima incremented
+        $this->assertEquals(4, $data['detail']->fresh()->total_qty_cacat_diterima);
+        // Verify good product stock is unchanged (remains 0)
+        $this->assertEquals(0, $data['produk']->fresh()->stok);
+    }
+
+    public function test_reversal_penerimaan_hasil_cacat()
+    {
+        $data = $this->createDetailWithReadyStok();
+        $data['stokVirtual']->update(['total_reject' => 10]);
+
+        // Submit defect receipt
+        $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 4,
+                'jenis_penerimaan' => 'cacat',
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'bukti_foto' => UploadedFile::fake()->image('bukti_cacat.jpg'),
+            ]);
+
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::where('jenis_penerimaan', 'cacat')->first();
+
+        // Perform reversal
+        $response = $this->actingAs($this->admin)
+            ->post("/admin/penerimaan-hasil-produksi/{$penerimaan->id}/reversal", [
+                'catatan' => 'Salah input reject'
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        // Check detail total_qty_cacat_diterima is back to 0
+        $this->assertEquals(0, $data['detail']->fresh()->total_qty_cacat_diterima);
+    }
+
+    public function test_available_karyawan_dapat_memfilter_berdasarkan_type()
+    {
+        $data = $this->createDetailWithReadyStok();
+        $data['stokVirtual']->update(['total_reject' => 5]);
+
+        // Fetch type=baik
+        $responseBaik = $this->actingAs($this->admin)
+            ->get("/admin/penerimaan-hasil-produksi/{$data['detail']->id}/available-karyawan?type=baik");
+        $responseBaik->assertStatus(200);
+        $dataBaik = $responseBaik->json('karyawan');
+        $this->assertCount(1, $dataBaik);
+        $this->assertEquals(100, $dataBaik[0]['qty_ready']);
+
+        // Fetch type=cacat
+        $responseCacat = $this->actingAs($this->admin)
+            ->get("/admin/penerimaan-hasil-produksi/{$data['detail']->id}/available-karyawan?type=cacat");
+        $responseCacat->assertStatus(200);
+        $dataCacat = $responseCacat->json('karyawan');
+        $this->assertCount(1, $dataCacat);
+        $this->assertEquals(5, $dataCacat[0]['qty_ready']);
+    }
 }
