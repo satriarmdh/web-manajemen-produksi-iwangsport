@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StorePembayaranPenjualanRequest;
 use App\Http\Requests\Admin\StorePenjualanRequest;
 use App\Http\Requests\Admin\UpdatePenjualanRequest;
 use App\Models\Penjualan;
@@ -65,7 +66,7 @@ class PenjualanController extends Controller
      */
     public function show(Penjualan $penjualan)
     {
-        $penjualan->load(['pelanggan', 'user', 'detailPenjualan.produk']);
+        $penjualan->load(['pelanggan', 'user', 'detailPenjualan.produk', 'pembayaranPenjualan.user']);
 
         return view('admin.penjualan.show', compact('penjualan'));
     }
@@ -117,7 +118,56 @@ class PenjualanController extends Controller
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->with('error', 'Gagal menghapus penjualan: ' . $e->getMessage());
+                ->with('error', 'Gagal membatalkan transaksi penjualan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cetak PDF Nota Penjualan
+     */
+    public function cetakPdf(Penjualan $penjualan)
+    {
+        $penjualan->load(['pelanggan', 'user', 'detailPenjualan.produk', 'pembayaranPenjualan.user']);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.penjualan.pdf', compact('penjualan'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('nota-penjualan-' . $penjualan->nomor_invoice . '.pdf');
+    }
+
+    /**
+     * Store new payment / installment for a penjualan.
+     */
+    public function storePembayaran(StorePembayaranPenjualanRequest $request, Penjualan $penjualan)
+    {
+        try {
+            $pembayaran = $this->service->tambahPembayaran($penjualan, $request->validated(), $request->user());
+
+            return redirect()
+                ->back()
+                ->with('success', "Pembayaran sebesar Rp " . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . " berhasil dicatat.");
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal mencatat pembayaran: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete a payment entry.
+     */
+    public function destroyPembayaran(\App\Models\PembayaranPenjualan $pembayaran)
+    {
+        try {
+            $this->service->hapusPembayaran($pembayaran);
+
+            return redirect()
+                ->back()
+                ->with('success', 'Riwayat pembayaran berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal menghapus riwayat pembayaran: ' . $e->getMessage());
         }
     }
 }

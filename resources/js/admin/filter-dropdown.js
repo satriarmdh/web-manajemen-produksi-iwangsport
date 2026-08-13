@@ -56,6 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Prevent clicks inside dropdown menus from closing them
+    document.querySelectorAll('[id^="dropdown-"], #filterDropdownMobile, #filterDropdown, #sortDropdown').forEach(m => {
+        m.addEventListener('click', (e) => e.stopPropagation());
+    });
+
     // Close when clicking outside
     document.addEventListener('click', (e) => {
         const clickedInside = e.target.closest('[id^="dropdown-"], #filterDropdownMobile, #filterDropdown, #sortDropdown');

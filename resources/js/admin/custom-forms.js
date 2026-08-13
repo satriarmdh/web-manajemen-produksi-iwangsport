@@ -229,9 +229,66 @@ function updateKategoriCheckbox(checkbox, prefix) {
     }
 }
 
+/**
+ * Format string/number into Indonesian thousands separator dot format (e.g. 500000 -> 500.000)
+ */
+function formatRupiah(val) {
+    if (val === null || val === undefined || val === '') return '0';
+    const digits = val.toString().replace(/[^0-9]/g, '');
+    if (!digits) return '0';
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+/**
+ * Bind currency auto-formatting with thousands dot separators.
+ * @param {string} displayId - ID of text display input
+ * @param {string} hiddenId - ID of hidden numeric input sent to backend
+ */
+function initCurrencyInput(displayId, hiddenId) {
+    const displayInput = document.getElementById(displayId);
+    const hiddenInput = document.getElementById(hiddenId);
+    if (!displayInput || !hiddenInput) return;
+
+    displayInput.placeholder = '0';
+
+    function syncValue() {
+        const rawDigits = displayInput.value.replace(/[^0-9]/g, '');
+        if (!rawDigits || rawDigits === '0') {
+            hiddenInput.value = '0';
+            displayInput.value = '';
+        } else {
+            hiddenInput.value = rawDigits;
+            displayInput.value = formatRupiah(rawDigits);
+        }
+    }
+
+    // Set initial formatted value
+    if (hiddenInput.value && hiddenInput.value !== '0') {
+        displayInput.value = formatRupiah(hiddenInput.value);
+    } else {
+        displayInput.value = '';
+        hiddenInput.value = '0';
+    }
+
+    displayInput.addEventListener('input', syncValue);
+    displayInput.addEventListener('focus', function() {
+        if (displayInput.value === '0') {
+            displayInput.value = '';
+        }
+    });
+    displayInput.addEventListener('blur', function() {
+        if (!displayInput.value || displayInput.value === '') {
+            displayInput.value = '';
+            hiddenInput.value = '0';
+        }
+    });
+}
+
 // Expose to global scope
 window.initCustomDropdown = initCustomDropdown;
 window.setCustomDropdownValue = setCustomDropdownValue;
 window.resetCustomDropdown = resetCustomDropdown;
 window.updateCheckbox = updateCheckbox;
 window.updateKategoriCheckbox = updateKategoriCheckbox;
+window.formatRupiah = formatRupiah;
+window.initCurrencyInput = initCurrencyInput;

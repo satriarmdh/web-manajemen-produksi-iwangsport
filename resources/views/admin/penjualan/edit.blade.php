@@ -19,12 +19,22 @@
     </x-slot:header>
 
     <div class="w-full bg-white rounded-xl shadow-sm border border-gray-100">
-        <div class="px-6 pt-6 pb-4 border-b border-gray-100 rounded-t-xl">
-            <h3 class="text-lg font-bold text-[#0F034D]">{{ $penjualan->nomor_invoice }}</h3>
-            <p class="text-sm text-gray-500 mt-1">Edit transaksi. Stok produk akan disesuaikan otomatis (dikembalikan lalu dikurangi ulang).</p>
+        <div class="px-6 pt-6 pb-4 border-b border-gray-100 rounded-t-xl flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h3 class="text-lg font-bold text-[#0F034D]">{{ $penjualan->nomor_invoice }}</h3>
+                <p class="text-sm text-gray-500 mt-1">Edit transaksi. Stok produk akan disesuaikan otomatis (dikembalikan lalu dikurangi ulang).</p>
+            </div>
+            <button type="button" onclick="openPanduanPembayaranModal()" class="inline-flex items-center gap-2 px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-[#0F034D] border border-blue-200 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-sm">
+                <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Info Pembayaran & Panduan Edit</span>
+            </button>
         </div>
 
-        <form method="POST" action="{{ route('admin.penjualan.update', $penjualan) }}" id="penjualan-form" class="px-6 py-6 space-y-6">
+        <form method="POST" action="{{ route('admin.penjualan.update', $penjualan) }}" id="penjualan-form" class="px-6 py-6 space-y-6"
+            data-swal-confirm
+            data-confirm-title="Simpan Perubahan Transaksi?"
+            data-confirm-message="Stok produk akan disesuaikan secara otomatis berdasarkan data terbaru. Pastikan data sudah benar."
+            data-confirm-button="Ya, Simpan Perubahan">
             @csrf
             @method('PUT')
 
@@ -33,7 +43,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pelanggan <span class="text-red-500">*</span></label>
                     <div class="relative">
-                        <input type="hidden" name="pelanggan_id" id="pelanggan_value" required>
+                        <input type="hidden" name="pelanggan_id" id="pelanggan_value" value="{{ old('pelanggan_id', $penjualan->pelanggan_id) }}" required>
                         <input type="text" id="pelanggan_input" placeholder="Cari / pilih pelanggan..." autocomplete="off" class="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm text-gray-500 @error('pelanggan_id') border-red-300 @enderror">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <svg class="dropdown-arrow w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -115,12 +125,13 @@
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
                 <a href="{{ route('admin.penjualan.index') }}" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-xl transition-colors cursor-pointer">Batal</a>
                 <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-[#0F034D]/20 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Simpan Perubahan
                 </button>
             </div>
         </form>
     </div>
+
+    @include('admin.penjualan.partials._panduan-pembayaran-modal')
 
     @php
         $produkJson = $produk->map(fn($p) => ['id' => $p->id, 'nama' => $p->nama_produk, 'warna' => $p->warna, 'stok' => $p->stok, 'harga' => $p->harga_satuan]);
@@ -138,6 +149,7 @@
     </script>
 
     @vite([
+        'resources/css/global-modal.css',
         'resources/js/admin/custom-forms.js',
         'resources/js/admin/penjualan/edit.js'
     ])

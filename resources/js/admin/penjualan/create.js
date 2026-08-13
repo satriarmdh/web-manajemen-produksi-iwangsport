@@ -84,6 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialization
     initCustomDropdown('pelanggan');
     initCustomDropdown('input_produk');
+    initCustomDropdown('metode_pembayaran');
+    initCurrencyInput('jumlah_bayar_display', 'jumlah_bayar_value');
+
     document.getElementById('input_produk_value').addEventListener('change', refreshInputPreview);
     document.getElementById('input-qty').addEventListener('input', refreshInputPreview);
     document.getElementById('btn-tambah-item').addEventListener('click', saveItem);
@@ -91,5 +94,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const oldPelanggan = document.getElementById('pelanggan_value').value;
     if (oldPelanggan) {
         setCustomDropdownValue('pelanggan', oldPelanggan);
+    }
+
+    const oldMetode = document.getElementById('metode_pembayaran_value').value;
+    if (oldMetode) {
+        setCustomDropdownValue('metode_pembayaran', oldMetode);
+    }
+
+    const buktiInput = document.getElementById('input_bukti_pembayaran');
+    if (buktiInput) {
+        buktiInput.addEventListener('change', function() {
+            const file = this.files[0];
+            const container = document.getElementById('preview_bukti_container');
+            const img = document.getElementById('preview_bukti_img');
+            if (file && container && img) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    container.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else if (container) {
+                container.classList.add('hidden');
+            }
+        });
     }
 });

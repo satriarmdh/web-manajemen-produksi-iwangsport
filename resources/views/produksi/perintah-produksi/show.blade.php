@@ -11,14 +11,26 @@
     </div>
 
     <div class="rounded-3xl bg-gradient-to-br from-[#0F034D] to-[#24116f] p-5 text-white shadow-xl shadow-[#0F034D]/20 mb-5">
-        <div class="flex items-start justify-between gap-3">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
                 <p class="text-xs text-white/60">Perintah Produksi</p>
                 <h2 class="text-xl font-bold mt-1">Perintah Produksi: {{ $perintahProduksi->nomor_wo }}</h2>
-                <p class="text-sm text-white/75 mt-2">Periode: {{ \Carbon\Carbon::parse($perintahProduksi->tgl_mulai)->format('d M Y') }} - {{ $perintahProduksi->tgl_selesai ? \Carbon\Carbon::parse($perintahProduksi->tgl_selesai)->format('d M Y') : '-' }}</p>
-                <p class="mt-3 rounded-2xl bg-white/10 border border-white/15 px-3 py-2 text-xs font-semibold text-white/85">Pastikan hasil yang diinput sesuai Perintah Produksi ini agar produk yang sama dari PP berbeda tidak tertukar.</p>
+                <p class="text-sm text-white/75 mt-1.5">Periode: {{ \Carbon\Carbon::parse($perintahProduksi->tgl_mulai)->format('d M Y') }} - {{ $perintahProduksi->tgl_selesai ? \Carbon\Carbon::parse($perintahProduksi->tgl_selesai)->format('d M Y') : '-' }}</p>
+                <div class="mt-3">
+                    <span class="inline-block rounded-2xl bg-white/10 border border-white/15 px-3 py-2 text-xs font-semibold text-white/85">
+                        Pastikan hasil yang diinput sesuai Perintah Produksi ini agar produk yang sama dari PP berbeda tidak tertukar.
+                    </span>
+                </div>
             </div>
-            <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold">{{ ucfirst(str_replace('_', ' ', $perintahProduksi->status_produksi)) }}</span>
+            <div class="flex flex-wrap sm:flex-col items-start sm:items-end gap-2 shrink-0">
+                <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-white">{{ ucfirst(str_replace('_', ' ', $perintahProduksi->status_produksi)) }}</span>
+                @php $dlInfo = $perintahProduksi->getDeadlineInfo(); @endphp
+                @if($dlInfo['statusType'] !== 'none' && $dlInfo['statusType'] !== 'normal')
+                    <span class="px-3 py-1.5 rounded-full text-xs font-bold shadow-sm border {{ $dlInfo['badgeClass'] }}">
+                        {{ $dlInfo['label'] }}
+                    </span>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -71,10 +83,10 @@
                 </div>
 
                 @if(! $perluPengajuan)
-                    <div class="rounded-2xl border border-[#0F034D]/10 bg-gradient-to-br from-[#0F034D]/5 via-white to-indigo-50/70 p-4 mb-4">
+                    <div class="rounded-2xl border border-gray-100 bg-gray-50/50 p-4 mb-4">
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <div>
-                            <p class="text-[11px] uppercase tracking-wide text-[#0F034D]/60 font-semibold">Progress input</p>
+                            <p class="text-[11px] uppercase tracking-wide text-gray-400 font-semibold">Progress input</p>
                             <p class="text-2xl font-bold text-[#0F034D] mt-0.5">
                                 {{ number_format($sudahDiinput, 0, ',', '.') }}
                                 <span class="text-sm font-semibold text-gray-400">/ {{ number_format($targetInput, 0, ',', '.') }} pcs</span>
@@ -87,33 +99,59 @@
                         </div>
                     </div>
 
-                    <div class="h-3 rounded-full bg-white border border-[#0F034D]/10 overflow-hidden">
+                    <div class="h-3 rounded-full bg-white border border-gray-200 overflow-hidden">
                         <div class="h-full rounded-full {{ $inputSelesai ? 'bg-green-500' : 'bg-[#0F034D]' }} transition-all" style="width: {{ $progressPersen }}%"></div>
                     </div>
 
                     @php
-                        $selisihKaryawan = (int) $sudahDiinput - (int) $targetInput;
-                        $selisihColorClass = $selisihKaryawan < 0 
-                            ? ($sudahDiinput < $batasBawah ? 'text-red-600' : 'text-amber-600') 
-                            : ($selisihKaryawan > 0 ? 'text-blue-600' : 'text-green-700');
+                        if (! $inputSelesai) {
+                            $displaySelisihVal = 0;
+                            $selisihColorClass = 'text-green-700';
+                        } else {
+                            if ($role === 'potong') {
+                                // Potong: patokan selisih kurang adalah batasBawah (estimasi - toleransi)
+                                if ($sudahDiinput < $batasBawah) {
+                                    $displaySelisihVal = $sudahDiinput - $batasBawah; // Misal 573 - 575 = -2 pcs
+                                    $selisihColorClass = 'text-red-600';
+                                } elseif ($sudahDiinput > $targetInput) {
+                                    $displaySelisihVal = $sudahDiinput - $targetInput; // Misal 610 - 600 = +10 pcs
+                                    $selisihColorClass = 'text-blue-600';
+                                } else {
+                                    $displaySelisihVal = 0;
+                                    $selisihColorClass = 'text-green-700';
+                                }
+                            } else {
+                                // Jahit & Finishing: selisih jika (hasil baik + cacat) < targetInput (barang yang diambil)
+                                if ($sudahDiinput < $targetInput) {
+                                    $displaySelisihVal = $sudahDiinput - $targetInput;
+                                    $selisihColorClass = 'text-red-600';
+                                } elseif ($sudahDiinput > $targetInput) {
+                                    $displaySelisihVal = $sudahDiinput - $targetInput;
+                                    $selisihColorClass = 'text-blue-600';
+                                } else {
+                                    $displaySelisihVal = 0;
+                                    $selisihColorClass = 'text-green-700';
+                                }
+                            }
+                        }
                     @endphp
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
-                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                        <div class="rounded-xl bg-white border border-gray-100 p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Batas normal</p>
                             <p class="text-sm font-bold text-green-700">&ge; {{ number_format($batasBawah, 0, ',', '.') }} pcs</p>
                         </div>
-                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                        <div class="rounded-xl bg-white border border-gray-100 p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Hasil baik</p>
                             <p class="text-sm font-bold text-blue-700">{{ number_format($hasilBaik, 0, ',', '.') }} pcs</p>
                         </div>
-                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                        <div class="rounded-xl bg-white border border-gray-100 p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Barang cacat / reject</p>
-                            <p class="text-sm font-bold text-red-600">{{ number_format($totalReject, 0, ',', '.') }} pcs</p>
+                            <p class="text-sm font-bold text-amber-600">{{ number_format($totalReject, 0, ',', '.') }} pcs</p>
                         </div>
-                        <div class="rounded-xl bg-white/80 border border-white p-2.5">
+                        <div class="rounded-xl bg-white border border-gray-100 p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">Selisih</p>
                             <p class="text-sm font-bold {{ $selisihColorClass }}">
-                                {{ $selisihKaryawan > 0 ? '+' : '' }}{{ number_format($selisihKaryawan, 0, ',', '.') }} pcs
+                                {{ ($inputSelesai && $displaySelisihVal > 0) ? '+' : '' }}{{ number_format($displaySelisihVal, 0, ',', '.') }} pcs
                             </p>
                         </div>
                     </div>

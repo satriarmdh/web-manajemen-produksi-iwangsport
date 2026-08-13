@@ -46,6 +46,12 @@
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $statusColors[$perintahProduksi->status_produksi] ?? 'bg-gray-50 text-gray-600 border-gray-100' }}">
                             {{ $statusLabels[$perintahProduksi->status_produksi] ?? $perintahProduksi->status_produksi }}
                         </span>
+                        @php $dlInfo = $perintahProduksi->getDeadlineInfo(); @endphp
+                        @if($dlInfo['statusType'] !== 'none' && $dlInfo['statusType'] !== 'normal')
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $dlInfo['badgeClass'] }}">
+                                {{ $dlInfo['label'] }}
+                            </span>
+                        @endif
                     </div>
                     <p class="text-sm text-gray-500 mt-1">
                         Dibuat oleh <span class="font-semibold text-[#0F034D]">{{ $perintahProduksi->user->name ?? '-' }}</span>
@@ -124,14 +130,18 @@
 
                     if ($isWOFinished) {
                         if ($hasWOFlag) {
-                            $progAdminBg = 'bg-amber-50 border-amber-200';
-                            $progAdminTextClass = 'text-amber-800 font-bold';
+                            $progAdminBg = 'bg-red-50 border-red-200';
+                            $progAdminTextClass = 'text-red-800 font-bold';
                             $progAdminLabel = 'Selesai - Flag/Selisih';
                         } else {
                             $progAdminBg = 'bg-green-50 border-green-200';
                             $progAdminTextClass = 'text-green-800 font-bold';
                             $progAdminLabel = 'Selesai';
                         }
+                    } elseif ($perintahProduksi->status_produksi === 'dalam_produksi') {
+                        $progAdminBg = 'bg-amber-50 border-amber-200';
+                        $progAdminTextClass = 'text-amber-800 font-bold';
+                        $progAdminLabel = 'Dalam Produksi';
                     }
                 @endphp
                 <div class="{{ $progAdminBg }} rounded-xl p-4 border">

@@ -134,4 +134,24 @@ class RiwayatPenjualanOwnerTest extends TestCase
             ->get(route('owner.riwayat-penjualan.index'));
         $responseKaryawan->assertStatus(403);
     }
+
+    /** @test */
+    public function owner_dapat_mencetak_pdf_nota_penjualan()
+    {
+        $pelanggan = Pelanggan::factory()->create();
+        $penjualan = Penjualan::create([
+            'nomor_invoice' => 'INV-PDF-OWNER',
+            'tanggal' => today(),
+            'pelanggan_id' => $pelanggan->id,
+            'user_id' => $this->admin->id,
+            'total_item' => 5,
+            'total_harga' => 250000,
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->get(route('owner.riwayat-penjualan.cetak-pdf', $penjualan));
+
+        $response->assertStatus(200);
+        $response->assertHeader('content-type', 'application/pdf');
+    }
 }

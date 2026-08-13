@@ -23,9 +23,7 @@ use App\Http\Controllers\Produksi\InputHasilPekerjaanController;
 use App\Http\Controllers\Produksi\ProdukCacatController;
 use App\Http\Controllers\Produksi\AjuanPengambilanProduksiController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/login');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -62,6 +60,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     // Rute Riwayat Transaksi Penjualan Owner
     Route::get('riwayat-penjualan', [\App\Http\Controllers\Owner\RiwayatPenjualanOwnerController::class, 'index'])->name('riwayat-penjualan.index');
     Route::get('riwayat-penjualan/{penjualan}', [\App\Http\Controllers\Owner\RiwayatPenjualanOwnerController::class, 'show'])->name('riwayat-penjualan.show');
+    Route::get('riwayat-penjualan/{penjualan}/cetak-pdf', [\App\Http\Controllers\Owner\RiwayatPenjualanOwnerController::class, 'cetakPdf'])->name('riwayat-penjualan.cetak-pdf');
 });
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardAdminController::class, 'index'])->name('dashboard');
@@ -100,6 +99,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('penerimaan-hasil-produksi/{detail}/available-karyawan', [PenerimaanHasilProduksiController::class, 'availableKaryawan'])->name('penerimaan-hasil-produksi.available-karyawan');
 
     // Rute Transaksi Penjualan
+    Route::get('penjualan/{penjualan}/cetak-pdf', [PenjualanController::class, 'cetakPdf'])->name('penjualan.cetak-pdf');
+    Route::post('penjualan/{penjualan}/pembayaran', [PenjualanController::class, 'storePembayaran'])->name('penjualan.pembayaran.store');
+    Route::delete('penjualan/pembayaran/{pembayaran}', [PenjualanController::class, 'destroyPembayaran'])->name('penjualan.pembayaran.destroy');
     Route::resource('penjualan', PenjualanController::class);
 });
 
@@ -127,7 +129,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 
-    // Notifications API
+    // Notifications Web & API
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'page'])->name('notifications.page');
     Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/api/notifications/dropdown', [\App\Http\Controllers\NotificationController::class, 'dropdown'])->name('notifications.dropdown');
     Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');

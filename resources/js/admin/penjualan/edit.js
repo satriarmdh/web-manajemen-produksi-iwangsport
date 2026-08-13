@@ -86,6 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose functions to global/window scope for inline onclick triggers
     window.editItem = editItem;
     window.removeItem = removeItem;
+    window.openPanduanPembayaranModal = function() {
+        const modal = document.getElementById('modal-panduan-pembayaran');
+        if (modal) modal.classList.add('is-open');
+    };
+    window.closePanduanPembayaranModal = function() {
+        const modal = document.getElementById('modal-panduan-pembayaran');
+        if (modal) modal.classList.remove('is-open');
+    };
 
     // Initialization
     initCustomDropdown('pelanggan'); 

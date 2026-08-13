@@ -18,12 +18,42 @@ class NotificationController extends Controller
     }
 
     /**
+     * Dedicated Notifications Page
+     */
+    public function page(Request $request)
+    {
+        $user = $request->user();
+        $filter = $request->query('filter', 'all');
+
+        if ($filter === 'unread') {
+            $query = $user->unreadNotifications();
+        } elseif ($filter === 'read') {
+            $query = $user->readNotifications();
+        } else {
+            $query = $user->notifications();
+        }
+
+        $notifications = $query->paginate(15)->withQueryString();
+        $unreadCount = $user->unreadNotifications()->count();
+        $totalCount = $user->notifications()->count();
+        $readCount = $user->readNotifications()->count();
+
+        return view('notifications.index', compact(
+            'notifications',
+            'unreadCount',
+            'totalCount',
+            'readCount',
+            'filter'
+        ));
+    }
+
+    /**
      * Render dropdown HTML via Blade partial (for bell.js fetch)
      */
     public function dropdown(Request $request)
     {
         $user = $request->user();
-        $notifications = $user->notifications()->limit(20)->get();
+        $notifications = $user->notifications()->limit(5)->get();
         $unreadCount = $user->unreadNotifications()->count();
 
         return view('components.partials._notification-dropdown', compact('notifications', 'unreadCount'))->render();
@@ -41,6 +71,10 @@ class NotificationController extends Controller
     {
         $request->user()->unreadNotifications->markAsRead();
 
-        return response()->json(['success' => true]);
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->back()->with('success', 'Semua notifikasi telah ditandai sebagai dibaca.');
     }
 }

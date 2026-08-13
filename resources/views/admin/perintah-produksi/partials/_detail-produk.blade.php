@@ -28,7 +28,7 @@
     ];
     $penerimaanColors = [
         'belum_diterima' => 'bg-gray-50 text-gray-600 border-gray-200',
-        'sebagian' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+        'sebagian' => 'bg-amber-50 text-amber-800 border-amber-200',
         'sesuai' => 'bg-green-50 text-green-700 border-green-200',
         'selisih_kurang' => 'bg-red-50 text-red-700 border-red-200',
         'selisih_lebih' => 'bg-orange-50 text-orange-700 border-orange-200',
@@ -37,9 +37,20 @@
 @php
     $totalDiterimaAkumulasi = (int) $detail->total_qty_diterima + (int) $detail->total_qty_cacat_diterima;
     $batasMinNormal = (int) $detail->estimasi_pcs - (int) $detail->toleransi_minus;
-    $selisihNet = $totalDiterimaAkumulasi - (int) $detail->estimasi_pcs;
-    $isBelowMin = $totalDiterimaAkumulasi < $batasMinNormal;
     $isWOFinished = $perintahProduksi->status_produksi === 'selesai';
+    
+    if ($isWOFinished) {
+        if ($totalDiterimaAkumulasi < $batasMinNormal) {
+            $selisihNet = $totalDiterimaAkumulasi - $batasMinNormal; // Misal 568 - 575 = -7 pcs
+        } elseif ($totalDiterimaAkumulasi > (int) $detail->estimasi_pcs) {
+            $selisihNet = $totalDiterimaAkumulasi - (int) $detail->estimasi_pcs; // Misal 610 - 600 = +10 pcs
+        } else {
+            $selisihNet = 0;
+        }
+    } else {
+        $selisihNet = 0;
+    }
+    $isBelowMin = $isWOFinished && ($totalDiterimaAkumulasi < $batasMinNormal);
 @endphp
 <div class="bg-white rounded-xl border border-gray-300 overflow-hidden max-h-[calc(100vh-8rem)] flex flex-col">
     {{-- Fixed Header --}}
@@ -61,7 +72,7 @@
 
                 if ($isWOFinished) {
                     if ($isBelowMin) {
-                        $dispPenerimaanClass = 'bg-amber-50 text-amber-800 border-amber-200';
+                        $dispPenerimaanClass = 'bg-red-50 text-red-800 border-red-200';
                         $dispPenerimaanTitle = 'Selesai - Flag/Selisih';
                         $dispPenerimaanDesc = 'Perintah selesai. Hasil diterima di bawah batas toleransi normal.';
                     } else {
@@ -111,7 +122,7 @@
                         <span class="text-[11px] font-bold text-[#0F034D] uppercase tracking-wide">Ringkasan Realisasi & Selisih</span>
                         @if($isWOFinished)
                             @if($isBelowMin)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
                                     Flag/Selisih
                                 </span>
                             @else
@@ -135,14 +146,14 @@
                         </div>
                         <div class="bg-white rounded-lg p-2 border border-gray-200">
                             <p class="text-[10px] text-gray-400 font-medium">Selisih</p>
-                            <p class="text-xs font-bold {{ $selisihNet < 0 ? ($isBelowMin ? 'text-red-600' : 'text-amber-600') : ($selisihNet > 0 ? 'text-blue-600' : 'text-green-600') }} mt-0.5">
-                                {{ $selisihNet > 0 ? '+' : '' }}{{ number_format($selisihNet, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500">pcs</span>
+                            <p class="text-xs font-bold {{ $isWOFinished ? ($selisihNet < 0 ? 'text-red-600' : ($selisihNet > 0 ? 'text-blue-600' : 'text-green-700')) : 'text-green-700' }} mt-0.5">
+                                {{ ($isWOFinished && $selisihNet > 0) ? '+' : '' }}{{ number_format($selisihNet, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500">pcs</span>
                             </p>
                         </div>
                         <div class="bg-white rounded-lg p-2 border border-gray-200">
                             <p class="text-[10px] text-gray-400 font-medium">Status Toleransi</p>
-                            <p class="text-xs font-bold {{ $isBelowMin ? 'text-red-600' : 'text-green-600' }} mt-0.5">
-                                {{ $isBelowMin ? 'Di Bawah Min' : 'Normal / Aman' }}
+                            <p class="text-xs font-bold {{ $isWOFinished ? ($isBelowMin ? 'text-red-600' : 'text-green-700') : 'text-gray-600' }} mt-0.5">
+                                {{ $isWOFinished ? ($isBelowMin ? 'Di Bawah Min' : 'Normal / Aman') : 'Dalam Proses' }}
                             </p>
                         </div>
                     </div>

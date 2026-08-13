@@ -44,4 +44,35 @@ class Penjualan extends Model
     {
         return $this->hasMany(DetailPenjualan::class);
     }
+
+    public function pembayaranPenjualan(): HasMany
+    {
+        return $this->hasMany(PembayaranPenjualan::class, 'penjualan_id')->orderBy('tanggal_bayar', 'asc')->orderBy('id', 'asc');
+    }
+
+    public function getTotalDibayarAttribute(): float
+    {
+        return (float) $this->pembayaranPenjualan->sum('jumlah_bayar');
+    }
+
+    public function getSisaPembayaranAttribute(): float
+    {
+        return max(0, (float) $this->total_harga - $this->total_dibayar);
+    }
+
+    public function getStatusPembayaranAttribute(): string
+    {
+        $paid = $this->total_dibayar;
+        $total = (float) $this->total_harga;
+
+        if ($paid >= $total && $total > 0) {
+            return 'lunas';
+        }
+
+        if ($paid > 0) {
+            return 'sebagian';
+        }
+
+        return 'belum_bayar';
+    }
 }

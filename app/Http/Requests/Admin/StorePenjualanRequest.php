@@ -28,6 +28,10 @@ class StorePenjualanRequest extends FormRequest
                 'before_or_equal:today',
             ],
             'catatan' => ['nullable', 'string', 'max:500'],
+            'jumlah_bayar' => ['nullable', 'numeric', 'min:0'],
+            'metode_pembayaran' => ['nullable', 'string', 'in:tunai,transfer'],
+            'catatan_pembayaran' => ['nullable', 'string', 'max:255'],
+            'bukti_pembayaran' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.produk_id' => [
                 'required',

@@ -138,13 +138,6 @@
             <button onclick="toggleMobileSidebar()" class="md:hidden mr-3 shrink-0 w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-
-            <div class="relative w-64 sm:w-80 md:w-96">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 sm:pl-4 pointer-events-none">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <input type="text" class="bg-gray-100/50 border border-gray-200 text-gray-900 text-xs sm:text-sm rounded-full focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D]/30 block w-full pl-9 sm:pl-11 p-2 sm:p-2.5 outline-none transition-all placeholder-gray-400" placeholder="Search...">
-            </div>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-5">

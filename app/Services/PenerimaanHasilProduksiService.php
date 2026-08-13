@@ -289,6 +289,7 @@ class PenerimaanHasilProduksiService
             ->with(['admin', 'dariKaryawan'])
             ->orderBy('tanggal_terima', 'desc')
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
     }
 

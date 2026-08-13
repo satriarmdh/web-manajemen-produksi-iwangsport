@@ -146,8 +146,8 @@
                     $woInProgress = $doneDetails > 0 || $inProgressDetails > 0;
                 @endphp
                 <div class="bg-white rounded-2xl border border-[#0F034D]/10 p-4 sm:p-5 shadow-[0_10px_30px_rgba(15,3,77,0.08)] h-full flex flex-col">
-                    <div class="flex items-start justify-between gap-3 mb-4">
-                        <div>
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                        <div class="space-y-1">
                             <div class="flex flex-wrap items-center gap-2">
                                 <h4 class="font-bold text-[#0F034D] text-base">{{ $wo->nomor_wo }}</h4>
                                 <span class="rounded-full bg-[#0F034D]/5 px-2.5 py-1 text-xs font-bold text-[#0F034D]">Prioritas Pengerjaan #{{ $fifoIndex }}</span>
@@ -168,9 +168,17 @@
                                     </span>
                                 @endif
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">Periode: {{ \Carbon\Carbon::parse($wo->tgl_mulai)->format('d M Y') }} - {{ $wo->tgl_selesai ? \Carbon\Carbon::parse($wo->tgl_selesai)->format('d M Y') : '-' }}</p>
+                            <p class="text-xs text-gray-400">Periode: {{ \Carbon\Carbon::parse($wo->tgl_mulai)->format('d M Y') }} - {{ $wo->tgl_selesai ? \Carbon\Carbon::parse($wo->tgl_selesai)->format('d M Y') : '-' }}</p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 shrink-0">{{ ucfirst(str_replace('_', ' ', $wo->status_produksi)) }}</span>
+                        <div class="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 shrink-0">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">{{ ucfirst(str_replace('_', ' ', $wo->status_produksi)) }}</span>
+                            @php $dlInfo = $wo->getDeadlineInfo(); @endphp
+                            @if($dlInfo['statusType'] !== 'none' && $dlInfo['statusType'] !== 'normal')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $dlInfo['badgeClass'] }}">
+                                    {{ $dlInfo['label'] }}
+                                </span>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 mb-3">

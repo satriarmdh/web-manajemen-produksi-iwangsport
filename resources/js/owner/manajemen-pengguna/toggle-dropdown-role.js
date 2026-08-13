@@ -26,6 +26,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (chevron) chevron.classList.add('rotate-180');
         }
 
+        menu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
             if (menu.classList.contains('hidden')) {
@@ -35,8 +39,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        document.addEventListener('click', function () {
-            closeMenu();
+        document.addEventListener('click', function (e) {
+            if (!container.contains(e.target)) {
+                closeMenu();
+            }
         });
 
         function selectRole(val) {

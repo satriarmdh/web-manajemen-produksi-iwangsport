@@ -50,6 +50,12 @@
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $statusColors[$perintahProduksi->status_produksi] ?? 'bg-gray-50 text-gray-600 border-gray-100' }}">
                             {{ $statusLabels[$perintahProduksi->status_produksi] ?? $perintahProduksi->status_produksi }}
                         </span>
+                        @php $dlInfo = $perintahProduksi->getDeadlineInfo(); @endphp
+                        @if($dlInfo['statusType'] !== 'none' && $dlInfo['statusType'] !== 'normal')
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $dlInfo['badgeClass'] }}">
+                                {{ $dlInfo['label'] }}
+                            </span>
+                        @endif
                     </div>
                     <p class="text-sm text-gray-500 mt-1">
                         Dibuat oleh <span class="font-semibold text-[#0F034D]">{{ $perintahProduksi->user->name ?? '-' }}</span>
@@ -234,7 +240,7 @@
                     ];
                     $penerimaanColors = [
                         'belum_diterima' => 'bg-gray-50 text-gray-600 border-gray-200',
-                        'sebagian' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                        'sebagian' => 'bg-amber-50 text-amber-800 border-amber-200',
                         'sesuai' => 'bg-green-50 text-green-700 border-green-200',
                         'selisih_kurang' => 'bg-red-50 text-red-700 border-red-200',
                         'selisih_lebih' => 'bg-orange-50 text-orange-700 border-orange-200',
@@ -252,9 +258,31 @@
                                     <p class="text-[10px] font-bold uppercase tracking-wide">Status Produksi: {{ ucfirst($detail->status_validasi_potong ?? 'pending') }}</p>
                                     <p class="text-[11px] mt-0.5 leading-relaxed">{{ $statusDescriptions[$detail->status_validasi_potong] ?? $statusDescriptions['pending'] }}</p>
                                 </div>
-                                <div class="rounded-lg border px-3 py-2 {{ $penerimaanColors[$detail->status_penerimaan] ?? $penerimaanColors['belum_diterima'] }}">
-                                    <p class="text-[10px] font-bold uppercase tracking-wide">Status Penerimaan: {{ ucfirst(str_replace('_', ' ', $detail->status_penerimaan ?? 'belum_diterima')) }}</p>
-                                    <p class="text-[11px] mt-0.5 leading-relaxed">{{ $penerimaanDescriptions[$detail->status_penerimaan] ?? $penerimaanDescriptions['belum_diterima'] }}</p>
+                                @php
+                                    $isWOFinished = $perintahProduksi->status_produksi === 'selesai';
+                                    $totalDiterimaAkumulasi = (int) $detail->total_qty_diterima + (int) $detail->total_qty_cacat_diterima;
+                                    $batasMinNormal = (int) $detail->estimasi_pcs - (int) $detail->toleransi_minus;
+                                    $isBelowMin = $isWOFinished && ($totalDiterimaAkumulasi < $batasMinNormal);
+
+                                    $dispPenerimaanClass = $penerimaanColors[$detail->status_penerimaan] ?? $penerimaanColors['belum_diterima'];
+                                    $dispPenerimaanTitle = ucfirst(str_replace('_', ' ', $detail->status_penerimaan ?? 'belum_diterima'));
+                                    $dispPenerimaanDesc = $penerimaanDescriptions[$detail->status_penerimaan] ?? $penerimaanDescriptions['belum_diterima'];
+
+                                    if ($isWOFinished) {
+                                        if ($isBelowMin) {
+                                            $dispPenerimaanClass = 'bg-red-50 text-red-800 border-red-200';
+                                            $dispPenerimaanTitle = 'Selesai - Flag/Selisih';
+                                            $dispPenerimaanDesc = 'Perintah selesai. Hasil diterima di bawah batas toleransi normal.';
+                                        } else {
+                                            $dispPenerimaanClass = 'bg-green-50 text-green-800 border-green-200';
+                                            $dispPenerimaanTitle = 'Selesai';
+                                            $dispPenerimaanDesc = 'Perintah selesai. Hasil diterima memenuhi batas toleransi normal.';
+                                        }
+                                    }
+                                @endphp
+                                <div class="rounded-lg border px-3 py-2 {{ $dispPenerimaanClass }}">
+                                    <p class="text-[10px] font-bold uppercase tracking-wide">Status Penerimaan: {{ $dispPenerimaanTitle }}</p>
+                                    <p class="text-[11px] mt-0.5 leading-relaxed">{{ $dispPenerimaanDesc }}</p>
                                 </div>
                             </div>
 
@@ -270,9 +298,9 @@
                                         </div>
                                         <p class="text-xs text-gray-500 mt-1">Informasi dasar produk dalam perintah produksi</p>
                                     </div>
-                                    <div class="p-5">
-                                        <div class="flex flex-col gap-2">
-                                            <div class="rounded-lg bg-gray-50 px-3 py-2">
+                                    <div class="p-5 space-y-3">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div class="rounded-lg bg-gray-50 px-3 py-2 col-span-2">
                                                 <p class="text-[10px] text-gray-400 mb-0.5">Bahan Baku Kain</p>
                                                 <p class="text-xs font-semibold text-[#0F034D] truncate">{{ $detail->bahanBaku->nama_bahan ?? '-' }}</p>
                                             </div>
@@ -281,12 +309,65 @@
                                                 <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->qty_roll_pakai) }} Roll</p>
                                             </div>
                                             <div class="rounded-lg bg-gray-50 px-3 py-2">
-                                                <p class="text-[10px] text-gray-400 mb-0.5">Estimasi Pcs</p>
-                                                <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->estimasi_pcs) }} Pcs</p>
-                                            </div>
-                                            <div class="rounded-lg bg-gray-50 px-3 py-2">
                                                 <p class="text-[10px] text-gray-400 mb-0.5">Toleransi -</p>
                                                 <p class="text-sm font-bold text-[#0F034D]">{{ number_format($detail->toleransi_minus ?? 0) }} Pcs</p>
+                                            </div>
+                                        </div>
+
+                                        @php
+                                            if ($isWOFinished) {
+                                                if ($totalDiterimaAkumulasi < $batasMinNormal) {
+                                                    $selisihNet = $totalDiterimaAkumulasi - $batasMinNormal;
+                                                } elseif ($totalDiterimaAkumulasi > (int) $detail->estimasi_pcs) {
+                                                    $selisihNet = $totalDiterimaAkumulasi - (int) $detail->estimasi_pcs;
+                                                } else {
+                                                    $selisihNet = 0;
+                                                }
+                                            } else {
+                                                $selisihNet = 0;
+                                            }
+                                        @endphp
+
+                                        {{-- Box Ringkasan Realisasi & Selisih --}}
+                                        <div class="rounded-xl border border-gray-200 bg-gray-50/70 p-3">
+                                            <div class="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-gray-200">
+                                                <span class="text-[11px] font-bold text-[#0F034D] uppercase tracking-wide">Ringkasan Realisasi & Selisih</span>
+                                                @if($isWOFinished)
+                                                    @if($isBelowMin)
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
+                                                            Flag/Selisih
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-100 text-green-800 border border-green-300">
+                                                            Sesuai
+                                                        </span>
+                                                    @endif
+                                                @endif
+                                            </div>
+
+                                            <div class="grid grid-cols-2 gap-2 text-left">
+                                                <div class="bg-white rounded-lg p-2 border border-gray-200">
+                                                    <p class="text-[10px] text-gray-400 font-medium">Estimasi Target</p>
+                                                    <p class="text-xs font-bold text-[#0F034D] mt-0.5">{{ number_format($detail->estimasi_pcs, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500">pcs</span></p>
+                                                    <p class="text-[9px] text-gray-400">Min: {{ number_format($batasMinNormal, 0, ',', '.') }} pcs</p>
+                                                </div>
+                                                <div class="bg-white rounded-lg p-2 border border-gray-200">
+                                                    <p class="text-[10px] text-gray-400 font-medium">Total Diterima</p>
+                                                    <p class="text-xs font-bold text-green-700 mt-0.5">{{ number_format($totalDiterimaAkumulasi, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500">pcs</span></p>
+                                                    <p class="text-[9px] text-gray-500">({{ number_format($detail->total_qty_diterima, 0, ',', '.') }} baik, {{ number_format($detail->total_qty_cacat_diterima, 0, ',', '.') }} cacat)</p>
+                                                </div>
+                                                <div class="bg-white rounded-lg p-2 border border-gray-200">
+                                                    <p class="text-[10px] text-gray-400 font-medium">Selisih</p>
+                                                    <p class="text-xs font-bold {{ $isWOFinished ? ($selisihNet < 0 ? 'text-red-600' : ($selisihNet > 0 ? 'text-blue-600' : 'text-green-700')) : 'text-green-700' }} mt-0.5">
+                                                        {{ ($isWOFinished && $selisihNet > 0) ? '+' : '' }}{{ number_format($selisihNet, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500">pcs</span>
+                                                    </p>
+                                                </div>
+                                                <div class="bg-white rounded-lg p-2 border border-gray-200">
+                                                    <p class="text-[10px] text-gray-400 font-medium">Status Toleransi</p>
+                                                    <p class="text-xs font-bold {{ $isWOFinished ? ($isBelowMin ? 'text-red-600' : 'text-green-700') : 'text-gray-600' }} mt-0.5">
+                                                        {{ $isWOFinished ? ($isBelowMin ? 'Di Bawah Min' : 'Normal / Aman') : 'Dalam Proses' }}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

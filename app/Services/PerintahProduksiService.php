@@ -456,7 +456,7 @@ class PerintahProduksiService
 
             $perintahProduksi->update([
                 'status_produksi' => 'selesai',
-                'tgl_selesai' => $tglSelesai,
+                'tgl_selesai_aktual' => $tglSelesai,
             ]);
 
             return $perintahProduksi;

@@ -519,7 +519,7 @@ class PerintahProduksiTest extends TestCase
         $this->assertDatabaseHas('perintah_produksi', [
             'id' => $wo->id,
             'status_produksi' => 'selesai',
-            'tgl_selesai' => now()->format('Y-m-d'),
+            'tgl_selesai_aktual' => now()->format('Y-m-d'),
         ]);
     }
 
@@ -592,6 +592,37 @@ class PerintahProduksiTest extends TestCase
 
         $response->assertRedirect('/admin/perintah-produksi');
         $this->assertEquals('selisih_kurang', $detail->fresh()->status_penerimaan);
+    }
+
+    public function test_wo_mendapatkan_status_deadline_info_yang_tepat()
+    {
+        // 1. Overdue WO (Target H-2 yang lalu)
+        $woOverdue = PerintahProduksi::factory()->dalamProduksi()->create([
+            'tgl_selesai' => now()->subDays(2)->format('Y-m-d'),
+        ]);
+        $this->assertEquals('overdue', $woOverdue->getDeadlineInfo()['statusType']);
+        $this->assertTrue($woOverdue->getDeadlineInfo()['isLate']);
+
+        // 2. H-1 Deadline
+        $woH1 = PerintahProduksi::factory()->dalamProduksi()->create([
+            'tgl_selesai' => now()->addDays(1)->format('Y-m-d'),
+        ]);
+        $this->assertEquals('h1', $woH1->getDeadlineInfo()['statusType']);
+
+        // 3. H-3 Deadline
+        $woH3 = PerintahProduksi::factory()->dalamProduksi()->create([
+            'tgl_selesai' => now()->addDays(3)->format('Y-m-d'),
+        ]);
+        $this->assertEquals('warning', $woH3->getDeadlineInfo()['statusType']);
+
+        // 4. Selesai Terlambat
+        $woLate = PerintahProduksi::factory()->create([
+            'status_produksi' => 'selesai',
+            'tgl_selesai' => now()->subDays(5)->format('Y-m-d'),
+            'tgl_selesai_aktual' => now()->subDays(2)->format('Y-m-d'),
+        ]);
+        $this->assertEquals('late_completed', $woLate->getDeadlineInfo()['statusType']);
+        $this->assertTrue($woLate->getDeadlineInfo()['isLate']);
     }
 
     // ============================================

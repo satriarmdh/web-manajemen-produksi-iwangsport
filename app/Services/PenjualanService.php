@@ -83,7 +83,25 @@ class PenjualanService
                 ]);
             }
 
-            return $penjualan->load(['pelanggan', 'detailPenjualan.produk']);
+            // 5. Create initial payment if provided
+            if (isset($data['jumlah_bayar']) && (float) $data['jumlah_bayar'] > 0) {
+                $buktiPath = null;
+                if (isset($data['bukti_pembayaran']) && $data['bukti_pembayaran'] instanceof \Illuminate\Http\UploadedFile) {
+                    $buktiPath = $data['bukti_pembayaran']->store('bukti-penjualan', 'public');
+                }
+
+                \App\Models\PembayaranPenjualan::create([
+                    'penjualan_id' => $penjualan->id,
+                    'user_id' => $admin->id,
+                    'tanggal_bayar' => $data['tanggal'],
+                    'jumlah_bayar' => $data['jumlah_bayar'],
+                    'metode_pembayaran' => $data['metode_pembayaran'] ?? 'tunai',
+                    'catatan' => $data['catatan_pembayaran'] ?? 'Pembayaran awal',
+                    'bukti_pembayaran' => $buktiPath,
+                ]);
+            }
+
+            return $penjualan->load(['pelanggan', 'detailPenjualan.produk', 'pembayaranPenjualan']);
         });
     }
 
@@ -276,5 +294,41 @@ class PenjualanService
             'pelanggan' => Pelanggan::where('is_aktif', true)->orderBy('nama_pelanggan')->get(),
             'produk' => Produk::where('is_aktif', true)->orderBy('nama_produk')->get(),
         ];
+    }
+
+    /**
+     * Tambah pembayaran / pelunasan baru.
+     */
+    public function tambahPembayaran(Penjualan $penjualan, array $data, User $admin): \App\Models\PembayaranPenjualan
+    {
+        return DB::transaction(function () use ($penjualan, $data, $admin) {
+            $buktiPath = null;
+            if (isset($data['bukti_pembayaran']) && $data['bukti_pembayaran'] instanceof \Illuminate\Http\UploadedFile) {
+                $buktiPath = $data['bukti_pembayaran']->store('bukti-penjualan', 'public');
+            }
+
+            return \App\Models\PembayaranPenjualan::create([
+                'penjualan_id' => $penjualan->id,
+                'user_id' => $admin->id,
+                'tanggal_bayar' => $data['tanggal_bayar'] ?? now(),
+                'jumlah_bayar' => $data['jumlah_bayar'],
+                'metode_pembayaran' => $data['metode_pembayaran'] ?? 'tunai',
+                'catatan' => $data['catatan'] ?? null,
+                'bukti_pembayaran' => $buktiPath,
+            ]);
+        });
+    }
+
+    /**
+     * Hapus entri pembayaran.
+     */
+    public function hapusPembayaran(\App\Models\PembayaranPenjualan $pembayaran): void
+    {
+        DB::transaction(function () use ($pembayaran) {
+            if ($pembayaran->bukti_pembayaran) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($pembayaran->bukti_pembayaran);
+            }
+            $pembayaran->delete();
+        });
     }
 }

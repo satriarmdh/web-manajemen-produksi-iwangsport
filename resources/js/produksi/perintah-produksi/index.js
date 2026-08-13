@@ -26,6 +26,11 @@
         const button = wrapper.querySelector('button');
         const menu = wrapper.querySelector('[id^="dropdown-"]');
         if (button && menu) {
+            // Prevent clicks inside the dropdown menu from closing it
+            menu.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
             button.addEventListener('click', (e) => {
                 e.stopPropagation();
 
@@ -45,9 +50,12 @@
     });
 
     // Close on click outside
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (e) => {
         document.querySelectorAll('[id^="dropdown-"]').forEach((m) => {
-            closeDropdown(m);
+            const wrapper = m.closest('[data-dropdown]');
+            if (wrapper && !wrapper.contains(e.target)) {
+                closeDropdown(m);
+            }
         });
     });
 })();

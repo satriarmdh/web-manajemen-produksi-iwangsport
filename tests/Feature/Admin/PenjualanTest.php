@@ -510,4 +510,65 @@ class PenjualanTest extends TestCase
         $response->assertDontSee($penjualan1->nomor_invoice);
         $response->assertSee($penjualan2->nomor_invoice);
     }
+
+    public function test_admin_dapat_mencetak_pdf_nota_penjualan()
+    {
+        $pelanggan = Pelanggan::factory()->create();
+        $penjualan = Penjualan::factory()->create([
+            'pelanggan_id' => $pelanggan->id,
+            'user_id' => $this->admin->id,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.penjualan.cetak-pdf', $penjualan));
+
+        $response->assertStatus(200);
+        $response->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_admin_dapat_mencatat_pembayaran_dp_dan_pelunasan_penjualan()
+    {
+        $produk = $this->createProdukWithStok(20);
+        $pelanggan = Pelanggan::factory()->create();
+
+        // 1. Create sale with DP 100,000 (total = 250,000)
+        $response = $this->actingAs($this->admin)
+            ->post('/admin/penjualan', [
+                'pelanggan_id' => $pelanggan->id,
+                'tanggal' => today()->format('Y-m-d'),
+                'jumlah_bayar' => 100000,
+                'metode_pembayaran' => 'transfer',
+                'catatan_pembayaran' => 'DP Awal',
+                'items' => [
+                    [
+                        'produk_id' => $produk->id,
+                        'qty' => 5,
+                    ],
+                ],
+            ]);
+
+        $response->assertRedirect('/admin/penjualan');
+        $penjualan = Penjualan::latest('id')->first();
+
+        $this->assertEquals(250000, $penjualan->total_harga);
+        $this->assertEquals(100000, $penjualan->total_dibayar);
+        $this->assertEquals(150000, $penjualan->sisa_pembayaran);
+        $this->assertEquals('sebagian', $penjualan->status_pembayaran);
+
+        // 2. Add follow up payment of 150,000
+        $responsePayment = $this->actingAs($this->admin)
+            ->post(route('admin.penjualan.pembayaran.store', $penjualan), [
+                'tanggal_bayar' => now()->format('Y-m-d H:i:s'),
+                'jumlah_bayar' => 150000,
+                'metode_pembayaran' => 'tunai',
+                'catatan' => 'Pelunasan sisa tagihan',
+            ]);
+
+        $responsePayment->assertRedirect();
+        $penjualan->refresh();
+
+        $this->assertEquals(250000, $penjualan->total_dibayar);
+        $this->assertEquals(0, $penjualan->sisa_pembayaran);
+        $this->assertEquals('lunas', $penjualan->status_pembayaran);
+    }
 }

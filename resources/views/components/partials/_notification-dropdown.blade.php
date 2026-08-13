@@ -26,3 +26,8 @@
         </div>
     @endforelse
 </div>
+<div class="p-2.5 border-t border-gray-100 bg-gray-50/70 text-center shrink-0">
+    <a href="{{ route('notifications.page') }}" id="notification-view-all" class="block w-full py-1.5 text-xs font-bold text-[#0F034D] hover:text-[#0a0235] transition-colors">
+        Lihat Selengkapnya →
+    </a>
+</div>

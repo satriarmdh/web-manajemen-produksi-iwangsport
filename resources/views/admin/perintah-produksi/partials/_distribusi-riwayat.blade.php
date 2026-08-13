@@ -5,7 +5,7 @@
 @endphp
 <!-- Tab Content: Riwayat Penerimaan -->
 <div>
-    @forelse($detail->penerimaanHasilProduksi->sortByDesc('tanggal_terima') as $penerimaan)
+    @forelse($detail->penerimaanHasilProduksi->sortByDesc(fn($p) => [$p->tanggal_terima ? $p->tanggal_terima->format('Y-m-d') : '', $p->id]) as $penerimaan)
         <div class="relative pl-6 pb-4 {{ $loop->last ? 'pb-0' : '' }}">
             {{-- Vertical line --}}
             @if(!$loop->last)

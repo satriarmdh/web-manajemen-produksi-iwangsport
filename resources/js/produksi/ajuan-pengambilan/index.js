@@ -40,6 +40,10 @@ document.getElementById('ajuan-date-filter')?.addEventListener('change', () => {
     document.getElementById('filter-ajuan-form')?.submit();
 });
 
+document.querySelectorAll('[data-custom-dropdown-menu]').forEach((menu) => {
+    menu.addEventListener('click', (event) => event.stopPropagation());
+});
+
 document.querySelectorAll('[data-custom-dropdown-button]').forEach((button) => {
     button.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -68,7 +72,13 @@ document.querySelectorAll('[data-custom-dropdown-option]').forEach((option) => {
     });
 });
 
-document.addEventListener('click', () => closeDropdowns());
+document.addEventListener('click', (e) => {
+    const clickedInsideBtn = e.target.closest('[data-custom-dropdown-button]');
+    const clickedInsideMenu = e.target.closest('[data-custom-dropdown-menu]');
+    if (!clickedInsideBtn && !clickedInsideMenu) {
+        closeDropdowns();
+    }
+});
 
 // --- Riwayat Ajuan Status Filter (client-side) ---
 const riwayatFilterBtns = document.querySelectorAll('[data-riwayat-status]');

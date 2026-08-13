@@ -142,7 +142,15 @@
                             <h3 class="font-bold text-[#0F034D] text-sm tracking-tight">{{ $wo->nomor_wo }}</h3>
                             <p class="text-xs text-gray-400 mt-1">Dibuat {{ $wo->created_at->format('d M Y, H:i') }}</p>
                         </div>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $statusClass }}">{{ $statusLabel }}</span>
+                        <div class="flex flex-col items-end gap-1 shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ $statusClass }}">{{ $statusLabel }}</span>
+                            @php $dlInfo = $wo->getDeadlineInfo(); @endphp
+                            @if($dlInfo['statusType'] !== 'none' && $dlInfo['statusType'] !== 'normal')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $dlInfo['badgeClass'] }}">
+                                    {{ $dlInfo['label'] }}
+                                </span>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-3 gap-2 mb-4">
