@@ -41,8 +41,8 @@ class DashboardAdminTest extends TestCase
             ->assertViewIs('admin.dashboard')
             ->assertSee('Dashboard Admin')
             ->assertSee('Perintah Produksi Aktif')
-            ->assertSee('Kritis / Stok Menipis')
-            ->assertSee('Supplier & Pelanggan')
+            ->assertSee('BAHAN MENIPIS / HABIS')
+            ->assertSee('PRODUK MENIPIS / HABIS')
             ->assertSee('Transaksi Hari Ini');
     }
 
@@ -70,7 +70,7 @@ class DashboardAdminTest extends TestCase
 
         // 2. Buat stok menipis (stok_minimal > 0, stok > 0, dan stok < stok_minimal)
         BahanBaku::factory()->create(['stok' => 5, 'stok_minimal' => 10]); // menipis
-        BahanBaku::factory()->create(['stok' => 0, 'stok_minimal' => 5]);  // habis (bukan menipis)
+        BahanBaku::factory()->create(['stok' => 0, 'stok_minimal' => 5]);  // habis
         Produk::factory()->create(['stok' => 50, 'stok_minimal' => 100]); // menipis
 
         // 3. Buat supplier dan pelanggan
@@ -97,7 +97,8 @@ class DashboardAdminTest extends TestCase
         // Uji asersi data stat
         $response->assertViewHas('stats', function ($stats) {
             return $stats['active_wo'] === 2 
-                && $stats['low_stock'] === 2
+                && $stats['low_bahan'] === 2
+                && $stats['low_produk'] === 1
                 && $stats['partners'] === 2
                 && $stats['today_transactions'] === 2;
         });

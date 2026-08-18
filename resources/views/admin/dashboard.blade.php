@@ -44,33 +44,33 @@
             </div>
         </a>
 
-        <!-- Card 2: Stok Menipis/Habis -->
-        <a href="{{ route('admin.bahan-baku.index', ['stok' => 'menipis']) }}" class="bg-white p-5 rounded-2xl shadow-sm border {{ $stats['low_stock'] > 0 ? 'border-amber-200 bg-amber-50/10' : 'border-gray-100' }} flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+        <!-- Card 2: Stok Bahan Menipis / Habis -->
+        <a href="{{ route('admin.bahan-baku.index') }}" class="bg-white p-5 rounded-2xl shadow-sm border {{ $stats['low_bahan'] > 0 ? 'border-amber-200 bg-amber-50/10' : 'border-gray-100' }} flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Kritis / Stok Menipis</p>
-                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['low_stock'] }} <span class="text-xs font-normal text-gray-400">item</span></h3>
-                <span class="text-[11px] {{ $stats['low_stock'] > 0 ? 'text-amber-600' : 'text-gray-400' }} mt-1.5 flex items-center gap-1 font-medium group-hover:underline">
-                    Bahan &amp; produk hampir habis
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">BAHAN MENIPIS / HABIS</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['low_bahan'] }} <span class="text-xs font-normal text-gray-400">bahan</span></h3>
+                <span class="text-[11px] {{ $stats['low_bahan'] > 0 ? 'text-amber-600 font-semibold' : 'text-gray-400' }} mt-1.5 flex items-center gap-1 font-medium group-hover:underline">
+                    {{ $stats['low_bahan'] }} bahan baku perlu perhatian
                     <svg class="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                 </span>
             </div>
             <div class="w-11 h-11 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-100 group-hover:scale-105 transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
             </div>
         </a>
 
-        <!-- Card 3: Supplier & Pelanggan -->
-        <a href="{{ route('admin.supplier.index') }}" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+        <!-- Card 3: Stok Produk Menipis / Habis -->
+        <a href="{{ route('admin.produk.index') }}" class="bg-white p-5 rounded-2xl shadow-sm border {{ $stats['low_produk'] > 0 ? 'border-amber-200 bg-amber-50/10' : 'border-gray-100' }} flex items-center justify-between gap-3 min-h-[92px] hover:border-amber-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Supplier &amp; Pelanggan</p>
-                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['partners'] }} <span class="text-xs font-normal text-gray-400">mitra</span></h3>
-                <span class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1 font-medium group-hover:text-blue-600 transition-colors">
-                    Kelola data partner bisnis
+                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">PRODUK MENIPIS / HABIS</p>
+                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['low_produk'] }} <span class="text-xs font-normal text-gray-400">produk</span></h3>
+                <span class="text-[11px] {{ $stats['low_produk'] > 0 ? 'text-amber-600 font-semibold' : 'text-gray-400' }} mt-1.5 flex items-center gap-1 font-medium group-hover:underline">
+                    {{ $stats['low_produk'] }} produk perlu perhatian
                     <svg class="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                 </span>
             </div>
-            <div class="w-11 h-11 bg-blue-50 text-[#0F034D] rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-100 group-hover:scale-105 transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            <div class="w-11 h-11 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-100 group-hover:scale-105 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"/></svg>
             </div>
         </a>
 
@@ -272,7 +272,7 @@
                         @foreach($lowStockAlerts as $item)
                             <div class="flex items-center justify-between gap-3 p-3 rounded-xl border {{ $item->stok == 0 ? 'border-red-100 bg-red-50/20' : 'border-amber-100 bg-amber-50/20' }} transition-all">
                                 <div class="min-w-0">
-                                    <h4 class="font-bold text-gray-900 text-xs truncate">{{ $item->nama }}</h4>
+                                    <h4 class="font-bold text-gray-900 text-xs truncate">{{ $item->nama }}{{ !empty($item->warna) ? ' - ' . $item->warna : '' }}</h4>
                                     <span class="inline-block text-[10px] font-semibold text-gray-400 mt-1 uppercase tracking-wider">{{ $item->tipe }}</span>
                                 </div>
                                 <div class="text-right shrink-0">
@@ -292,31 +292,36 @@
                 @endif
             </div>
 
-            <!-- 2. Quick Actions -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2 relative z-10">
-                    <svg class="w-4 h-4 text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                    Aksi Cepat Admin
+            <!-- 2. Stok Habis Widget (Warna Merah) -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h3 class="text-base font-bold text-gray-900 mb-4 pb-4 border-b border-gray-50 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    Stok Habis
                 </h3>
 
-                <div class="space-y-3 relative z-10">
-                    <a href="{{ route('admin.perintah-produksi.create') }}" class="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-[#0F034D]/5 border border-gray-100 hover:border-[#0F034D]/25 rounded-xl transition-all group font-semibold text-xs text-gray-700 hover:text-[#0F034D]">
-                        <span>Buat Perintah Produksi (WO)</span>
-                        <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D] -translate-x-1 group-hover:translate-x-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </a>
-                    <a href="{{ route('admin.pergerakan-stok.create', ['tab' => 'masuk']) }}" class="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-[#0F034D]/5 border border-gray-100 hover:border-[#0F034D]/25 rounded-xl transition-all group font-semibold text-xs text-gray-700 hover:text-[#0F034D]">
-                        <span>Catat Transaksi Stok Masuk</span>
-                        <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D] -translate-x-1 group-hover:translate-x-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </a>
-                    <a href="{{ route('admin.pergerakan-stok.create', ['tab' => 'keluar']) }}" class="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-[#0F034D]/5 border border-gray-100 hover:border-[#0F034D]/25 rounded-xl transition-all group font-semibold text-xs text-gray-700 hover:text-[#0F034D]">
-                        <span>Catat Transaksi Stok Keluar</span>
-                        <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D] -translate-x-1 group-hover:translate-x-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </a>
-                    <a href="{{ route('admin.penjualan.create') }}" class="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-[#0F034D]/5 border border-gray-100 hover:border-[#0F034D]/25 rounded-xl transition-all group font-semibold text-xs text-gray-700 hover:text-[#0F034D]">
-                        <span>Catat Transaksi Penjualan Baru</span>
-                        <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0F034D] -translate-x-1 group-hover:translate-x-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </a>
-                </div>
+                @if($stockoutAlerts->count() > 0)
+                    <div class="space-y-3.5">
+                        @foreach($stockoutAlerts as $item)
+                            <div class="flex items-center justify-between gap-3 p-3 rounded-xl border border-red-100 bg-red-50/30 transition-all">
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-gray-900 text-xs truncate">{{ $item->nama }}{{ !empty($item->warna) ? ' - ' . $item->warna : '' }}</h4>
+                                    <span class="inline-block text-[10px] font-semibold text-gray-400 mt-1 uppercase tracking-wider">{{ $item->tipe }}</span>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="text-sm font-extrabold text-red-600 font-mono">0</p>
+                                    <p class="text-[10px] text-red-500 font-medium lowercase">stok habis</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-6 text-gray-400 text-xs flex flex-col items-center justify-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-green-50 text-green-500 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        Aman! Tidak ada item yang kehabisan stok.
+                    </div>
+                @endif
             </div>
         </div>
     </div>

@@ -41,6 +41,8 @@ class DashboardOwnerService
         // agar konsisten dengan getInventoryStats() di halaman inventori.
         $bahanMenipis = (int) BahanBaku::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count();
         $produkMenipis = (int) Produk::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count();
+        $bahanHabis = (int) BahanBaku::where('stok', 0)->count();
+        $produkHabis = (int) Produk::where('stok', 0)->count();
 
         return [
             'stats' => [
@@ -50,6 +52,8 @@ class DashboardOwnerService
                 'total_produk_count' => (int) Produk::count(),
                 'bahan_menipis_count' => $bahanMenipis,
                 'produk_menipis_count' => $produkMenipis,
+                'bahan_habis_count' => $bahanHabis,
+                'produk_habis_count' => $produkHabis,
             ],
             'topProduk' => $topProduk,
         ];

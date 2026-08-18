@@ -76,6 +76,16 @@
         </div>
     </div>
 
+    @if(($stats['stok_habis'] ?? 0) > 0)
+        <div class="mb-4 px-4 py-3.5 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-2.5">
+                <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Ada <strong>{{ $stats['stok_habis'] }}</strong> bahan baku dengan stok yang telah habis (= 0).</span>
+            </div>
+            <a href="{{ request()->fullUrlWithQuery(['stok' => 'habis']) }}" class="text-xs font-bold bg-red-100 hover:bg-red-200 text-red-900 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0">Lihat</a>
+        </div>
+    @endif
+
     @if($stats['stok_menipis'] > 0)
         <div class="mb-6 px-4 py-3.5 bg-amber-50 border border-amber-100 text-amber-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm">
             <div class="flex items-center gap-2.5">
@@ -157,6 +167,7 @@
                                 <div class="w-44 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
                                     <a href="{{ request()->fullUrlWithQuery(['stok' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request('stok') ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Status</a>
                                     <a href="{{ request()->fullUrlWithQuery(['stok' => 'tersedia']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('stok') == 'tersedia' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Tersedia (> 0)</a>
+                                    <a href="{{ request()->fullUrlWithQuery(['stok' => 'menipis']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('stok') == 'menipis' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Stok Menipis</a>
                                     <a href="{{ request()->fullUrlWithQuery(['stok' => 'habis']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('stok') == 'habis' ? 'bg-red-50 text-red-600 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Stockout (Habis)</a>
                                 </div>
                             </div>

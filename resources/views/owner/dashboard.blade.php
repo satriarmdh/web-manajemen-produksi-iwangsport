@@ -16,6 +16,17 @@
         Dashboard Utama Owner
     </x-slot:header>
 
+    <!-- Alert Banner Inventori Habis (Merah) -->
+    @if(($stats['bahan_habis_count'] ?? 0) > 0 || ($stats['produk_habis_count'] ?? 0) > 0)
+        <div class="mb-4 px-4 py-3.5 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-2.5">
+                <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Peringatan Stok Habis! Ada <strong>{{ $stats['bahan_habis_count'] ?? 0 }}</strong> bahan baku dan <strong>{{ $stats['produk_habis_count'] ?? 0 }}</strong> produk dengan stok yang telah habis (= 0).</span>
+            </div>
+            <a href="{{ route('owner.inventori') }}" class="text-xs font-bold bg-red-100 hover:bg-red-200 text-red-900 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0">Lihat Inventori</a>
+        </div>
+    @endif
+
     <!-- Alert Banner Inventori Kritis -->
     @if($stats['bahan_menipis_count'] > 0 || $stats['produk_menipis_count'] > 0)
         <div class="mb-6 px-4 py-3.5 bg-amber-50 border border-amber-100 text-amber-800 rounded-xl text-sm flex items-center justify-between gap-3 shadow-sm">

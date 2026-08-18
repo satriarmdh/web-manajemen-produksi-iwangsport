@@ -83,14 +83,14 @@
         </aside>
 
         <div class="flex-1 lg:ml-72 min-h-screen pb-24 lg:pb-0">
-            <header class="sticky top-0 inset-x-0 z-40 bg-white border-b border-gray-100 shadow-sm shadow-gray-200/40">
+            <header class="sticky top-0 inset-x-0 z-30 bg-white border-b border-gray-100 shadow-sm shadow-gray-200/40">
                 <div class="px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
                     <div class="min-w-0">
                         <h1 class="text-lg sm:text-xl font-bold text-[#0F034D] truncate">{{ $header ?? 'Panel Produksi' }}</h1>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
                         <!-- Notification Bell -->
-                        <div class="relative">
+                        <div class="relative z-50">
                             <button id="notification-bell" class="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                                 <span id="notification-badge" class="hidden absolute top-1 right-1 sm:top-1.5 sm:right-1.5 min-w-[16px] h-4 flex items-center justify-center px-1 bg-red-500 rounded-full border-2 border-white text-[10px] font-bold text-white leading-none">0</span>
@@ -103,7 +103,7 @@
                             <p class="text-sm font-semibold text-[#0F034D]">{{ auth()->user()->name }}</p>
                             <p class="text-xs text-gray-500">{{ $roleLabel }}</p>
                         </div>
-                        <div class="relative">
+                        <div class="relative z-50">
                             <button id="profile-btn" type="button" onclick="toggleProfileDropdown()" class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded-full transition-colors cursor-pointer">
                                 <div class="w-10 h-10 rounded-full bg-[#0F034D] text-white flex items-center justify-center text-xs font-bold shrink-0">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
