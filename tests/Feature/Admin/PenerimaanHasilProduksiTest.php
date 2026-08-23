@@ -595,4 +595,93 @@ class PenerimaanHasilProduksiTest extends TestCase
         $this->assertCount(1, $dataCacat);
         $this->assertEquals(5, $dataCacat[0]['qty_ready']);
     }
+
+    public function test_admin_dapat_menghapus_penerimaan_hasil_produksi_baik()
+    {
+        $data = $this->createDetailWithReadyStok();
+
+        // Submit penerimaan
+        $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 50,
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'bukti_foto' => UploadedFile::fake()->image('bukti.jpg'),
+            ]);
+
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::first();
+        $this->assertEquals(50, $data['produk']->fresh()->stok);
+
+        // Delete penerimaan
+        $response = $this->actingAs($this->admin)
+            ->delete("/admin/penerimaan-hasil-produksi/{$penerimaan->id}");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        // Product stock in warehouse is restored back to 0
+        $this->assertEquals(0, $data['produk']->fresh()->stok);
+        // Detail total_qty_diterima is back to 0
+        $this->assertEquals(0, $data['detail']->fresh()->total_qty_diterima);
+        // Penerimaan record deleted
+        $this->assertDatabaseMissing('penerimaan_hasil_produksi', ['id' => $penerimaan->id]);
+    }
+
+    public function test_admin_dapat_menghapus_penerimaan_hasil_cacat()
+    {
+        $data = $this->createDetailWithReadyStok();
+        $data['stokVirtual']->update(['total_reject' => 10]);
+
+        $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 4,
+                'jenis_penerimaan' => 'cacat',
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'bukti_foto' => UploadedFile::fake()->image('bukti_cacat.jpg'),
+            ]);
+
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::where('jenis_penerimaan', 'cacat')->first();
+        $this->assertEquals(4, $data['detail']->fresh()->total_qty_cacat_diterima);
+
+        $response = $this->actingAs($this->admin)
+            ->delete("/admin/penerimaan-hasil-produksi/{$penerimaan->id}");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertEquals(0, $data['detail']->fresh()->total_qty_cacat_diterima);
+        $this->assertDatabaseMissing('penerimaan_hasil_produksi', ['id' => $penerimaan->id]);
+    }
+
+    public function test_hapus_penerimaan_gagal_jika_stok_gudang_kurang()
+    {
+        $data = $this->createDetailWithReadyStok();
+
+        $this->actingAs($this->admin)
+            ->post('/admin/penerimaan-hasil-produksi', [
+                'perintah_produksi_detail_id' => $data['detail']->id,
+                'dari_karyawan_id' => $this->finishing->id,
+                'qty_diterima' => 50,
+                'tanggal_terima' => today()->format('Y-m-d'),
+                'bukti_foto' => UploadedFile::fake()->image('bukti.jpg'),
+            ]);
+
+        $penerimaan = \App\Models\PenerimaanHasilProduksi::first();
+
+        // Simulate product sold/decreased manually in warehouse to 10
+        $data['produk']->update(['stok' => 10]);
+
+        // Attempt delete
+        $response = $this->actingAs($this->admin)
+            ->delete("/admin/penerimaan-hasil-produksi/{$penerimaan->id}");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+
+        // Penerimaan record still exists
+        $this->assertDatabaseHas('penerimaan_hasil_produksi', ['id' => $penerimaan->id]);
+    }
 }

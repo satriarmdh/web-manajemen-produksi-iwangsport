@@ -72,15 +72,11 @@
 
         const labelReady = document.getElementById('stat_label_ready');
         const labelDiserahkan = document.getElementById('stat_label_diserahkan');
-        const labelSisa = document.getElementById('stat_label_sisa');
         if (labelReady) {
-            labelReady.textContent = jenisPenerimaan === 'cacat' ? 'Total Cacat' : 'Barang Ready';
+            labelReady.textContent = jenisPenerimaan === 'cacat' ? 'Barang Cacat Ready' : 'Barang Ready';
         }
         if (labelDiserahkan) {
-            labelDiserahkan.textContent = jenisPenerimaan === 'cacat' ? 'Sudah Diserahkan' : 'Diserahkan';
-        }
-        if (labelSisa) {
-            labelSisa.textContent = jenisPenerimaan === 'cacat' ? 'Sisa Cacat' : 'Sisa';
+            labelDiserahkan.textContent = jenisPenerimaan === 'cacat' ? 'Cacat Diserahkan' : 'Sudah Diserahkan';
         }
 
         const helpText = document.getElementById('jenis_penerimaan_help');
@@ -219,9 +215,8 @@
 
             // Update card values
             document.getElementById('stat_karyawan_nama').textContent = karyawanName;
-            document.getElementById('stat_qty_ready').textContent = qtyTotal.toLocaleString('id-ID');
+            document.getElementById('stat_qty_ready').textContent = qtyReady.toLocaleString('id-ID');
             document.getElementById('stat_qty_diserahkan').textContent = qtyDiserahkan.toLocaleString('id-ID');
-            document.getElementById('stat_qty_sisa').textContent = qtyReady.toLocaleString('id-ID');
 
             // Show card
             statCard.classList.remove('hidden');

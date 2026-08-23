@@ -51,15 +51,28 @@
                 @if($penerimaan->catatan)
                     <p class="text-[10px] text-gray-500 italic mt-1">{{ Str::limit($penerimaan->catatan, 60) }}</p>
                 @endif
-                @if($penerimaan->bukti_foto)
-                    <button type="button" data-view-photo="{{ asset('storage/' . $penerimaan->bukti_foto) }}"
-                        class="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium rounded-lg transition-colors border border-blue-100 cursor-pointer">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        Lihat Foto
-                    </button>
-                @endif
+                <div class="flex items-center gap-2 mt-2">
+                    @if($penerimaan->bukti_foto)
+                        <button type="button" data-view-photo="{{ asset('storage/' . $penerimaan->bukti_foto) }}"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium rounded-lg transition-colors border border-blue-100 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Foto
+                        </button>
+                    @endif
+
+                    @if($penerimaan->qty_diterima > 0)
+                        <button type="button" data-swal-delete
+                            data-url="{{ route('admin.penerimaan-hasil-produksi.destroy', $penerimaan) }}"
+                            data-method="DELETE"
+                            data-message="Penerimaan hasil {{ ($penerimaan->jenis_penerimaan ?? 'baik') === 'cacat' ? 'cacat' : 'baik' }} sebanyak {{ number_format($penerimaan->qty_diterima) }} pcs dari {{ $penerimaan->dariKaryawan->name ?? '-' }} akan dibatalkan. Stok persediaan gudang & stok karyawan akan dipulihkan."
+                            class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition-colors border border-red-100 cursor-pointer" title="Batalkan/Hapus Penerimaan">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            Hapus
+                        </button>
+                    @endif
+                </div>
             </div>
         </div>
     @empty

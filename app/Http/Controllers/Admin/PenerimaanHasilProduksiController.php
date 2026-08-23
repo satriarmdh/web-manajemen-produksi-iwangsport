@@ -96,6 +96,25 @@ class PenerimaanHasilProduksiController extends Controller
     }
 
     /**
+     * Pembatalan / Hapus penerimaan hasil produksi (Reversal)
+     */
+    public function destroy(Request $request, PenerimaanHasilProduksi $penerimaan)
+    {
+        try {
+            $qty = $penerimaan->qty_diterima;
+            $this->service->destroyPenerimaan($penerimaan, $request->user());
+
+            return redirect()
+                ->back()
+                ->with('success', "Penerimaan hasil produksi ({$qty} pcs) berhasil dibatalkan. Stok persediaan & stok karyawan telah dipulihkan.");
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Gagal membatalkan penerimaan: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Get available karyawan for detail (AJAX for dropdown)
      */
     public function availableKaryawan(Request $request, int $detailId)

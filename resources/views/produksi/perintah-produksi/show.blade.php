@@ -30,6 +30,19 @@
                         {{ $dlInfo['label'] }}
                     </span>
                 @endif
+
+                @if($role === 'potong' && $perintahProduksi->status_produksi === 'disetujui')
+                    <form action="{{ route('produksi.perintah-produksi.mulai', $perintahProduksi) }}" method="POST" class="mt-1"
+                        data-swal-confirm
+                        data-confirm-title="Mulai Kerjakan WO Ini?"
+                        data-confirm-message="Status perintah kerja {{ $perintahProduksi->nomor_wo }} akan berubah menjadi Dalam Produksi."
+                        data-confirm-button="Ya, Mulai Kerjakan">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors shadow-md shadow-green-600/20 cursor-pointer">
+                            Mulai Kerjakan WO Ini
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>
@@ -69,6 +82,7 @@
                 $stokReady = $stokVirtualSaya
                     ? max(0, (int) $stokVirtualSaya->total_selesai - (int) $stokVirtualSaya->total_dikeluarkan)
                     : 0;
+                $isItemStarted = (bool) $stokVirtualSaya || ((int) $detail->qty_pcs_potong > 0);
             @endphp
 
             <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
@@ -155,8 +169,8 @@
                             </p>
                         </div>
                     </div>
-                    @if($stokReady > 0 || $totalDikeluarkan > 0)
-                    <div class="grid grid-cols-2 gap-2 mt-2">
+                    @if($role !== 'potong' && ($stokReady > 0 || $totalDikeluarkan > 0))
+                    <div class="grid grid-cols-2 gap-2 mt-2 text-center">
                         <div class="rounded-xl bg-green-50/80 border border-green-100 p-2.5">
                             <p class="text-[10px] uppercase tracking-wide text-green-600/70 font-semibold">Stok ready</p>
                             <p class="text-sm font-bold text-green-700">{{ number_format($stokReady, 0, ',', '.') }} pcs</p>
@@ -168,7 +182,6 @@
                     </div>
                     @endif
                     </div>
-
                 @endif
 
                 @if($role === 'potong')
@@ -180,6 +193,25 @@
                             <div>
                                 <p class="text-sm font-bold text-green-800">Hasil produksi {{ $detail->produk->nama_produk ?? 'produk ini' }} - {{ ucfirst($detail->produk->warna ?? '-') }} selesai diinputkan</p>
                                 <p class="text-xs text-green-700 mt-0.5">Jika ada perubahan jumlah, silakan hubungi admin.</p>
+                            </div>
+                        </div>
+                    @elseif($perintahProduksi->status_produksi === 'disetujui')
+                        <div class="rounded-xl bg-amber-50/80 border border-amber-200 p-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-bold text-amber-900">Perintah Kerja Belum Dimulai</p>
+                                    <p class="text-xs text-amber-700 mt-0.5">Klik Mulai Kerjakan untuk mulai memotong produk pada Perintah Produksi ini.</p>
+                                </div>
+                                <form action="{{ route('produksi.perintah-produksi.mulai', $perintahProduksi) }}" method="POST"
+                                    data-swal-confirm
+                                    data-confirm-title="Mulai Kerjakan WO Ini?"
+                                    data-confirm-message="Status perintah kerja {{ $perintahProduksi->nomor_wo }} akan berubah menjadi Dalam Produksi."
+                                    data-confirm-button="Ya, Mulai Kerjakan">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm shadow-green-600/20 cursor-pointer shrink-0">
+                                        Mulai Kerjakan
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     @else

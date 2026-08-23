@@ -496,12 +496,12 @@
                             {{-- Top Row: Side-by-side Cacat Cards --}}
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
-                                    <p class="text-[11px] text-amber-700 font-semibold">Total Cacat</p>
+                                    <p class="text-[11px] text-amber-700 font-semibold">Total Barang Cacat</p>
                                     <p class="text-lg font-bold text-amber-700 mt-1"><span id="summary-total-cacat">0</span> <span class="text-xs">pcs</span></p>
                                     <p class="text-[10px] text-amber-600 mt-0.5"><span id="summary-count-cacat">0</span> laporan</p>
                                 </div>
                                 <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
-                                    <p class="text-[11px] text-amber-700 font-semibold">Cacat Diserahkan</p>
+                                    <p class="text-[11px] text-amber-700 font-semibold">Barang Cacat Diserahkan</p>
                                     <p class="text-lg font-bold text-amber-700 mt-1"><span id="summary-cacat-diserahkan">0</span> <span class="text-xs">pcs</span></p>
                                 </div>
                             </div>

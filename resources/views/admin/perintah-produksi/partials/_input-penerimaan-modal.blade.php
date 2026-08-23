@@ -82,18 +82,14 @@
                                 <p class="text-sm font-bold text-[#0F034D]" id="stat_karyawan_nama">-</p>
                             </div>
                         </div>
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div class="bg-white/60 rounded-lg p-2.5 border border-white">
                                 <p class="text-xs text-gray-500 mb-0.5" id="stat_label_ready">Barang Ready</p>
                                 <p class="text-lg font-bold text-blue-600" id="stat_qty_ready">0</p>
                             </div>
                             <div class="bg-white/60 rounded-lg p-2.5 border border-white">
-                                <p class="text-xs text-gray-500 mb-0.5" id="stat_label_diserahkan">Diserahkan</p>
+                                <p class="text-xs text-gray-500 mb-0.5" id="stat_label_diserahkan">Sudah Diserahkan</p>
                                 <p class="text-lg font-bold text-green-600" id="stat_qty_diserahkan">0</p>
-                            </div>
-                            <div class="bg-white/60 rounded-lg p-2.5 border border-white">
-                                <p class="text-xs text-gray-500 mb-0.5" id="stat_label_sisa">Sisa</p>
-                                <p class="text-lg font-bold text-amber-600" id="stat_qty_sisa">0</p>
                             </div>
                         </div>
                     </div>

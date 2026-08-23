@@ -265,9 +265,22 @@
                     </div>
 
                     <div class="pt-3 border-t border-gray-100 mt-auto">
-                        <a href="{{ route('produksi.perintah-produksi.show', $wo) }}" class="block w-full text-center py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer shadow-md shadow-[#0F034D]/10">
-                            {{ $woDone ? 'Lihat Detail Pekerjaan' : 'Input Hasil Pekerjaan' }}
-                        </a>
+                        @if($role === 'potong' && $wo->status_produksi === 'disetujui')
+                            <form action="{{ route('produksi.perintah-produksi.mulai', $wo) }}" method="POST"
+                                data-swal-confirm
+                                data-confirm-title="Mulai Kerjakan WO Ini?"
+                                data-confirm-message="Status perintah kerja {{ $wo->nomor_wo }} akan berubah menjadi Dalam Produksi."
+                                data-confirm-button="Ya, Mulai Kerjakan">
+                                @csrf
+                                <button type="submit" class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors shadow-md shadow-green-600/20 block text-center cursor-pointer">
+                                    Mulai Kerjakan
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('produksi.perintah-produksi.show', $wo) }}" class="block w-full text-center py-2.5 bg-[#0F034D] hover:bg-[#0a0235] text-white text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer shadow-md shadow-[#0F034D]/10">
+                                {{ $woDone ? 'Lihat Detail Pekerjaan' : 'Input Hasil Pekerjaan' }}
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endforeach

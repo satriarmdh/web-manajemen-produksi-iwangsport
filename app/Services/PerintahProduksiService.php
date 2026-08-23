@@ -404,6 +404,54 @@ class PerintahProduksiService
     }
 
     /**
+     * Memulai pengerjaan perintah produksi oleh Tukang Potong (WO level)
+     * Mengubah status dari 'disetujui' menjadi 'dalam_produksi'
+     */
+    public function mulaiKerjakan(PerintahProduksi $perintahProduksi): PerintahProduksi
+    {
+        if ($perintahProduksi->status_produksi === 'disetujui') {
+            $perintahProduksi->update([
+                'status_produksi' => 'dalam_produksi',
+            ]);
+        }
+
+        return $perintahProduksi;
+    }
+
+    /**
+     * Memulai pengerjaan potong untuk satu item detail perintah produksi.
+     */
+    public function mulaiKerjakanDetail(DetailPerintahProduksi $detail, \App\Models\User $user): void
+    {
+        DB::transaction(function () use ($detail, $user) {
+            // 1. Buat StokVirtual potong jika belum ada
+            \App\Models\StokVirtual::firstOrCreate(
+                [
+                    'id_detail_perintah' => $detail->id,
+                    'id_karyawan' => $user->id,
+                    'peran' => 'potong',
+                ],
+                [
+                    'id_perintah' => $detail->perintah_produksi_id,
+                    'id_produk' => $detail->produk_id,
+                    'qty_hold' => 0,
+                    'total_selesai' => 0,
+                    'total_dikeluarkan' => 0,
+                    'total_reject' => 0,
+                    'status_barang' => 'Proses',
+                    'is_selesai' => false,
+                ]
+            );
+
+            // 2. Update status_produksi WO ke 'dalam_produksi' jika masih 'disetujui'
+            $perintahProduksi = $detail->perintahProduksi;
+            if ($perintahProduksi && $perintahProduksi->status_produksi === 'disetujui') {
+                $perintahProduksi->update(['status_produksi' => 'dalam_produksi']);
+            }
+        });
+    }
+
+    /**
      * Tandai perintah produksi selesai (oleh admin).
      *
      * Completion Gate (Opsi A):

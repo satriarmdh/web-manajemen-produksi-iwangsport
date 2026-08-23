@@ -28,4 +28,20 @@ class PotongController extends Controller
             ->back()
             ->with('success', 'Hasil potong berhasil diinput');
     }
+
+    /**
+     * Memulai pengerjaan potong untuk satu item detail produk
+     */
+    public function mulaiKerjakan(\Illuminate\Http\Request $request, DetailPerintahProduksi $detail)
+    {
+        if ($request->user()->role !== 'potong') {
+            abort(403, 'Hanya tukang potong yang dapat memulai pekerjaan.');
+        }
+
+        $this->service->mulaiKerjakanDetail($detail, $request->user());
+
+        return redirect()
+            ->back()
+            ->with('success', 'Pekerjaan potong untuk produk ini resmi dimulai!');
+    }
 }

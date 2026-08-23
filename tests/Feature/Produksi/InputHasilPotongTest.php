@@ -103,6 +103,32 @@ class InputHasilPotongTest extends TestCase
         ]);
     }
 
+    public function test_tukang_potong_dapat_mulai_kerjakan_per_item_produk()
+    {
+        $wo = PerintahProduksi::factory()->disetujui()->create();
+        $detail1 = DetailPerintahProduksi::factory()->create(['perintah_produksi_id' => $wo->id]);
+        $detail2 = DetailPerintahProduksi::factory()->create(['perintah_produksi_id' => $wo->id]);
+
+        $response = $this->actingAs($this->karyawanPotong)
+            ->post("/produksi/potong/{$detail1->id}/mulai");
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('stok_virtual', [
+            'id_detail_perintah' => $detail1->id,
+            'id_karyawan' => $this->karyawanPotong->id,
+            'peran' => 'potong',
+        ]);
+
+        $this->assertDatabaseMissing('stok_virtual', [
+            'id_detail_perintah' => $detail2->id,
+            'id_karyawan' => $this->karyawanPotong->id,
+            'peran' => 'potong',
+        ]);
+
+        $this->assertEquals('dalam_produksi', $wo->fresh()->status_produksi);
+    }
+
     // ============================================
     // VALIDASI - Field Required
     // ============================================

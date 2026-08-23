@@ -96,6 +96,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('penerimaan-hasil-produksi', [PenerimaanHasilProduksiController::class, 'store'])->name('penerimaan-hasil-produksi.store');
     Route::get('penerimaan-hasil-produksi/{detail}/history', [PenerimaanHasilProduksiController::class, 'history'])->name('penerimaan-hasil-produksi.history');
     Route::post('penerimaan-hasil-produksi/{penerimaan}/reversal', [PenerimaanHasilProduksiController::class, 'reversal'])->name('penerimaan-hasil-produksi.reversal');
+    Route::delete('penerimaan-hasil-produksi/{penerimaan}', [PenerimaanHasilProduksiController::class, 'destroy'])->name('penerimaan-hasil-produksi.destroy');
     Route::get('penerimaan-hasil-produksi/{detail}/available-karyawan', [PenerimaanHasilProduksiController::class, 'availableKaryawan'])->name('penerimaan-hasil-produksi.available-karyawan');
 
     // Rute Transaksi Penjualan
@@ -109,6 +110,7 @@ Route::middleware(['auth', 'role:potong,jahit,finishing'])->prefix('produksi')->
     Route::get('/dashboard', [DashboardProduksiController::class, 'index'])->name('dashboard');
     Route::get('/perintah-produksi', [PerintahProduksiKaryawanController::class, 'index'])->name('perintah-produksi.index');
     Route::get('/perintah-produksi/{perintahProduksi}', [PerintahProduksiKaryawanController::class, 'show'])->name('perintah-produksi.show');
+    Route::post('/perintah-produksi/{perintahProduksi}/mulai', [PerintahProduksiKaryawanController::class, 'mulaiKerjakan'])->name('perintah-produksi.mulai');
 
     Route::get('/input-hasil', [DashboardProduksiController::class, 'index'])->name('input-hasil.index');
     
@@ -123,6 +125,7 @@ Route::middleware(['auth', 'role:potong,jahit,finishing'])->prefix('produksi')->
     Route::post('/ajuan-pengambilan/{ajuan}/reject', [AjuanPengambilanProduksiController::class, 'reject'])->name('ajuan-pengambilan.reject');
 
     Route::post('/potong/{detail}/input-hasil', [PotongController::class, 'inputHasil'])->name('potong.input-hasil');
+    Route::post('/potong/{detail}/mulai', [PotongController::class, 'mulaiKerjakan'])->name('potong.mulai');
 });
 
 Route::middleware('auth')->group(function () {

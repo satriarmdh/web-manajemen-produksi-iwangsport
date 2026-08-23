@@ -40,4 +40,18 @@ class PerintahProduksiKaryawanController extends Controller
 
         return view('produksi.perintah-produksi.show', compact('perintahProduksi', 'role'));
     }
+
+    public function mulaiKerjakan(Request $request, PerintahProduksi $perintahProduksi)
+    {
+        if ($request->user()->role !== 'potong') {
+            abort(403, 'Hanya tukang potong yang dapat memulai pekerjaan.');
+        }
+
+        $this->service->ensureVisibleForKaryawan($perintahProduksi);
+        $this->service->mulaiKerjakan($perintahProduksi);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Proses pemotongan resmi dimulai! Status WO kini Dalam Produksi.');
+    }
 }

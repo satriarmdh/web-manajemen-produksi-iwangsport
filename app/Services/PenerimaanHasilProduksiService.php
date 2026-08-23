@@ -110,6 +110,10 @@ class PenerimaanHasilProduksiService
             $this->calculateAndSetStatus($detail->fresh());
 
             // 7. Create audit trail in riwayat_stok
+            $nomorWo = $detail->perintahProduksi->nomor_wo ?? '-';
+            $karyawanName = $penerimaan->dariKaryawan->name ?? '-';
+            $catatanStr = !empty($data['catatan']) ? " - Catatan: {$data['catatan']}" : '';
+
             RiwayatStok::create([
                 'jenis_item' => 'produk',
                 'id_item' => $produk->id,
@@ -117,7 +121,7 @@ class PenerimaanHasilProduksiService
                 'jumlah' => $data['qty_diterima'],
                 'stok_sebelum' => $stokSebelum,
                 'stok_sesudah' => $stokSesudah,
-                'keterangan' => "Penerimaan hasil produksi dari {$penerimaan->dariKaryawan->name}: " . ($data['catatan'] ?? ''),
+                'keterangan' => "Penerimaan hasil produksi dari {$karyawanName} (WO: {$nomorWo}){$catatanStr}",
                 'referencing_type' => 'penerimaan_hasil_produksi',
                 'referensi_type' => 'penerimaan_hasil_produksi',
                 'referensi_id' => $penerimaan->id,
@@ -193,6 +197,10 @@ class PenerimaanHasilProduksiService
             $this->calculateAndSetStatus($detail->fresh());
 
             // 6. Create audit trail
+            $nomorWo = $detail->perintahProduksi->nomor_wo ?? '-';
+            $karyawanName = $original->dariKaryawan->name ?? '-';
+            $catatanStr = !empty($catatan) ? " - {$catatan}" : '';
+
             RiwayatStok::create([
                 'jenis_item' => 'produk',
                 'id_item' => $produk->id,
@@ -200,13 +208,102 @@ class PenerimaanHasilProduksiService
                 'jumlah' => -1 * $original->qty_diterima,
                 'stok_sebelum' => $stokSebelum,
                 'stok_sesudah' => $stokSesudah,
-                'keterangan' => "REVERSAL penerimaan #{$original->id}: {$catatan}",
+                'keterangan' => "Pembatalan penerimaan hasil produksi dari {$karyawanName} (WO: {$nomorWo}){$catatanStr}",
                 'referencing_type' => 'penerimaan_hasil_produksi',
                 'referensi_type' => 'penerimaan_hasil_produksi',
                 'referensi_id' => $penerimaan->id,
             ]);
 
             return $penerimaan;
+        });
+    }
+
+    /**
+     * Pembatalan / Hapus Penerimaan Hasil Produksi (Reversal)
+     */
+    public function destroyPenerimaan(PenerimaanHasilProduksi $penerimaan, User $admin): void
+    {
+        if ($penerimaan->qty_diterima <= 0) {
+            throw new \Exception('Transaksi reversal tidak dapat dihapus kembali.');
+        }
+
+        DB::transaction(function () use ($penerimaan, $admin) {
+            $detail = $penerimaan->detail;
+            $jenisPenerimaan = $penerimaan->jenis_penerimaan ?? 'baik';
+            $qty = $penerimaan->qty_diterima;
+
+            if ($jenisPenerimaan === 'cacat') {
+                // 1. Decrement detail total_qty_cacat_diterima
+                $detail->decrement('total_qty_cacat_diterima', $qty);
+
+                // 2. Delete photo if exists
+                if ($penerimaan->bukti_foto && Storage::disk('public')->exists($penerimaan->bukti_foto)) {
+                    Storage::disk('public')->delete($penerimaan->bukti_foto);
+                }
+
+                // 3. Delete penerimaan record
+                $penerimaan->delete();
+
+                // 4. Recalculate status
+                $this->calculateAndSetStatus($detail->fresh());
+                return;
+            }
+
+            // For 'baik' penerimaan:
+            $produk = $detail->produk;
+
+            // Check if warehouse product stock is sufficient to reverse
+            if ($produk->stok < $qty) {
+                throw new \Exception("Stok produk '{$produk->nama_produk}' di gudang tersisa {$produk->stok} pcs, tidak mencukupi untuk membatalkan penerimaan ({$qty} pcs).");
+            }
+
+            // 1. Decrement product stock in warehouse
+            $stokSebelum = $produk->stok;
+            Produk::withoutEvents(function () use ($produk, $qty) {
+                $produk->decrement('stok', $qty);
+            });
+            $stokSesudah = $produk->fresh()->stok;
+
+            // 2. Decrement total_dikeluarkan in stok_virtual (returning stock to employee's virtual hold)
+            $stokVirtual = StokVirtual::where([
+                'id_detail_perintah' => $detail->id,
+                'id_karyawan' => $penerimaan->dari_karyawan_id,
+            ])->first();
+
+            if ($stokVirtual) {
+                $stokVirtual->decrement('total_dikeluarkan', $qty);
+            }
+
+            // 3. Decrement detail total_qty_diterima
+            $detail->decrement('total_qty_diterima', $qty);
+
+            // 4. Create audit trail in riwayat_stok
+            $nomorWo = $detail->perintahProduksi->nomor_wo ?? '-';
+            $karyawanName = $penerimaan->dariKaryawan->name ?? '-';
+
+            RiwayatStok::create([
+                'jenis_item' => 'produk',
+                'id_item' => $produk->id,
+                'jenis_pergerakan' => 'keluar',
+                'jumlah' => -1 * $qty,
+                'stok_sebelum' => $stokSebelum,
+                'stok_sesudah' => $stokSesudah,
+                'keterangan' => "Pembatalan penerimaan hasil produksi dari {$karyawanName} (WO: {$nomorWo}) oleh Admin {$admin->name}",
+                'referencing_type' => 'penerimaan_hasil_produksi',
+                'referensi_type' => 'penerimaan_hasil_produksi',
+                'referensi_id' => $penerimaan->id,
+            ]);
+
+            // 5. Delete photo if exists
+            if ($penerimaan->bukti_foto && Storage::disk('public')->exists($penerimaan->bukti_foto)) {
+                Storage::disk('public')->delete($penerimaan->bukti_foto);
+            }
+
+            // 6. Delete penerimaan record
+            $penerimaan->delete();
+
+            // 7. Recalculate status
+            $this->calculateAndSetStatus($detail->fresh());
         });
     }
 

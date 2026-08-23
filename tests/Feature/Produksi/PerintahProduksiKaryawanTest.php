@@ -146,4 +146,27 @@ class PerintahProduksiKaryawanTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_tukang_potong_dapat_memulai_pekerjaan_perintah_produksi_disetujui()
+    {
+        $wo = PerintahProduksi::factory()->disetujui()->create();
+
+        $response = $this->actingAs($this->karyawan)
+            ->post("/produksi/perintah-produksi/{$wo->id}/mulai");
+
+        $response->assertRedirect();
+        $this->assertEquals('dalam_produksi', $wo->fresh()->status_produksi);
+    }
+
+    public function test_karyawan_selain_potong_tidak_dapat_memulai_pekerjaan()
+    {
+        $penjahit = User::factory()->create(['role' => 'jahit']);
+        $wo = PerintahProduksi::factory()->disetujui()->create();
+
+        $response = $this->actingAs($penjahit)
+            ->post("/produksi/perintah-produksi/{$wo->id}/mulai");
+
+        $response->assertStatus(403);
+        $this->assertEquals('disetujui', $wo->fresh()->status_produksi);
+    }
 }
