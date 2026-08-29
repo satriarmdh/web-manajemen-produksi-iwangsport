@@ -156,8 +156,8 @@
 
         <!-- Pagination -->
         @if($penjualan->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100">
-                {{ $penjualan->withQueryString()->links() }}
+            <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
+                <x-pagination.custom-global-pagination :paginator="$penjualan" />
             </div>
         @endif
     </div>

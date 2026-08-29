@@ -26,7 +26,7 @@ class SupplierSeeder extends Seeder
             [
                 'kode_supplier' => 'SUP-002',
                 'nama_supplier' => 'UD Sumber Benang Indah',
-                'kategori' => ['benang'],
+                'kategori' => ['bahan_pendukung'],
                 'kontak' => '082345678901',
                 'email' => 'sales@sumberbenang.com',
                 'alamat' => 'Jl. Raya Tekstil No. 12, Solo, Jawa Tengah',
@@ -36,11 +36,11 @@ class SupplierSeeder extends Seeder
             [
                 'kode_supplier' => 'SUP-003',
                 'nama_supplier' => 'PT Aksesoris Garmen Nusantara',
-                'kategori' => ['kancing', 'resleting'],
+                'kategori' => ['bahan_pendukung'],
                 'kontak' => '083456789012',
                 'email' => 'order@aksesorisgarmen.co.id',
                 'alamat' => 'Jl. Garmen Raya No. 78, Semarang, Jawa Tengah',
-                'catatan' => 'Supplier kancing, resleting, dan aksesoris garmen lainnya. Minimum order 1000 pcs.',
+                'catatan' => 'Supplier peniti, tali peniti, kolor, karet, dan aksesoris garmen lainnya.',
                 'is_aktif' => '1',
             ],
         ];

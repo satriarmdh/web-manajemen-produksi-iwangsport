@@ -12,12 +12,16 @@ class StandardBaselineProduksiSeeder extends Seeder
     public function run(): void
     {
         $baselines = [
-            ['produk' => 'CLN-001', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 120, 'toleransi_minus' => 5, 'keterangan' => 'Celana training pria normal bahan baby terry hitam.'],
-            ['produk' => 'CLN-002', 'bahan' => 'KAIN-002', 'pcs_per_roll' => 118, 'toleransi_minus' => 5, 'keterangan' => 'Celana training wanita normal bahan baby terry navy.'],
-            ['produk' => 'CLN-003', 'bahan' => 'KAIN-003', 'pcs_per_roll' => 120, 'toleransi_minus' => 6, 'keterangan' => 'Celana jogger normal bahan fleece abu-abu.'],
-            ['produk' => 'CLN-004', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 95, 'toleransi_minus' => 4, 'keterangan' => 'Celana training pria jumbo bahan baby terry hitam.'],
-            ['produk' => 'CLN-005', 'bahan' => 'KAIN-002', 'pcs_per_roll' => 92, 'toleransi_minus' => 4, 'keterangan' => 'Celana training wanita jumbo bahan baby terry navy.'],
-            ['produk' => 'CLN-006', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 90, 'toleransi_minus' => 4, 'keterangan' => 'Celana jogger sport jumbo bahan baby terry hitam.'],
+            ['produk' => 'CLN-001', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 120, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana Training Terry Hitam per roll Baby Terry.'],
+            ['produk' => 'CLN-002', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 120, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana Training Terry Abu-abu per roll Baby Terry.'],
+            ['produk' => 'CLN-003', 'bahan' => 'KAIN-002', 'pcs_per_roll' => 118, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana Training Terry Navy per roll Baby Terry Navy.'],
+            ['produk' => 'CLN-004', 'bahan' => 'KAIN-003', 'pcs_per_roll' => 110, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana Jogger Diadora Hitam per roll Diadora.'],
+            ['produk' => 'CLN-005', 'bahan' => 'KAIN-003', 'pcs_per_roll' => 110, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana Jogger Diadora Abu-abu per roll Diadora.'],
+            ['produk' => 'CLN-006', 'bahan' => 'KAIN-003', 'pcs_per_roll' => 108, 'toleransi_minus' => 4, 'keterangan' => 'Baseline Celana Jogger Diadora Navy per roll Diadora.'],
+            ['produk' => 'CLN-007', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 140, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana BroadShort Hitam per roll.'],
+            ['produk' => 'CLN-008', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 140, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana BroadShort Abu-abu per roll.'],
+            ['produk' => 'CLN-010', 'bahan' => 'KAIN-003', 'pcs_per_roll' => 130, 'toleransi_minus' => 5, 'keterangan' => 'Baseline Celana Basket Hitam per roll.'],
+            ['produk' => 'CLN-013', 'bahan' => 'KAIN-001', 'pcs_per_roll' => 160, 'toleransi_minus' => 8, 'keterangan' => 'Baseline Celana Boxer Hitam per roll.'],
         ];
 
         foreach ($baselines as $baseline) {
@@ -40,6 +44,10 @@ class StandardBaselineProduksiSeeder extends Seeder
                     'is_aktif' => true,
                 ]
             );
+        }
+
+        if ($this->command) {
+            $this->command->info('StandardBaselineProduksiSeeder berhasil diperbarui!');
         }
     }
 }

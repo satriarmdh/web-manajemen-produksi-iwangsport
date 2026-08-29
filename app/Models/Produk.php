@@ -32,11 +32,36 @@ class Produk extends Model
     ];
 
     /**
-     * Cek apakah stok di bawah ambang stok minimal.
+     * Cek apakah stok di bawah/sama dengan ambang stok minimal.
      */
     public function isStokMenipis(): bool
     {
-        return $this->stok > 0 && $this->stok_minimal > 0 && $this->stok < $this->stok_minimal;
+        if ($this->stok <= 0) {
+            return false;
+        }
+
+        $threshold = ($this->stok_minimal && $this->stok_minimal > 0) ? $this->stok_minimal : 10;
+
+        return $this->stok <= $threshold;
+    }
+
+    /**
+     * Scope query untuk filter stok menipis.
+     */
+    public function scopeMenipis($query)
+    {
+        return $query->where('stok', '>', 0)
+            ->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->whereNotNull('stok_minimal')
+                       ->where('stok_minimal', '>', 0)
+                       ->whereColumn('stok', '<=', 'stok_minimal');
+                })->orWhere(function ($q2) {
+                    $q2->where(function ($q3) {
+                        $q3->whereNull('stok_minimal')->orWhere('stok_minimal', '<=', 0);
+                    })->where('stok', '<=', 10);
+                });
+            });
     }
 
     public function riwayatStokTerakhir()

@@ -323,10 +323,7 @@
                                 <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
                                     <button type="button" onclick="selectBahanCategory('semua')" class="bahan-cat-btn block w-full text-left px-3 py-2 text-xs font-bold rounded-lg transition-colors bg-[#0F034D]/5 text-[#0F034D]">Semua Kategori</button>
                                     <button type="button" onclick="selectBahanCategory('kain')" class="bahan-cat-btn block w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">Kain</button>
-                                    <button type="button" onclick="selectBahanCategory('benang')" class="bahan-cat-btn block w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">Benang</button>
-                                    <button type="button" onclick="selectBahanCategory('kancing')" class="bahan-cat-btn block w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">Kancing</button>
-                                    <button type="button" onclick="selectBahanCategory('resleting')" class="bahan-cat-btn block w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">Resleting</button>
-                                    <button type="button" onclick="selectBahanCategory('aksesoris')" class="bahan-cat-btn block w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">Aksesoris</button>
+                                    <button type="button" onclick="selectBahanCategory('bahan_pendukung')" class="bahan-cat-btn block w-full text-left px-3 py-2 text-xs font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">Bahan Pendukung</button>
                                 </div>
                             </div>
                         </div>
@@ -386,7 +383,7 @@
                                 $statusBahan = 'aman';
                                 if ($bahan->stok == 0) {
                                     $statusBahan = 'habis';
-                                } elseif ($bahan->stok < 10) {
+                                } elseif ($bahan->isStokMenipis()) {
                                     $statusBahan = 'menipis';
                                 }
                             @endphp
@@ -432,7 +429,7 @@
                                 <td class="px-6 py-4 text-center">
                                     @if($bahan->stok == 0)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-600 border border-red-100">Habis</span>
-                                    @elseif($bahan->stok < 10)
+                                    @elseif($bahan->isStokMenipis())
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">Menipis</span>
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">Aman</span>
@@ -457,6 +454,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($bahanBaku->hasPages())
+                <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
+                    <x-pagination.custom-global-pagination :paginator="$bahanBaku->appends(request()->query())" />
+                </div>
+            @endif
         </div>
 
         <!-- Tab Content 3: Katalog Stok Produk Jadi -->
@@ -558,7 +560,7 @@
                                 $statusProduk = 'aman';
                                 if ($item->stok == 0) {
                                     $statusProduk = 'habis';
-                                } elseif ($item->stok < 100) {
+                                } elseif ($item->isStokMenipis()) {
                                     $statusProduk = 'menipis';
                                 }
                             @endphp
@@ -606,7 +608,7 @@
                                 <td class="px-6 py-4 text-center">
                                     @if($item->stok == 0)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-600 border border-red-100">Habis</span>
-                                    @elseif($item->stok < 100)
+                                    @elseif($item->isStokMenipis())
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">Menipis</span>
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">Aman</span>
@@ -631,6 +633,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($produk->hasPages())
+                <div class="p-4 border-t border-gray-100 rounded-b-xl bg-white relative z-10">
+                    <x-pagination.custom-global-pagination :paginator="$produk->appends(request()->query())" />
+                </div>
+            @endif
         </div>
 
     </div>

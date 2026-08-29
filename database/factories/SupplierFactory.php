@@ -14,7 +14,7 @@ class SupplierFactory extends Factory
         return [
             'kode_supplier' => 'SUP-' . $this->faker->unique()->numerify('###'),
             'nama_supplier' => $this->faker->company(),
-            'kategori'      => $this->faker->randomElements(['kain', 'benang', 'kancing', 'resleting', 'aksesoris'], rand(1, 3)),
+            'kategori'      => $this->faker->randomElements(['kain', 'bahan_pendukung'], rand(1, 2)),
             'kontak'        => '08' . $this->faker->numerify('##########'),
             'email'         => $this->faker->unique()->safeEmail(),
             'alamat'        => $this->faker->address(),

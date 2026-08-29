@@ -62,7 +62,7 @@ class InputHasilPekerjaanService
             ->value('total_reject') ?? 0) + $qtyReject;
 
         $batasBawah = $detail->estimasi_pcs - $detail->toleransi_minus;
-        $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false);
+        $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false) || !empty(trim($data['alasan'] ?? ''));
         $statusValidasi = $ditandaiSelesai && ($totalSetelahInput + $totalReject) < $batasBawah ? 'flag' : 'normal';
 
         $detail->update([
@@ -129,7 +129,7 @@ class InputHasilPekerjaanService
 
         $target = (int) $stokVirtual->qty_hold + (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject;
         $progressSetelahInput = (int) $stokVirtual->total_selesai + (int) $stokVirtual->total_reject + $qtySelesai + $qtyReject;
-        $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false);
+        $ditandaiSelesai = (bool) ($data['tandai_selesai'] ?? false) || !empty(trim($data['alasan'] ?? ''));
 
         $stokVirtual->qty_hold = max(0, ((int) $stokVirtual->qty_hold) - $qtySelesai - $qtyReject);
         $stokVirtual->total_selesai = ((int) $stokVirtual->total_selesai) + $qtySelesai;

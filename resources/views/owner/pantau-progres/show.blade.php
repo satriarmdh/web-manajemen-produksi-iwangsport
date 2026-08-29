@@ -41,7 +41,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
         <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-start justify-between gap-4 rounded-t-xl">
             <div class="flex items-start gap-3">
-                <a href="{{ route('owner.pantau-progres.index') }}" class="inline-flex items-center justify-center w-9 h-9 hover:bg-gray-50 rounded-xl text-gray-500 hover:text-[#0F034D] transition-colors border border-gray-200 shrink-0 mt-0.5" title="Kembali ke Daftar">
+                <a href="{{ (str_contains(url()->previous(), route('owner.pantau-progres.index')) ? url()->previous() : route('owner.pantau-progres.index')) }}" class="inline-flex items-center justify-center w-9 h-9 hover:bg-gray-50 rounded-xl text-gray-500 hover:text-[#0F034D] transition-colors border border-gray-200 shrink-0 mt-0.5" title="Kembali ke Daftar">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 </a>
                 <div>

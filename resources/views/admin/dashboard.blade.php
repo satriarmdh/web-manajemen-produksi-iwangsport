@@ -229,7 +229,7 @@
                                     <th class="pb-3 pr-2">No. Invoice</th>
                                     <th class="pb-3 px-2">Tanggal</th>
                                     <th class="pb-3 px-2">Pelanggan</th>
-                                    <th class="pb-3 px-2 text-right">Total Bayar</th>
+                                    <th class="pb-3 px-2 text-right">Total Transaksi</th>
                                     <th class="pb-3 pl-2 text-right">Aksi</th>
                                 </tr>
                             </thead>
@@ -239,7 +239,7 @@
                                         <td class="py-3.5 pr-2 font-semibold text-gray-900 font-mono">{{ $sale->nomor_invoice }}</td>
                                         <td class="py-3.5 px-2 text-gray-600">{{ \Carbon\Carbon::parse($sale->tanggal)->format('d M Y') }}</td>
                                         <td class="py-3.5 px-2 text-gray-500">{{ $sale->pelanggan->nama_pelanggan ?? 'Umum' }}</td>
-                                        <td class="py-3.5 px-2 text-right font-semibold text-green-600 font-mono">Rp {{ number_format($sale->total_bayar, 0, ',', '.') }}</td>
+                                        <td class="py-3.5 px-2 text-right font-semibold text-green-600 font-mono">Rp {{ number_format($sale->total_harga, 0, ',', '.') }}</td>
                                         <td class="py-3.5 pl-2 text-right">
                                             <a href="{{ route('admin.penjualan.show', $sale->id) }}" class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-[#0F034D] hover:bg-gray-100 rounded-lg transition-all" title="Detail Penjualan">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>

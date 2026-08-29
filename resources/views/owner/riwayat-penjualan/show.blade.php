@@ -22,7 +22,7 @@
         <!-- Header Panel -->
         <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <a href="{{ route('owner.riwayat-penjualan.index') }}" 
+                <a href="{{ (str_contains(url()->previous(), route('owner.riwayat-penjualan.index')) ? url()->previous() : route('owner.riwayat-penjualan.index')) }}" 
                    class="inline-flex items-center justify-center w-9 h-9 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-xl transition-colors cursor-pointer" title="Kembali ke Daftar Penjualan">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </a>

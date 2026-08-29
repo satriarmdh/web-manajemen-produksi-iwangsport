@@ -63,10 +63,12 @@ class AjuanPengambilanProduksiService
             ->where('status', 'pending')
             ->get()
             ->sortBy(fn ($ajuan) => sprintf(
-                '%s-%010d-%010d',
+                '%s-%010d-%010d-%010d-%010d',
                 $ajuan->perintahProduksi?->tgl_mulai?->format('Y-m-d') ?? '9999-12-31',
                 $ajuan->perintahProduksi?->created_at?->timestamp ?? 0,
-                $ajuan->perintahProduksi?->id ?? 0
+                $ajuan->perintahProduksi?->id ?? 0,
+                $ajuan->created_at?->timestamp ?? 0,
+                $ajuan->id ?? 0
             ))
             ->values();
     }

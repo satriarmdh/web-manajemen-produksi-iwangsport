@@ -32,7 +32,7 @@ class BahanBakuService
             } elseif ($filters['stok'] === 'habis') {
                 $query->where('stok', 0);
             } elseif ($filters['stok'] === 'menipis') {
-                $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
+                $query->menipis();
             }
         }
 
@@ -75,14 +75,11 @@ class BahanBakuService
     public function generateKodeBahan(string $kategori): string
     {
         $prefixes = [
-            'kain'      => 'KAIN',
-            'benang'    => 'BNG',
-            'kancing'   => 'KNC',
-            'resleting' => 'RSL',
-            'aksesoris' => 'AKS',
+            'kain'            => 'KAIN',
+            'bahan_pendukung' => 'BPD',
         ];
 
-        $prefix = $prefixes[$kategori] ?? 'BRG';
+        $prefix = $prefixes[$kategori] ?? 'BPD';
 
         $lastData = BahanBaku::where('kategori', $kategori)->latest('id')->first();
 
@@ -104,7 +101,7 @@ class BahanBakuService
     {
         return [
             'total_items' => BahanBaku::count(),
-            'stok_menipis' => BahanBaku::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count(),
+            'stok_menipis' => BahanBaku::menipis()->count(),
             'stok_habis' => BahanBaku::where('stok', '=', 0)->count(),
             'total_kategori' => BahanBaku::distinct('kategori')->count('kategori'),
         ];

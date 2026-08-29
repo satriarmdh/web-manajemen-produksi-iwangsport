@@ -193,7 +193,7 @@ class PergerakanStokBahanBakuTest extends TestCase
     {
         $bahan = BahanBaku::factory()->create([
             'nama_bahan' => 'Benang Jahit',
-            'kategori' => 'benang',
+            'kategori' => 'bahan_pendukung',
             'stok' => 5,
             'is_aktif' => true
         ]);

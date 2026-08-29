@@ -56,12 +56,9 @@
                             </button>
                             <div class="absolute top-0 left-full pl-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
                                 <div class="w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-2 space-y-0.5">
-                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request('kategori') ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
-                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'kain']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'kain' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Kain</a>
-                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'benang']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'benang' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Benang</a>
-                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'kancing']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'kancing' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Kancing</a>
-                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'resleting']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'resleting' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Resleting</a>
-                                    <a href="{{ request()->fullUrlWithQuery(['kategori' => 'aksesoris']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'aksesoris' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Aksesoris</a>
+                                     <a href="{{ request()->fullUrlWithQuery(['kategori' => null]) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ !request('kategori') ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
+                                     <a href="{{ request()->fullUrlWithQuery(['kategori' => 'kain']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'kain' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Kain</a>
+                                     <a href="{{ request()->fullUrlWithQuery(['kategori' => 'bahan_pendukung']) }}" class="block px-3 py-2 text-sm rounded-lg transition-colors {{ request('kategori') == 'bahan_pendukung' ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Bahan Pendukung</a>
                                 </div>
                             </div>
                         </div>
@@ -184,7 +181,7 @@
                                 <div class="flex flex-wrap gap-1 justify-center">
                                     @foreach($supplier->kategori as $kat)
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-gray-100 text-gray-700 border-gray-200">
-                                            {{ ucfirst($kat) }}
+                                            {{ ucwords(str_replace('_', ' ', $kat)) }}
                                         </span>
                                     @endforeach
                                 </div>

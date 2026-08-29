@@ -30,11 +30,11 @@ class PelangganSeeder extends Seeder
             ],
             [
                 'kode_pelanggan' => 'PLG-003',
-                'nama_pelanggan' => 'Komunitas Lari Sidoarjo',
+                'nama_pelanggan' => 'Agen Iwangsport Probolinggo',
                 'no_telp' => '083344556677',
-                'email' => 'lari.sidoarjo@example.com',
-                'alamat' => 'Jl. Pahlawan No. 8, Sidoarjo',
-                'keterangan' => 'Pelanggan komunitas untuk pesanan seragam olahraga.',
+                'email' => 'agen.probolinggo@example.com',
+                'alamat' => 'Jl. KH. Ahmad Dahlan, Mayangan, Probolinggo',
+                'keterangan' => 'Agen reseller wilayah pasar Probolinggo.',
                 'is_aktif' => true,
             ],
         ];

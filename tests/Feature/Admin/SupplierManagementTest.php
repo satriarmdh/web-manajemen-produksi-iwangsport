@@ -53,7 +53,7 @@ class SupplierManagementTest extends TestCase
     {
         $dataSupplier = [
             'nama_supplier' => 'PT Tekstil Jaya Abadi',
-            'kategori'      => ['kain', 'benang'],
+            'kategori'      => ['kain', 'bahan_pendukung'],
             'kontak'        => '08123456789',
             'email'         => 'info@tekstiljaya.com',
             'alamat'        => 'Jl. Industri No. 123, Bandung',
@@ -68,7 +68,7 @@ class SupplierManagementTest extends TestCase
         $supplier = Supplier::where('nama_supplier', 'PT Tekstil Jaya Abadi')->first();
         $this->assertNotNull($supplier);
         $this->assertContains('kain', $supplier->kategori);
-        $this->assertContains('benang', $supplier->kategori);
+        $this->assertContains('bahan_pendukung', $supplier->kategori);
     }
 
     /**
@@ -96,7 +96,7 @@ class SupplierManagementTest extends TestCase
 
         $dataSupplier = [
             'nama_supplier' => 'Supplier Baru',
-            'kategori'      => ['benang'],
+            'kategori'      => ['bahan_pendukung'],
             'kontak'        => '08987654321',
             'email'         => 'supplier@existing.com',
             'alamat'        => 'Jl. Baru No. 456',
@@ -118,7 +118,7 @@ class SupplierManagementTest extends TestCase
         $dataDuplikat = [
             'kode_supplier' => 'SUP-001',
             'nama_supplier' => 'Supplier Berbeda',
-            'kategori'      => ['benang'],
+            'kategori'      => ['bahan_pendukung'],
             'kontak'        => '08111222333',
             'email'         => 'berbeda@supplier.com',
             'alamat'        => 'Jl. Berbeda No. 789',
@@ -142,7 +142,7 @@ class SupplierManagementTest extends TestCase
 
         $dataUpdate = [
             'nama_supplier' => 'Supplier Premium',
-            'kategori'      => ['benang', 'kancing'],
+            'kategori'      => ['bahan_pendukung'],
             'kontak'        => '08999888777',
             'email'         => 'premium@supplier.com',
             'alamat'        => 'Jl. Premium No. 100',
@@ -160,8 +160,7 @@ class SupplierManagementTest extends TestCase
         ]);
 
         $updated = Supplier::find($supplier->id);
-        $this->assertContains('benang', $updated->kategori);
-        $this->assertContains('kancing', $updated->kategori);
+        $this->assertContains('bahan_pendukung', $updated->kategori);
     }
 
     /**
@@ -250,7 +249,7 @@ class SupplierManagementTest extends TestCase
     public function test_admin_dapat_memfilter_supplier_berdasarkan_kategori(): void
     {
         Supplier::factory()->create(['nama_supplier' => 'Supplier Kain A', 'kategori' => ['kain']]);
-        Supplier::factory()->create(['nama_supplier' => 'Supplier Benang B', 'kategori' => ['benang']]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Pendukung B', 'kategori' => ['bahan_pendukung']]);
         Supplier::factory()->create(['nama_supplier' => 'Supplier Kain C', 'kategori' => ['kain']]);
 
         $response = $this->actingAs($this->admin)->get('/admin/supplier?kategori=kain');
@@ -258,7 +257,7 @@ class SupplierManagementTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Supplier Kain A');
         $response->assertSee('Supplier Kain C');
-        $response->assertDontSee('Supplier Benang B');
+        $response->assertDontSee('Supplier Pendukung B');
     }
 
     /**
@@ -308,7 +307,7 @@ class SupplierManagementTest extends TestCase
         
         $supplier2 = Supplier::create([
             'nama_supplier' => 'Supplier Kedua',
-            'kategori' => ['benang'],
+            'kategori' => ['bahan_pendukung'],
             'kontak' => '08222222222',
             'email' => 'supplier2@test.com',
             'alamat' => 'Alamat 2',
@@ -317,7 +316,7 @@ class SupplierManagementTest extends TestCase
         
         $supplier3 = Supplier::create([
             'nama_supplier' => 'Supplier Ketiga',
-            'kategori' => ['kancing'],
+            'kategori' => ['bahan_pendukung'],
             'kontak' => '08333333333',
             'email' => 'supplier3@test.com',
             'alamat' => 'Alamat 3',
@@ -415,7 +414,7 @@ class SupplierManagementTest extends TestCase
     {
         Supplier::factory()->create(['nama_supplier' => 'Supplier Kain Aktif', 'kategori' => ['kain'], 'is_aktif' => true]);
         Supplier::factory()->create(['nama_supplier' => 'Supplier Kain Nonaktif', 'kategori' => ['kain'], 'is_aktif' => false]);
-        Supplier::factory()->create(['nama_supplier' => 'Supplier Benang Aktif', 'kategori' => ['benang'], 'is_aktif' => true]);
+        Supplier::factory()->create(['nama_supplier' => 'Supplier Pendukung Aktif', 'kategori' => ['bahan_pendukung'], 'is_aktif' => true]);
 
         $response = $this->actingAs($this->admin)
             ->get('/admin/supplier?search=Supplier Kain&status=aktif');
@@ -423,14 +422,14 @@ class SupplierManagementTest extends TestCase
         $response->assertStatus(200)
             ->assertSee('Supplier Kain Aktif')
             ->assertDontSee('Supplier Kain Nonaktif')
-            ->assertDontSee('Supplier Benang Aktif');
+            ->assertDontSee('Supplier Pendukung Aktif');
     }
 
     public function test_admin_dapat_menggabungkan_filter_kategori_dan_sort(): void
     {
         Supplier::factory()->create(['nama_supplier' => 'Zebra Kain', 'kategori' => ['kain'], 'created_at' => now()]);
         Supplier::factory()->create(['nama_supplier' => 'Alpha Kain', 'kategori' => ['kain'], 'created_at' => now()->subDay()]);
-        Supplier::factory()->create(['nama_supplier' => 'Beta Benang', 'kategori' => ['benang'], 'created_at' => now()]);
+        Supplier::factory()->create(['nama_supplier' => 'Beta Pendukung', 'kategori' => ['bahan_pendukung'], 'created_at' => now()]);
 
         $response = $this->actingAs($this->admin)
             ->get('/admin/supplier?kategori=kain&sort=nama_asc');

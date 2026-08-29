@@ -31,7 +31,7 @@ class ProdukService
             } elseif ($filters['stok'] === 'habis') {
                 $query->where('stok', 0);
             } elseif ($filters['stok'] === 'menipis') {
-                $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
+                $query->menipis();
             }
         }
 

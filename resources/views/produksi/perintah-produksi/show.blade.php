@@ -333,5 +333,8 @@
             </div>
         @endforeach
     </div>
+    @vite([
+        'resources/js/produksi/perintah-produksi/show.js',
+    ])
 </x-layouts.produksi>
 

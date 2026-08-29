@@ -19,7 +19,7 @@ class UpdateSupplierRequest extends FormRequest
             'kode_supplier' => 'nullable|string|unique:suppliers,kode_supplier,' . $supplierId . '|max:20',
             'nama_supplier' => 'required|string|max:255',
             'kategori'      => 'required|array|min:1',
-            'kategori.*'    => 'string|in:kain,benang,kancing,resleting,aksesoris',
+            'kategori.*'    => 'string|in:kain,bahan_pendukung',
             'kontak'        => 'required|string|max:20',
             'email'         => 'required|email|unique:suppliers,email,' . $supplierId . '|max:255',
             'alamat'        => 'required|string',

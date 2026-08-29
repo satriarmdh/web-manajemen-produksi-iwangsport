@@ -70,18 +70,18 @@
                 <div class="relative" data-dropdown="kategori">
                     <button type="button" id="btn-dropdown-kategori" class="flex items-center gap-2 px-4 py-2.5 bg-white border {{ request($kategoriName) ? 'border-[#0F034D] text-[#0F034D]' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                        {{ request($kategoriName) ? ucfirst(request($kategoriName)) : 'Kategori' }}
+                        {{ request($kategoriName) ? ucwords(str_replace('_', ' ', request($kategoriName))) : 'Kategori' }}
                         <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
                     </button>
                     <div id="dropdown-kategori" class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 origin-top-left hidden p-1.5">
                         @php
-                            $kategoriList = ['kain','benang','kancing','resleting','aksesoris'];
+                            $kategoriList = ['kain', 'bahan_pendukung'];
                         @endphp
                         <a href="{{ route('owner.mutasi-bahan-baku.index', ['tab' => $tab, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
                            class="block px-3 py-2 rounded-lg text-sm transition-colors {{ !request($kategoriName) ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">Semua Kategori</a>
                         @foreach($kategoriList as $kat)
                             <a href="{{ route('owner.mutasi-bahan-baku.index', ['tab' => $tab, $kategoriName => $kat, $searchName => request($searchName), $tanggalMulaiName => request($tanggalMulaiName), $tanggalAkhirName => request($tanggalAkhirName)]) }}" 
-                               class="block px-3 py-2 rounded-lg text-sm transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucfirst($kat) }}</a>
+                               class="block px-3 py-2 rounded-lg text-sm transition-colors {{ request($kategoriName) == $kat ? 'bg-[#0F034D]/5 text-[#0F034D] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">{{ ucwords(str_replace('_', ' ', $kat)) }}</a>
                         @endforeach
                     </div>
                 </div>

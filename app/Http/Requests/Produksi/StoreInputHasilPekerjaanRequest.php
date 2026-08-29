@@ -38,6 +38,15 @@ class StoreInputHasilPekerjaanRequest extends FormRequest
         return $rules;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('alasan')) {
+            $this->merge([
+                'tandai_selesai' => true,
+            ]);
+        }
+    }
+
     public function messages(): array
     {
         return [

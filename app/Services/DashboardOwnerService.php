@@ -88,11 +88,35 @@ class DashboardOwnerService
     public function getInventoryStats(): array
     {
         return [
-            'bahan_menipis_count' => (int) BahanBaku::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count(),
-            'produk_menipis_count' => (int) Produk::where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal')->count(),
+            'bahan_menipis_count' => (int) BahanBaku::menipis()->count(),
+            'produk_menipis_count' => (int) Produk::menipis()->count(),
             'bahan_habis_count' => (int) BahanBaku::where('stok', 0)->count(),
             'produk_habis_count' => (int) Produk::where('stok', 0)->count(),
         ];
+    }
+
+    /**
+     * Mengambil list bahan baku beserta filter stok.
+     *
+     * @param array $filters
+     * @return Collection
+     */
+    /**
+     * Mengambil list bahan baku paginated beserta filter stok.
+     *
+     * @param array $filters
+     * @param int $perPage
+     * @return LengthAwarePaginator
+     */
+    public function getBahanBakuStockPaginated(array $filters, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = BahanBaku::query();
+
+        if (!empty($filters['stok']) && $filters['stok'] === 'menipis') {
+            $query->menipis();
+        }
+
+        return $query->orderBy('stok', 'asc')->paginate($perPage, ['*'], 'page_bahan')->withQueryString();
     }
 
     /**
@@ -106,10 +130,28 @@ class DashboardOwnerService
         $query = BahanBaku::query();
 
         if (!empty($filters['stok']) && $filters['stok'] === 'menipis') {
-            $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
+            $query->menipis();
         }
 
         return $query->orderBy('stok', 'asc')->get();
+    }
+
+    /**
+     * Mengambil list produk paginated beserta filter stok.
+     *
+     * @param array $filters
+     * @param int $perPage
+     * @return LengthAwarePaginator
+     */
+    public function getProdukStockPaginated(array $filters, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = Produk::query();
+
+        if (!empty($filters['stok']) && $filters['stok'] === 'menipis') {
+            $query->menipis();
+        }
+
+        return $query->orderBy('stok', 'asc')->paginate($perPage, ['*'], 'page_produk')->withQueryString();
     }
 
     /**
@@ -123,7 +165,7 @@ class DashboardOwnerService
         $query = Produk::query();
 
         if (!empty($filters['stok']) && $filters['stok'] === 'menipis') {
-            $query->where('stok', '>', 0)->where('stok_minimal', '>', 0)->whereColumn('stok', '<', 'stok_minimal');
+            $query->menipis();
         }
 
         return $query->orderBy('stok', 'asc')->get();

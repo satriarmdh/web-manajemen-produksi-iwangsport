@@ -171,7 +171,7 @@
                             <p class="text-xs text-gray-400">Periode: {{ \Carbon\Carbon::parse($wo->tgl_mulai)->format('d M Y') }} - {{ $wo->tgl_selesai ? \Carbon\Carbon::parse($wo->tgl_selesai)->format('d M Y') : '-' }}</p>
                         </div>
                         <div class="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 shrink-0">
-                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">{{ ucfirst(str_replace('_', ' ', $wo->status_produksi)) }}</span>
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold {{ $wo->status_produksi === 'dalam_produksi' ? 'bg-purple-50 text-purple-700 border border-purple-100' : 'bg-blue-50 text-blue-700 border border-blue-100' }}">{{ ucfirst(str_replace('_', ' ', $wo->status_produksi)) }}</span>
                             @php $dlInfo = $wo->getDeadlineInfo(); @endphp
                             @if($dlInfo['statusType'] !== 'none' && $dlInfo['statusType'] !== 'normal')
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $dlInfo['badgeClass'] }}">

@@ -97,7 +97,7 @@ class BahanBakuManagementTest extends TestCase
         $bahan = BahanBaku::factory()->create([
             'nama_bahan' => 'Benang Merah Lama',
             'warna' => 'merah',
-            'kategori' => 'benang',
+            'kategori' => 'bahan_pendukung',
             'satuan' => 'roll',
             'stok' => 10,
         ]);
@@ -105,7 +105,7 @@ class BahanBakuManagementTest extends TestCase
         $dataUpdate = [
             'nama_bahan' => 'Benang Jahit Merah Super',
             'warna' => 'abu',
-            'kategori' => 'benang',
+            'kategori' => 'bahan_pendukung',
             'satuan' => 'pcs',
             'stok' => 10,
         ];
@@ -150,16 +150,14 @@ class BahanBakuManagementTest extends TestCase
     public function test_admin_dapat_memfilter_bahan_baku_berdasarkan_kategori()
     {
         BahanBaku::factory()->create(['nama_bahan' => 'Kain A', 'kategori' => 'kain']);
-        BahanBaku::factory()->create(['nama_bahan' => 'Benang B', 'kategori' => 'benang']);
-        BahanBaku::factory()->create(['nama_bahan' => 'Kancing C', 'kategori' => 'kancing']);
+        BahanBaku::factory()->create(['nama_bahan' => 'Peniti B', 'kategori' => 'bahan_pendukung']);
 
         $response = $this->actingAs($this->admin)
             ->get('/admin/bahan-baku?kategori=kain');
 
         $response->assertStatus(200)
             ->assertSee('Kain A')
-            ->assertDontSee('Benang B')
-            ->assertDontSee('Kancing C');
+            ->assertDontSee('Peniti B');
     }
 
     public function test_admin_dapat_memfilter_bahan_baku_berdasarkan_status_stok()
@@ -303,29 +301,29 @@ class BahanBakuManagementTest extends TestCase
             'stok' => 0,
         ];
 
-        $dataBenang = [
-            'nama_bahan' => 'Benang Test',
-            'warna' => 'putih',
-            'kategori' => 'benang',
-            'satuan' => 'roll',
+        $dataPendukung = [
+            'nama_bahan' => 'Peniti Test',
+            'warna' => 'silver',
+            'kategori' => 'bahan_pendukung',
+            'satuan' => 'pcs',
             'stok' => 0,
         ];
 
         $this->actingAs($this->admin)->post('/admin/bahan-baku', $dataKain);
-        $this->actingAs($this->admin)->post('/admin/bahan-baku', $dataBenang);
+        $this->actingAs($this->admin)->post('/admin/bahan-baku', $dataPendukung);
 
         $kain = BahanBaku::where('nama_bahan', 'Kain Test')->first();
-        $benang = BahanBaku::where('nama_bahan', 'Benang Test')->first();
+        $pendukung = BahanBaku::where('nama_bahan', 'Peniti Test')->first();
 
         $this->assertEquals('KAIN-001', $kain->kode_bahan);
-        $this->assertEquals('BNG-001', $benang->kode_bahan);
+        $this->assertEquals('BPD-001', $pendukung->kode_bahan);
     }
 
     public function test_admin_dapat_menggabungkan_filter_dan_search()
     {
         BahanBaku::factory()->create(['nama_bahan' => 'Kain Katun A', 'kategori' => 'kain', 'stok' => 10]);
         BahanBaku::factory()->create(['nama_bahan' => 'Kain Katun B', 'kategori' => 'kain', 'stok' => 0]);
-        BahanBaku::factory()->create(['nama_bahan' => 'Benang Katun', 'kategori' => 'benang', 'stok' => 10]);
+        BahanBaku::factory()->create(['nama_bahan' => 'Peniti Katun', 'kategori' => 'bahan_pendukung', 'stok' => 10]);
 
         $response = $this->actingAs($this->admin)
             ->get('/admin/bahan-baku?search=Katun&kategori=kain&stok=tersedia');
@@ -333,7 +331,7 @@ class BahanBakuManagementTest extends TestCase
         $response->assertStatus(200)
             ->assertSee('Kain Katun A')
             ->assertDontSee('Kain Katun B')
-            ->assertDontSee('Benang Katun');
+            ->assertDontSee('Peniti Katun');
     }
 
     public function test_default_sort_adalah_terbaru()
@@ -425,12 +423,12 @@ class BahanBakuManagementTest extends TestCase
         $dataBenang = [
             'nama_bahan' => 'Benang Jahit 500yd',
             'warna' => 'Putih',
-            'kategori' => 'benang',
+            'kategori' => 'bahan_pendukung',
         ];
         $this->actingAs($this->admin)->post('/admin/bahan-baku', $dataBenang);
         $this->assertDatabaseHas('bahan_baku', [
             'nama_bahan' => 'Benang Jahit 500yd',
-            'kategori' => 'benang',
+            'kategori' => 'bahan_pendukung',
             'satuan' => 'pcs',
         ]);
     }

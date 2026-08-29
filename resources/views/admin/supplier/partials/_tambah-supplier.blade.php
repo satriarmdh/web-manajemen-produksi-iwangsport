@@ -1,4 +1,4 @@
-﻿    {{-- MODAL TAMBAH SUPPLIER --}}
+    {{-- MODAL TAMBAH SUPPLIER --}}
     {{-- ========================================= --}}
     <div id="add-modal" class="slide-panel">
         <div class="slide-panel-backdrop" data-panel-close></div>
@@ -33,39 +33,12 @@
                                 </div>
                             </div>
                             <div>
-                                <input type="checkbox" name="kategori[]" value="benang" id="add_kategori_benang" class="hidden" onchange="updateKategoriCheckbox(this, 'add_kategori_benang')">
-                                <div id="add_kategori_benang_wrapper" onclick="document.getElementById('add_kategori_benang').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <div id="add_kategori_benang_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                        <svg id="add_kategori_benang_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <input type="checkbox" name="kategori[]" value="bahan_pendukung" id="add_kategori_bahan_pendukung" class="hidden" onchange="updateKategoriCheckbox(this, 'add_kategori_bahan_pendukung')">
+                                <div id="add_kategori_bahan_pendukung_wrapper" onclick="document.getElementById('add_kategori_bahan_pendukung').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div id="add_kategori_bahan_pendukung_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
+                                        <svg id="add_kategori_bahan_pendukung_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                     </div>
-                                    <span id="add_kategori_benang_text" class="text-sm font-medium text-gray-700">Benang</span>
-                                </div>
-                            </div>
-                            <div>
-                                <input type="checkbox" name="kategori[]" value="kancing" id="add_kategori_kancing" class="hidden" onchange="updateKategoriCheckbox(this, 'add_kategori_kancing')">
-                                <div id="add_kategori_kancing_wrapper" onclick="document.getElementById('add_kategori_kancing').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <div id="add_kategori_kancing_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                        <svg id="add_kategori_kancing_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                    </div>
-                                    <span id="add_kategori_kancing_text" class="text-sm font-medium text-gray-700">Kancing</span>
-                                </div>
-                            </div>
-                            <div>
-                                <input type="checkbox" name="kategori[]" value="resleting" id="add_kategori_resleting" class="hidden" onchange="updateKategoriCheckbox(this, 'add_kategori_resleting')">
-                                <div id="add_kategori_resleting_wrapper" onclick="document.getElementById('add_kategori_resleting').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <div id="add_kategori_resleting_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                        <svg id="add_kategori_resleting_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                    </div>
-                                    <span id="add_kategori_resleting_text" class="text-sm font-medium text-gray-700">Resleting</span>
-                                </div>
-                            </div>
-                            <div>
-                                <input type="checkbox" name="kategori[]" value="aksesoris" id="add_kategori_aksesoris" class="hidden" onchange="updateKategoriCheckbox(this, 'add_kategori_aksesoris')">
-                                <div id="add_kategori_aksesoris_wrapper" onclick="document.getElementById('add_kategori_aksesoris').click()" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <div id="add_kategori_aksesoris_box" class="relative flex shrink-0 items-center justify-center w-5 h-5 rounded border-2 border-gray-300 transition-all">
-                                        <svg id="add_kategori_aksesoris_icon" class="w-3 h-3 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                    </div>
-                                    <span id="add_kategori_aksesoris_text" class="text-sm font-medium text-gray-700">Aksesoris</span>
+                                    <span id="add_kategori_bahan_pendukung_text" class="text-sm font-medium text-gray-700">Bahan Pendukung</span>
                                 </div>
                             </div>
                         </div>

@@ -65,7 +65,7 @@ class DashboardAdminController extends Controller
             ->take(5)
             ->get();
 
-        $recentSales = Penjualan::with('pelanggan')
+        $recentSales = Penjualan::with(['pelanggan', 'pembayaranPenjualan'])
             ->latest('id')
             ->take(5)
             ->get();

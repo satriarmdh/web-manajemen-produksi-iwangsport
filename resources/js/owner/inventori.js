@@ -370,25 +370,39 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('search-produk').addEventListener('input', filterProduk);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const activeTab = urlParams.get('tab');
+    let activeTab = urlParams.get('tab');
+
+    if (!activeTab) {
+        if (urlParams.has('page_produk')) {
+            activeTab = 'stok-produk';
+        } else if (urlParams.has('page_mutasi') || urlParams.has('page')) {
+            activeTab = 'mutasi-gudang';
+        } else if (urlParams.has('page_bahan')) {
+            activeTab = 'stok-bahan';
+        }
+    }
+
     if (activeTab) {
         switchTab(activeTab);
     } else if (window.inventoriConfig && window.inventoriConfig.requestStok === 'menipis') {
         filterBahanFromCard('menipis');
     }
 
-    const mutasiContent = document.getElementById('content-mutasi-gudang');
-    if (mutasiContent) {
-        mutasiContent.querySelectorAll('a[href]').forEach(link => {
-            try {
-                const href = new URL(link.href, window.location.origin);
-                if (href.searchParams.has('page')) {
-                    href.searchParams.set('tab', 'mutasi-gudang');
-                    link.href = href.toString();
-                }
-            } catch (e) { /* ignore */ }
-        });
-    }
+    ['content-stok-bahan', 'content-stok-produk', 'content-mutasi-gudang'].forEach(contentId => {
+        const contentEl = document.getElementById(contentId);
+        if (contentEl) {
+            const tabName = contentId.replace('content-', '');
+            contentEl.querySelectorAll('a[href]').forEach(link => {
+                try {
+                    const href = new URL(link.href, window.location.origin);
+                    if (href.searchParams.has('page_bahan') || href.searchParams.has('page_produk') || href.searchParams.has('page_mutasi') || href.searchParams.has('page')) {
+                        href.searchParams.set('tab', tabName);
+                        link.href = href.toString();
+                    }
+                } catch (e) { /* ignore */ }
+            });
+        }
+    });
 
     // ========== MUTASI DETAIL SLIDE PANEL ==========
     const mutasiModal = document.getElementById('mutasiDetailModal');

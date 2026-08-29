@@ -17,7 +17,7 @@ class UpdateBahanBakuRequest extends FormRequest
         return [
             'nama_bahan' => 'required|string|max:255',
             'warna'      => 'required|string|max:100',
-            'kategori'   => 'required|string|max:100',
+            'kategori'   => 'required|string|in:kain,bahan_pendukung|max:100',
             'satuan'     => 'required|string|max:50',
             'stok'       => 'required|integer|min:0',
             'stok_minimal' => 'nullable|integer|min:0',

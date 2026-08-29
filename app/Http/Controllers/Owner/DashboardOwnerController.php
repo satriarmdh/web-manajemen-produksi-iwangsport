@@ -77,8 +77,8 @@ class DashboardOwnerController extends Controller
         $mutasiFilters = $request->only(['jenis_item', 'jenis_pergerakan']);
         $mutasiStok = $this->dashboardService->getMutasiStokPaginated($mutasiFilters, 10);
         
-        $bahanBaku = $this->dashboardService->getBahanBakuStockList($filters);
-        $produk = $this->dashboardService->getProdukStockList($filters);
+        $bahanBaku = $this->dashboardService->getBahanBakuStockPaginated($filters, 10);
+        $produk = $this->dashboardService->getProdukStockPaginated($filters, 10);
 
         return view('owner.inventori', compact('stats', 'mutasiStok', 'bahanBaku', 'produk'));
     }
