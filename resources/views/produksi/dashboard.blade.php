@@ -23,23 +23,27 @@
     </div>
 
     {{-- PUSAT TUGAS & INFORMASI HARI INI --}}
+    @php
+        $hasAlerts = ($role === 'potong' && ($jumlahPerintahKerja > 0 || $jumlahAjuanMasuk > 0))
+            || ($role === 'jahit' && ($jumlahBarangReady > 0 || $jumlahAjuanMasuk > 0))
+            || ($role === 'finishing' && ($jumlahBarangReady > 0));
+        $hasActiveJobs = isset($pekerjaanAktifList) && $pekerjaanAktifList->count() > 0;
+    @endphp
+
     <div class="mb-6">
         <h3 class="text-base font-bold text-[#0F034D] mb-4 flex items-center gap-2">
             <svg class="w-5 h-5 text-[#0F034D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
                 <path d="m9 12 2 2 4-4"/>
             </svg>
-            Tugas & Informasi Hari Ini
+            Pekerjaan & Informasi Hari Ini
         </h3>
 
         <div class="space-y-4">
-            @php $hasTask = false; @endphp
-
             {{-- 1. TUKANG POTONG --}}
             @if ($role === 'potong')
                 {{-- Perintah Kerja Baru --}}
                 @if ($jumlahPerintahKerja > 0)
-                    @php $hasTask = true; @endphp
                     <div class="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                         <div class="flex items-start gap-3.5">
                             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100/60 shadow-sm">
@@ -58,7 +62,6 @@
 
                 {{-- Ajuan Pengambilan Baru --}}
                 @if ($jumlahAjuanMasuk > 0)
-                    @php $hasTask = true; @endphp
                     <div class="p-5 bg-blue-50 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                         <div class="flex items-start gap-3.5">
                             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100/60 shadow-sm">
@@ -80,7 +83,6 @@
             @if ($role === 'jahit')
                 {{-- Barang Ready di Potong --}}
                 @if ($jumlahBarangReady > 0)
-                    @php $hasTask = true; @endphp
                     <div class="p-5 bg-blue-50 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                         <div class="flex items-start gap-3.5">
                             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100/60 shadow-sm">
@@ -97,28 +99,8 @@
                     </div>
                 @endif
 
-                {{-- Pekerjaan Aktif (Hold) --}}
-                @if ($jumlahPekerjaanAktif > 0)
-                    @php $hasTask = true; @endphp
-                    <div class="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-                        <div class="flex items-start gap-3.5">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100/60 shadow-sm">
-                                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-amber-900 text-sm">Selesaikan Pekerjaan Jahit</h4>
-                                <p class="text-xs text-amber-800 mt-1 leading-relaxed">Anda memegang <strong>{{ $jumlahPekerjaanAktif }}</strong> pekerjaan jahit aktif. Jangan lupa untuk menginput hasil jahitan jika sudah selesai.</p>
-                            </div>
-                        </div>
-                        <a href="{{ route('produksi.perintah-produksi.index') }}" class="inline-flex items-center justify-center px-4.5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-xs transition-colors shrink-0 shadow-sm shadow-amber-600/10 cursor-pointer">
-                            Input Hasil Jahit
-                        </a>
-                    </div>
-                @endif
-
                 {{-- Ajuan Masuk dari Finishing --}}
                 @if ($jumlahAjuanMasuk > 0)
-                    @php $hasTask = true; @endphp
                     <div class="p-5 bg-blue-50 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                         <div class="flex items-start gap-3.5">
                             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100/60 shadow-sm">
@@ -140,7 +122,6 @@
             @if ($role === 'finishing')
                 {{-- Barang Ready di Jahit --}}
                 @if ($jumlahBarangReady > 0)
-                    @php $hasTask = true; @endphp
                     <div class="p-5 bg-blue-50 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                         <div class="flex items-start gap-3.5">
                             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100/60 shadow-sm">
@@ -156,33 +137,110 @@
                         </a>
                     </div>
                 @endif
-
-                {{-- Pekerjaan Aktif (Hold) --}}
-                @if ($jumlahPekerjaanAktif > 0)
-                    @php $hasTask = true; @endphp
-                    <div class="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-                        <div class="flex items-start gap-3.5">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100/60 shadow-sm">
-                                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-amber-900 text-sm">Selesaikan Pekerjaan Finishing</h4>
-                                <p class="text-xs text-amber-800 mt-1 leading-relaxed">Anda memegang <strong>{{ $jumlahPekerjaanAktif }}</strong> pekerjaan finishing aktif. Silakan catat/input hasil finishing ke sistem.</p>
-                            </div>
-                        </div>
-                        <a href="{{ route('produksi.perintah-produksi.index') }}" class="inline-flex items-center justify-center px-4.5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-xs transition-colors shrink-0 shadow-sm shadow-amber-600/10 cursor-pointer">
-                            Input Hasil Finishing
-                        </a>
-                    </div>
-                @endif
             @endif
 
-            {{-- 4. STATE: SEMUA BERSIH/TIDAK ADA TUGAS --}}
-            @if (!$hasTask)
-                <div class="p-6 bg-green-50 border border-green-200 rounded-2xl text-center shadow-sm">
-                    <svg class="w-12 h-12 text-green-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <h4 class="font-bold text-green-900 text-sm mt-3">Semua Pekerjaan Selesai</h4>
-                    <p class="text-xs text-green-800 mt-1.5 leading-relaxed">Tidak ada tugas tertunda yang membutuhkan tindakan Anda saat ini. Kerja bagus!</p>
+            {{-- DAFTAR PEKERJAAN SEDANG DIKERJAKAN --}}
+            @if($hasActiveJobs)
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                    @if($role === 'potong')
+                        @foreach($pekerjaanAktifList as $wo)
+                            @php
+                                $totalRoll = $wo->details->sum('qty_roll_pakai');
+                                $totalPcs = $wo->details->sum('estimasi_pcs');
+                                $doneCount = $wo->details->filter(fn($d) => $wo->stokVirtual->where('id_detail_perintah', $d->id)->first()?->is_selesai)->count();
+                                $totalDetails = $wo->details->count();
+                            @endphp
+                            <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:border-[#0F034D]/20 hover:shadow-md transition-all flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-start justify-between gap-3 mb-3">
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h4 class="font-bold text-[#0F034D] text-base">{{ $wo->nomor_wo }}</h4>
+                                                <span class="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100 text-[10px] font-bold">Dalam Produksi</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">{{ $totalDetails }} jenis produk ({{ number_format($totalRoll, 0, ',', '.') }} Roll Kain)</p>
+                                        </div>
+                                        <span class="px-2.5 py-1 rounded-full bg-[#0F034D]/5 text-[#0F034D] text-xs font-bold shrink-0">
+                                            {{ $doneCount }}/{{ $totalDetails }} Selesai
+                                        </span>
+                                    </div>
+
+                                    <div class="space-y-2 mb-4">
+                                        @foreach($wo->details->take(2) as $det)
+                                            <div class="flex items-center justify-between text-xs p-2 bg-gray-50 rounded-xl border border-gray-100">
+                                                <span class="font-medium text-gray-800">{{ $det->produk->nama_produk ?? 'Produk' }} - {{ ucfirst($det->produk->warna ?? '-') }} ({{ strtoupper($det->produk->ukuran ?? '-') }})</span>
+                                                <span class="font-bold text-[#0F034D]">{{ number_format($det->qty_pcs_potong ?? 0) }} / {{ number_format($det->estimasi_pcs) }} pcs</span>
+                                            </div>
+                                        @endforeach
+                                        @if($wo->details->count() > 2)
+                                            <p class="text-[11px] text-gray-400 text-right">+ {{ $wo->details->count() - 2 }} produk lainnya</p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <a href="{{ route('produksi.perintah-produksi.show', $wo->id) }}" class="w-full py-2.5 px-4 rounded-xl bg-[#0F034D] hover:bg-[#24116f] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    Lihat Perintah Produksi & Input Hasil
+                                </a>
+                            </div>
+                        @endforeach
+                    @else
+                        @foreach($pekerjaanAktifList as $sv)
+                            <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:border-[#0F034D]/20 hover:shadow-md transition-all flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-start justify-between gap-3 mb-3">
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h4 class="font-bold text-[#0F034D] text-base">{{ $sv->perintahProduksi->nomor_wo ?? 'WO' }}</h4>
+                                                <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">Diproses</span>
+                                            </div>
+                                            @php
+                                                $produkObj = $sv->detailPerintahProduksi->produk ?? $sv->produk;
+                                            @endphp
+                                            <p class="text-xs font-semibold text-gray-800 mt-1">
+                                                {{ $produkObj->nama_produk ?? 'Produk' }} - {{ ucfirst($produkObj->warna ?? '-') }} ({{ strtoupper($produkObj->ukuran ?? '-') }})
+                                            </p>
+                                        </div>
+                                        <div class="text-right shrink-0">
+                                            <span class="text-xs text-gray-400 block">Diproses</span>
+                                            <span class="text-base font-bold text-amber-600 tabular-nums">{{ number_format($sv->qty_hold, 0, ',', '.') }} pcs</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
+                                        <div class="p-2 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                                            <span class="text-[10px] text-emerald-600 block">Selesai Diinput</span>
+                                            <span class="font-bold text-emerald-700">{{ number_format($sv->total_selesai, 0, ',', '.') }} pcs</span>
+                                        </div>
+                                        <div class="p-2 bg-amber-50/50 rounded-xl border border-amber-100">
+                                            <span class="text-[10px] text-amber-600 block">Barang Cacat</span>
+                                            <span class="font-bold text-amber-700">{{ number_format($sv->total_reject, 0, ',', '.') }} pcs</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <a href="{{ route('produksi.perintah-produksi.show', $sv->id_perintah) }}" class="w-full py-2.5 px-4 rounded-xl bg-[#0F034D] hover:bg-[#24116f] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    Lihat Perintah Produksi & Input Hasil
+                                </a>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+            @endif
+
+            {{-- 4. SINGLE UNIFIED EMPTY STATE SANGAT BERSIH (Hanya jika tidak ada alert DAN tidak ada pekerjaan aktif) --}}
+            @if(!$hasAlerts && !$hasActiveJobs)
+                <div class="p-6 bg-gray-50 border border-gray-200/60 rounded-2xl text-center shadow-sm">
+                    <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                    </div>
+                    <p class="text-xs font-semibold text-gray-500">Belum ada pekerjaan aktif atau pemberitahuan baru saat ini.</p>
+                    @if($role === 'potong')
+                        <p class="text-[11px] text-gray-400 mt-0.5">Pekerjaan akan muncul di sini setelah perintah kerja disetujui owner dan Anda mengklik "Mulai Kerjakan WO Ini".</p>
+                    @else
+                        <p class="text-[11px] text-gray-400 mt-0.5">Pekerjaan akan muncul di sini setelah ajuan pengambilan barang Anda disetujui oleh penyetuju.</p>
+                    @endif
                 </div>
             @endif
         </div>

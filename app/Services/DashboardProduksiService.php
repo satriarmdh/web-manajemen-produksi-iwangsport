@@ -33,10 +33,21 @@ class DashboardProduksiService
             ->count();
 
         if ($role === 'potong') {
-            // Perintah kerja baru/aktif yang menunggu dipotong oleh potong (status disetujui / dalam_produksi dan belum input potong sama sekali)
-            $data['jumlahPerintahKerja'] = PerintahProduksi::whereIn('status_produksi', ['disetujui', 'dalam_produksi'])
-                ->whereHas('details', fn($q) => $q->whereNull('qty_pcs_potong'))
+            // Perintah kerja baru yang menunggu dimulai/dipotong (status disetujui)
+            $data['jumlahPerintahKerja'] = PerintahProduksi::where('status_produksi', 'disetujui')
                 ->count();
+
+            // Pekerjaan aktif: Perintah produksi yang sudah diklik "Mulai Kerjakan" (status_produksi === 'dalam_produksi')
+            $data['pekerjaanAktifList'] = PerintahProduksi::with(['details.produk', 'details.bahanBaku', 'stokVirtual'])
+                ->where('status_produksi', 'dalam_produksi')
+                ->get()
+                ->filter(function ($wo) {
+                    return $wo->details->contains(function ($d) use ($wo) {
+                        $sv = $wo->stokVirtual->where('id_detail_perintah', $d->id)->first();
+                        return !($sv?->is_selesai);
+                    });
+                })
+                ->take(6);
         } else {
             // Pekerjaan aktif (di-hold oleh jahit / finishing) yang belum diselesaikan
             $data['jumlahPekerjaanAktif'] = StokVirtual::where('id_karyawan', $user->id)
@@ -49,6 +60,14 @@ class DashboardProduksiService
             $data['jumlahBarangReady'] = StokVirtual::where('peran', $sourceRole)
                 ->whereRaw('total_selesai - total_dikeluarkan > 0')
                 ->count();
+
+            $data['pekerjaanAktifList'] = StokVirtual::with(['perintahProduksi', 'detailPerintahProduksi.produk', 'detailPerintahProduksi.bahanBaku', 'produk'])
+                ->where('id_karyawan', $user->id)
+                ->where('is_selesai', false)
+                ->where('qty_hold', '>', 0)
+                ->orderBy('created_at', 'desc')
+                ->take(6)
+                ->get();
         }
 
         // ponytail: fallback keys for backward compatibility, even though we removed the cards
