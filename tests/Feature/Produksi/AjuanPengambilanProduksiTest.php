@@ -345,7 +345,8 @@ class AjuanPengambilanProduksiTest extends TestCase
         // Approve with insufficient virtual stock
         $this->actingAs($this->potong)
             ->post("/produksi/ajuan-pengambilan/{$ajuanId}/approve")
-            ->assertStatus(422);
+            ->assertRedirect()
+            ->assertSessionHas('error', 'Stok ready sumber tidak mencukupi.');
     }
 
     private function buatDetailProduksiDisetujui(): DetailPerintahProduksi

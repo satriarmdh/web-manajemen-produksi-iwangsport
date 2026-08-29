@@ -49,4 +49,35 @@ class StoreProdukRequest extends FormRequest
             'is_aktif.boolean'      => 'Status aktif tidak valid.',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'stok' => $this->filled('stok') ? (int) $this->input('stok') : 0,
+            'stok_minimal' => $this->filled('stok_minimal') ? (int) $this->input('stok_minimal') : 0,
+        ]);
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $nama = trim($this->input('nama_produk', ''));
+            $ukuran = trim($this->input('ukuran', ''));
+            $warna = trim($this->input('warna', ''));
+
+            if ($nama !== '' && $ukuran !== '' && $warna !== '') {
+                $exists = \App\Models\Produk::whereRaw('LOWER(TRIM(nama_produk)) = ?', [strtolower($nama)])
+                    ->whereRaw('LOWER(TRIM(ukuran)) = ?', [strtolower($ukuran)])
+                    ->whereRaw('LOWER(TRIM(warna)) = ?', [strtolower($warna)])
+                    ->exists();
+
+                if ($exists) {
+                    $validator->errors()->add(
+                        'nama_produk',
+                        "Produk dengan nama '{$nama}', ukuran '" . ucfirst($ukuran) . "', dan warna '" . ucfirst($warna) . "' sudah ada di dalam sistem."
+                    );
+                }
+            }
+        });
+    }
 }

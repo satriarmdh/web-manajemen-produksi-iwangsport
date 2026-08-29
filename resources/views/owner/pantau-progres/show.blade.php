@@ -166,22 +166,32 @@
                                 'selisih_lebih' => 'bg-orange-50 text-orange-700 border-orange-100',
                             ];
                             $penerimaanLabel = [
-                                'belum_diterima' => 'Belum',
+                                'belum_diterima' => 'Belum Diterima',
                                 'sebagian' => 'Sebagian',
                                 'sesuai' => 'Sesuai',
                                 'selisih_kurang' => 'Kurang',
                                 'selisih_lebih' => 'Lebih',
                             ];
-                            $warnaProduk = strtolower($detail->produk->warna ?? '-');
+                            $warnaProduk = strtolower(trim($detail->produk->warna ?? '-'));
                             $warnaDotMap = [
-                                'hitam' => '#111827',
-                                'navy' => '#061952',
+                                'hitam' => '#000000',
+                                'putih' => '#FFFFFF',
                                 'abu-abu' => '#9CA3AF',
                                 'abu' => '#9CA3AF',
-                                'putih' => '#FFFFFF',
+                                'navy' => '#061952',
+                                'silver' => '#C0C0C0',
+                                'biru' => '#2563EB',
                             ];
-                            $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
-                            $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+                            $warnaDot = $warnaDotMap[$warnaProduk] ?? (
+                                str_contains($warnaProduk, 'navy') ? '#061952' : (
+                                str_contains($warnaProduk, 'biru') ? '#2563EB' : (
+                                str_contains($warnaProduk, 'hitam') ? '#000000' : (
+                                str_contains($warnaProduk, 'putih') ? '#FFFFFF' : (
+                                str_contains($warnaProduk, 'silver') ? '#C0C0C0' : (
+                                str_contains($warnaProduk, 'abu') ? '#9CA3AF' : '#CBD5E1'
+                                )))))
+                            );
+                            $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih', 'silver'], true) || str_contains($warnaProduk, 'putih');
                         @endphp
                         <button type="button" data-product-selector="{{ $detail->id }}" data-product-name="{{ strtolower($detail->produk->nama_produk ?? '') }}" class="product-list-item shrink-0 lg:shrink w-64 lg:w-full text-left p-3 rounded-xl border transition-all duration-200 {{ $loop->first ? 'bg-[#0F034D]/5 border-[#0F034D] shadow-sm' : 'bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:-translate-y-0.5 hover:shadow-md' }}">
                             <div class="flex items-center gap-2 mb-2">
@@ -211,16 +221,26 @@
         <div>
             @foreach($perintahProduksi->details as $detail)
                 @php
-                    $warnaProduk = strtolower($detail->produk->warna ?? '-');
+                    $warnaProduk = strtolower(trim($detail->produk->warna ?? '-'));
                     $warnaDotMap = [
-                        'hitam' => '#111827',
-                        'navy' => '#061952',
+                        'hitam' => '#000000',
+                        'putih' => '#FFFFFF',
                         'abu-abu' => '#9CA3AF',
                         'abu' => '#9CA3AF',
-                        'putih' => '#FFFFFF',
+                        'navy' => '#061952',
+                        'silver' => '#C0C0C0',
+                        'biru' => '#2563EB',
                     ];
-                    $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
-                    $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+                    $warnaDot = $warnaDotMap[$warnaProduk] ?? (
+                        str_contains($warnaProduk, 'navy') ? '#061952' : (
+                        str_contains($warnaProduk, 'biru') ? '#2563EB' : (
+                        str_contains($warnaProduk, 'hitam') ? '#000000' : (
+                        str_contains($warnaProduk, 'putih') ? '#FFFFFF' : (
+                        str_contains($warnaProduk, 'silver') ? '#C0C0C0' : (
+                        str_contains($warnaProduk, 'abu') ? '#9CA3AF' : '#CBD5E1'
+                        )))))
+                    );
+                    $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih', 'silver'], true) || str_contains($warnaProduk, 'putih');
                     $statusDescriptions = [
                         'pending' => 'Belum ada hasil potong yang divalidasi.',
                         'normal' => 'Hasil potong memenuhi batas toleransi.',

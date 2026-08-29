@@ -272,16 +272,26 @@
 
                             <td class="px-6 py-4 text-left">
                                 @php
-                                    $warnaProduk = strtolower($item->warna ?? '-');
+                                    $warnaProduk = strtolower(trim($item->warna ?? '-'));
                                     $warnaDotMap = [
-                                        'hitam' => '#111827',
-                                        'navy' => '#061952',
+                                        'hitam' => '#000000',
+                                        'putih' => '#FFFFFF',
                                         'abu-abu' => '#9CA3AF',
                                         'abu' => '#9CA3AF',
-                                        'putih' => '#FFFFFF',
+                                        'navy' => '#061952',
+                                        'silver' => '#C0C0C0',
+                                        'biru' => '#2563EB',
                                     ];
-                                    $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
-                                    $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+                                    $warnaDot = $warnaDotMap[$warnaProduk] ?? (
+                                        str_contains($warnaProduk, 'navy') ? '#061952' : (
+                                        str_contains($warnaProduk, 'biru') ? '#2563EB' : (
+                                        str_contains($warnaProduk, 'hitam') ? '#000000' : (
+                                        str_contains($warnaProduk, 'putih') ? '#FFFFFF' : (
+                                        str_contains($warnaProduk, 'silver') ? '#C0C0C0' : (
+                                        str_contains($warnaProduk, 'abu') ? '#9CA3AF' : '#CBD5E1'
+                                        )))))
+                                    );
+                                    $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih', 'silver'], true) || str_contains($warnaProduk, 'putih');
                                 @endphp
                                 <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 capitalize">
                                     <span class="inline-block w-3 h-3 rounded-full shrink-0 {{ $needsStroke ? 'ring-1 ring-gray-300' : '' }}" style="background-color: {{ $warnaDot }}"></span>

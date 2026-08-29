@@ -136,7 +136,7 @@
                                             $bahanList = $tab === 'masuk' ? $bahanBakuAll : $bahanBakuNonKain;
                                         @endphp
                                         @foreach($bahanList as $b)
-                                            <div class="dropdown-option flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" 
+                                            <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm" 
                                                  data-value="{{ $b->id }}" 
                                                  data-text="{{ $b->nama_bahan }} - {{ ucfirst($b->warna) }} ({{ $b->kode_bahan }})"
                                                  data-nama="{{ $b->nama_bahan }}"
@@ -144,19 +144,22 @@
                                                  data-kode="{{ $b->kode_bahan }}"
                                                  data-satuan="{{ $b->satuan }}"
                                                  data-stok="{{ $b->stok }}">
-                                                <div class="min-w-0">
+                                                <div class="flex-1 min-w-0">
                                                     <div class="text-sm font-medium text-gray-700">{{ $b->nama_bahan }} - {{ ucfirst($b->warna) }} <span class="text-gray-400">({{ $b->kode_bahan }})</span></div>
-                                                    @if($tab === 'keluar')
-                                                        <div class="text-[11px] text-gray-500">Tersedia: {{ $b->stok }} {{ $b->satuan }}</div>
-                                                    @endif
                                                 </div>
-                                                <svg class="check-icon w-4 h-4 text-[#0F034D] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                                <div class="shrink-0 text-right">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold {{ $b->stok > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200' }}">
+                                                        Stok: {{ number_format($b->stok, 0, ',', '.') }} {{ ucfirst($b->satuan) }}
+                                                    </span>
+                                                </div>
+                                                <svg class="check-icon w-4 h-4 text-[#0F034D] hidden shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                             </div>
                                         @endforeach
                                     </div>
                                     <div id="input_bahan_baku_no_results" class="hidden p-4 text-center text-sm text-gray-500">Bahan baku tidak ditemukan</div>
                                 </div>
                             </div>
+                            <p id="info_stok_baku" class="text-xs mt-1.5 hidden"></p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1.5">Jumlah PCS / Satuan <span class="text-red-500">*</span></label>
@@ -166,6 +169,7 @@
                                     Tambah
                                 </button>
                             </div>
+                            <p id="info_qty_baku_warning" class="text-xs text-red-500 font-medium mt-1.5 hidden"></p>
                         </div>
                     </div>
 

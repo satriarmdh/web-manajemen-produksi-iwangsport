@@ -467,4 +467,24 @@ class ProdukManagementTest extends TestCase
         $this->assertEquals('Normal Lama', $produk->first()->nama_produk);
         $this->assertCount(2, $produk);
     }
+
+    public function test_gagal_tambah_produk_dengan_kombinasi_nama_ukuran_warna_yang_sama()
+    {
+        Produk::factory()->create([
+            'nama_produk' => 'Celana Basket',
+            'ukuran' => 'normal',
+            'warna' => 'Biru',
+        ]);
+
+        $data = [
+            'nama_produk' => 'celana basket',
+            'ukuran' => 'normal',
+            'warna' => 'biru',
+            'harga_satuan' => 50000,
+            'satuan' => 'pcs',
+        ];
+
+        $response = $this->actingAs($this->admin)->post('/admin/produk', $data);
+        $response->assertSessionHasErrors(['nama_produk']);
+    }
 }

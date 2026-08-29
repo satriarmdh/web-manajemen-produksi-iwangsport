@@ -16,6 +16,10 @@
             document.getElementById('input-qty').value = '';
             document.getElementById('input-estimasi').value = '-';
             document.getElementById('baseline-alert').classList.add('hidden');
+            const infoStok = document.getElementById('info-stok-bahan');
+            if (infoStok) { infoStok.classList.add('hidden'); infoStok.textContent = ''; }
+            const infoWarning = document.getElementById('info-qty-warning');
+            if (infoWarning) { infoWarning.classList.add('hidden'); infoWarning.textContent = ''; }
             document.getElementById('btn-tambah-detail').disabled = true;
             document.getElementById('btn-tambah-detail').textContent = 'Tambah';
         }
@@ -67,19 +71,43 @@
             if (editingIndex === index) resetDetailForm();
             renderTable();
         }
-        const tglMulaiInput = document.getElementById('tgl_mulai');
-        const tglSelesaiInput = document.getElementById('tgl_selesai');
 
-        function syncTanggalSelesaiMin() {
-            tglSelesaiInput.min = tglMulaiInput.value;
+        function updateBahanStokInfo() {
+            const bahanId = document.getElementById('input-bahan').value;
+            const infoStok = document.getElementById('info-stok-bahan');
+            const infoWarning = document.getElementById('info-qty-warning');
 
-            if (tglSelesaiInput.value && tglSelesaiInput.value < tglMulaiInput.value) {
-                tglSelesaiInput.value = '';
+            if (!bahanId) {
+                if (infoStok) {
+                    infoStok.classList.add('hidden');
+                    infoStok.textContent = '';
+                }
+                if (infoWarning) {
+                    infoWarning.classList.add('hidden');
+                    infoWarning.textContent = '';
+                }
+                return null;
             }
-        }
 
-        tglMulaiInput.addEventListener('change', syncTanggalSelesaiMin);
-        syncTanggalSelesaiMin();
+            const opt = document.querySelector(`#input-bahan-dropdown .dropdown-option[data-value="${bahanId}"]`);
+            if (!opt) return null;
+
+            const stok = parseInt(opt.dataset.stok) || 0;
+            const satuan = opt.dataset.satuan || 'Roll';
+
+            if (infoStok) {
+                infoStok.classList.remove('hidden', 'text-emerald-600', 'text-red-500');
+                if (stok > 0) {
+                    infoStok.classList.add('text-emerald-600', 'font-semibold');
+                    infoStok.innerHTML = `Stok Tersedia: <strong>${stok.toLocaleString('id-ID')} ${satuan}</strong>`;
+                } else {
+                    infoStok.classList.add('text-red-500', 'font-semibold');
+                    infoStok.innerHTML = `Stok Kosong (0 ${satuan})`;
+                }
+            }
+
+            return { stok, satuan };
+        }
 
         // Hitung estimasi saat input berubah
         function calculateEstimasi() {
@@ -89,11 +117,27 @@
             const estimasiInput = document.getElementById('input-estimasi');
             const baselineAlert = document.getElementById('baseline-alert');
             const tambahButton = document.getElementById('btn-tambah-detail');
+            const infoWarning = document.getElementById('info-qty-warning');
 
             baselineAlert.classList.add('hidden');
             tambahButton.disabled = true;
+            if (infoWarning) {
+                infoWarning.classList.add('hidden');
+                infoWarning.textContent = '';
+            }
+
+            const bahanInfo = updateBahanStokInfo();
 
             if (!produkId || !bahanId) {
+                estimasiInput.value = '-';
+                return;
+            }
+
+            if (bahanInfo && qty > bahanInfo.stok) {
+                if (infoWarning) {
+                    infoWarning.classList.remove('hidden');
+                    infoWarning.textContent = `Jumlah roll (${qty}) melebihi stok tersedia (${bahanInfo.stok} ${bahanInfo.satuan})`;
+                }
                 estimasiInput.value = '-';
                 return;
             }
@@ -113,8 +157,25 @@
             }
 
             const estimasi = qty * baseline.pcs_per_roll;
-            estimasiInput.value = estimasi + ' pcs';
+            estimasiInput.value = estimasi.toLocaleString('id-ID') + ' pcs';
             tambahButton.disabled = false;
+        }
+
+        const tglMulaiInput = document.getElementById('tgl_mulai');
+        const tglSelesaiInput = document.getElementById('tgl_selesai');
+
+        function syncTanggalSelesaiMin() {
+            if (!tglMulaiInput || !tglSelesaiInput) return;
+            tglSelesaiInput.min = tglMulaiInput.value;
+
+            if (tglSelesaiInput.value && tglSelesaiInput.value < tglMulaiInput.value) {
+                tglSelesaiInput.value = '';
+            }
+        }
+
+        if (tglMulaiInput && tglSelesaiInput) {
+            tglMulaiInput.addEventListener('change', syncTanggalSelesaiMin);
+            syncTanggalSelesaiMin();
         }
 
         // Event listeners untuk kalkulasi otomatis

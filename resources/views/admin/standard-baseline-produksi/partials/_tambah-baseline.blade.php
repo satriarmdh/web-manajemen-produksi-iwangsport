@@ -1,4 +1,4 @@
-﻿    {{-- MODAL TAMBAH BASELINE --}}
+    {{-- MODAL TAMBAH BASELINE --}}
     {{-- ========================================= --}}
     <div id="add-modal" class="slide-panel">
         <!-- Backdrop -->
@@ -99,7 +99,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-1">Toleransi Minus</label>
-                                    <input type="number" name="toleransi_minus" min="0" value="0" placeholder="Contoh: 5" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
+                                    <input type="number" name="toleransi_minus" min="0" placeholder="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-1 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors text-sm">
                                     <p class="text-xs text-gray-500 mt-1">Batas bawah yang masih wajar.</p>
                                 </div>
                             </div>

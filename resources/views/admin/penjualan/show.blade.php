@@ -18,13 +18,6 @@
         Detail Transaksi Penjualan
     </x-slot:header>
 
-    @if(session('success'))
-        <div class="mb-4 p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-sm flex items-center justify-between">
-            <span>{{ session('success') }}</span>
-            <button type="button" onclick="this.parentElement.remove()" class="text-green-600 font-bold ml-4">&times;</button>
-        </div>
-    @endif
-
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden">
         <!-- Header Panel -->
         <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-wrap items-center justify-between gap-4">

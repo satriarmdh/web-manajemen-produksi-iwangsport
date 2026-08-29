@@ -46,4 +46,41 @@ class UpdateBahanBakuRequest extends FormRequest
             'is_aktif.boolean'    => 'Status aktif tidak valid.',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('kategori')) {
+            $kategori = strtolower(trim($this->input('kategori', '')));
+            $satuan = ($kategori === 'kain') ? 'roll' : 'pcs';
+            $this->merge(['satuan' => $satuan]);
+        }
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $nama = trim($this->input('nama_bahan', ''));
+            $warna = trim($this->input('warna', ''));
+            $kategori = trim($this->input('kategori', ''));
+            $satuan = trim($this->input('satuan', ''));
+
+            if ($nama !== '' && $warna !== '' && $kategori !== '' && $satuan !== '') {
+                $bahanBakuId = $this->route('bahan_baku')?->id ?? $this->route('bahan_baku');
+
+                $exists = \App\Models\BahanBaku::whereRaw('LOWER(TRIM(nama_bahan)) = ?', [strtolower($nama)])
+                    ->whereRaw('LOWER(TRIM(warna)) = ?', [strtolower($warna)])
+                    ->whereRaw('LOWER(TRIM(kategori)) = ?', [strtolower($kategori)])
+                    ->whereRaw('LOWER(TRIM(satuan)) = ?', [strtolower($satuan)])
+                    ->when($bahanBakuId, fn($q) => $q->where('id', '!=', $bahanBakuId))
+                    ->exists();
+
+                if ($exists) {
+                    $validator->errors()->add(
+                        'nama_bahan',
+                        "Bahan baku '{$nama}' dengan warna '" . ucfirst($warna) . "', kategori '" . ucfirst($kategori) . "', dan satuan '" . ucfirst($satuan) . "' sudah ada di dalam sistem."
+                    );
+                }
+            }
+        });
+    }
 }

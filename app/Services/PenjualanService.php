@@ -128,7 +128,7 @@ class PenjualanService
                     'stok_sebelum' => $stokSebelum,
                     'stok_sesudah' => $stokSesudah,
                     'user_id' => $admin->id,
-                    'keterangan' => "REVERSAL edit penjualan {$penjualan->nomor_invoice}",
+                    'keterangan' => "Pengembalian stok (edit penjualan {$penjualan->nomor_invoice})",
                     'referensi_type' => 'penjualan',
                     'referensi_id' => $penjualan->id,
                 ]);
@@ -211,7 +211,7 @@ class PenjualanService
                     'stok_sebelum' => $stokSebelum,
                     'stok_sesudah' => $stokSesudah,
                     'user_id' => $admin->id,
-                    'keterangan' => "REVERSAL hapus penjualan {$penjualan->nomor_invoice}",
+                    'keterangan' => "Pengembalian stok (pembatalan penjualan {$penjualan->nomor_invoice})",
                     'referensi_type' => 'penjualan',
                     'referensi_id' => $penjualan->id,
                 ]);

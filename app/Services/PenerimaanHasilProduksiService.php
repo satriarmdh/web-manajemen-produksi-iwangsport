@@ -153,7 +153,7 @@ class PenerimaanHasilProduksiService
                     'tanggal_terima' => today(),
                     'qty_diterima' => -1 * $original->qty_diterima, // NEGATIVE
                     'jenis_penerimaan' => 'cacat',
-                    'catatan' => "REVERSAL: {$catatan}",
+                    'catatan' => "PEMBATALAN: {$catatan}",
                     'bukti_foto' => $original->bukti_foto, // Reuse original photo
                 ]);
 
@@ -177,7 +177,7 @@ class PenerimaanHasilProduksiService
                 'tanggal_terima' => today(),
                 'qty_diterima' => -1 * $original->qty_diterima, // NEGATIVE
                 'jenis_penerimaan' => 'baik',
-                'catatan' => "REVERSAL: {$catatan}",
+                'catatan' => "PEMBATALAN: {$catatan}",
                 'bukti_foto' => $original->bukti_foto, // Reuse original photo
             ]);
 

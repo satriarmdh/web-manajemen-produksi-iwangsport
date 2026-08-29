@@ -25,6 +25,13 @@ class StoreStandardBaselineProduksiRequest extends FormRequest
         ];
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'toleransi_minus' => $this->filled('toleransi_minus') ? (int) $this->input('toleransi_minus') : 0,
+        ]);
+    }
+
     public function messages(): array
     {
         return [

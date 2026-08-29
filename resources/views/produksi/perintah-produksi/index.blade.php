@@ -33,7 +33,7 @@
             <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
                 <!-- Filter Status -->
                 <div class="relative" data-dropdown="status">
-                    <button type="button" id="btn-dropdown-status" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $status !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" id="btn-dropdown-status" data-stock-dropdown="status" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $status !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                         <span>{{ $statusOptions[$status] ?? 'Status' }}</span>
                         @if($status !== '')
@@ -53,7 +53,7 @@
 
                 <!-- Filter Tanggal -->
                 <div class="relative" data-dropdown="tanggal">
-                    <button type="button" id="btn-dropdown-tanggal" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $filterTanggal !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" id="btn-dropdown-tanggal" data-stock-dropdown="tanggal" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $filterTanggal !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         {{ $filterTanggal !== '' ? \Carbon\Carbon::parse($filterTanggal)->format('d M Y') : 'Tanggal' }}
                         <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
@@ -79,7 +79,7 @@
 
                 <!-- Sort -->
                 <div class="relative" data-dropdown="sort">
-                    <button type="button" id="btn-dropdown-sort" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $sort !== 'mulai_terlama' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <button type="button" id="btn-dropdown-sort" data-stock-dropdown="sort" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $sort !== 'mulai_terlama' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
                         {{ $sortOptions[$sort] ?? 'Urutan Pengerjaan' }}
                         <svg class="dropdown-arrow w-3.5 h-3.5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
@@ -189,16 +189,26 @@
                     <div class="space-y-3 mb-4 flex-1">
                         @foreach($displayDetails as $detail)
                             @php
-                                $warnaProduk = strtolower($detail->produk->warna ?? '-');
+                                $warnaProduk = strtolower(trim($detail->produk->warna ?? '-'));
                                 $warnaDotMap = [
-                                    'hitam' => '#111827',
-                                    'navy' => '#061952',
+                                    'hitam' => '#000000',
+                                    'putih' => '#FFFFFF',
                                     'abu-abu' => '#9CA3AF',
                                     'abu' => '#9CA3AF',
-                                    'putih' => '#FFFFFF',
+                                    'navy' => '#061952',
+                                    'silver' => '#C0C0C0',
+                                    'biru' => '#2563EB',
                                 ];
-                                $warnaDot = $warnaDotMap[$warnaProduk] ?? '#CBD5E1';
-                                $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih'], true);
+                                $warnaDot = $warnaDotMap[$warnaProduk] ?? (
+                                    str_contains($warnaProduk, 'navy') ? '#061952' : (
+                                    str_contains($warnaProduk, 'biru') ? '#2563EB' : (
+                                    str_contains($warnaProduk, 'hitam') ? '#000000' : (
+                                    str_contains($warnaProduk, 'putih') ? '#FFFFFF' : (
+                                    str_contains($warnaProduk, 'silver') ? '#C0C0C0' : (
+                                    str_contains($warnaProduk, 'abu') ? '#9CA3AF' : '#CBD5E1'
+                                    )))))
+                                );
+                                $needsStroke = in_array($warnaProduk, ['abu-abu', 'abu', 'putih', 'silver'], true) || str_contains($warnaProduk, 'putih');
 
                                 $stokV = $wo->stokVirtual->where('id_detail_perintah', $detail->id)->first();
                                 $isDetDone = (bool) ($stokV?->is_selesai);
@@ -216,7 +226,7 @@
                                     $detTarget = $detHold + $detDoneCount + $detRejCount;
                                     $detSelesai = $detDoneCount + $detRejCount;
                                     $detProg = $detTarget > 0 ? min(100, (int) round($detSelesai / $detTarget * 100)) : 0;
-                                    $progText = $detTarget > 0 ? (number_format($detSelesai, 0, ',', '.') . ' / ' . number_format($detTarget, 0, ',', '.') . ' pcs') : 'Belum dipegang';
+                                    $progText = $detTarget > 0 ? (number_format($detSelesai, 0, ',', '.') . ' / ' . number_format($detTarget, 0, ',', '.') . ' pcs') : 'Belum dikerjakan';
                                     $hasStarted = $stokV && ($detSelesai > 0 || $detHold > 0);
                                 }
                             @endphp
@@ -233,7 +243,7 @@
                                         <p class="text-xs text-gray-500 truncate mt-0.5">{{ $detail->bahanBaku->nama_bahan ?? '-' }} - {{ ucfirst($detail->bahanBaku->warna ?? '-') }} - {{ number_format($detail->qty_roll_pakai ?? 0) }} Roll</p>
                                     </div>
 
-                                    {{-- Status Badge per Produk (Hanya: Selesai [Hijau], Diproses [Amber], Belum Input [Abu-abu]) --}}
+                                    {{-- Status Badge per Produk (Hanya: Selesai [Hijau], Diproses [Amber], Belum Dikerjakan [Abu-abu]) --}}
                                     @if($isDetDone)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                                             <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -245,7 +255,7 @@
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-200 shrink-0">
-                                            Belum Input
+                                            Belum Dikerjakan
                                         </span>
                                     @endif
                                 </div>

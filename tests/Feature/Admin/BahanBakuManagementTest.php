@@ -385,4 +385,53 @@ class BahanBakuManagementTest extends TestCase
         $this->assertEquals('Kain Stok Tinggi', $bahanBaku->first()->nama_bahan);
         $this->assertCount(2, $bahanBaku);
     }
+
+    public function test_gagal_tambah_bahan_baku_dengan_kombinasi_nama_warna_kategori_satuan_yang_sama()
+    {
+        BahanBaku::factory()->create([
+            'nama_bahan' => 'Diadora',
+            'warna' => 'Biru',
+            'kategori' => 'kain',
+            'satuan' => 'roll',
+        ]);
+
+        $data = [
+            'nama_bahan' => 'diadora',
+            'warna' => 'biru',
+            'kategori' => 'kain',
+            'satuan' => 'roll',
+        ];
+
+        $response = $this->actingAs($this->admin)->post('/admin/bahan-baku', $data);
+        $response->assertSessionHasErrors(['nama_bahan']);
+    }
+
+    public function test_satuan_otomatis_mengikuti_kategori_saat_tambah_bahan_baku()
+    {
+        // 1. Kategori Kain -> Satuan Roll
+        $dataKain = [
+            'nama_bahan' => 'Combed 30s',
+            'warna' => 'Hitam',
+            'kategori' => 'kain',
+        ];
+        $this->actingAs($this->admin)->post('/admin/bahan-baku', $dataKain);
+        $this->assertDatabaseHas('bahan_baku', [
+            'nama_bahan' => 'Combed 30s',
+            'kategori' => 'kain',
+            'satuan' => 'roll',
+        ]);
+
+        // 2. Kategori Non-Kain -> Satuan Pcs
+        $dataBenang = [
+            'nama_bahan' => 'Benang Jahit 500yd',
+            'warna' => 'Putih',
+            'kategori' => 'benang',
+        ];
+        $this->actingAs($this->admin)->post('/admin/bahan-baku', $dataBenang);
+        $this->assertDatabaseHas('bahan_baku', [
+            'nama_bahan' => 'Benang Jahit 500yd',
+            'kategori' => 'benang',
+            'satuan' => 'pcs',
+        ]);
+    }
 }

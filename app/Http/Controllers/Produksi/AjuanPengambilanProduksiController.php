@@ -40,22 +40,32 @@ class AjuanPengambilanProduksiController extends Controller
 
     public function store(StoreAjuanPengambilanProduksiRequest $request)
     {
-        $items = $request->ajuanItems();
+        try {
+            $items = $request->ajuanItems();
 
-        // Kumpulkan unique dari_karyawan_id dari stok_virtual sebelum create
-        $dariKaryawanIds = [];
-        foreach ($items as $item) {
-            $stokVirtual = \App\Models\StokVirtual::find($item['stok_virtual_id']);
-            if ($stokVirtual && !in_array($stokVirtual->id_karyawan, $dariKaryawanIds)) {
-                $dariKaryawanIds[] = $stokVirtual->id_karyawan;
+            // Kumpulkan unique dari_karyawan_id dari stok_virtual sebelum create
+            $dariKaryawanIds = [];
+            foreach ($items as $item) {
+                $stokVirtual = \App\Models\StokVirtual::find($item['stok_virtual_id']);
+                if ($stokVirtual && !in_array($stokVirtual->id_karyawan, $dariKaryawanIds)) {
+                    $dariKaryawanIds[] = $stokVirtual->id_karyawan;
+                }
             }
-        }
 
-        $this->service->storeMany(
-            $items,
-            $request->user(),
-            $request->validated('catatan_pengaju')
-        );
+            $this->service->storeMany(
+                $items,
+                $request->user(),
+                $request->validated('catatan_pengaju')
+            );
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage() ?: 'Gagal membuat ajuan pengambilan barang.');
+        }
 
         // Notifikasi -> karyawan pemilik stok (dariKaryawan) yang perlu approve
         foreach ($dariKaryawanIds as $karyawanId) {
@@ -80,7 +90,17 @@ class AjuanPengambilanProduksiController extends Controller
         ApproveAjuanPengambilanProduksiRequest $request,
         AjuanPengambilanProduksi $ajuan
     ) {
-        $this->service->approve($ajuan, $request->user());
+        try {
+            $this->service->approve($ajuan, $request->user());
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage() ?: 'Gagal menyetujui ajuan pengambilan.');
+        }
 
         // Notifikasi -> karyawan pengaju
         $ajuan->loadMissing(['produk', 'keKaryawan']);
@@ -106,12 +126,22 @@ class AjuanPengambilanProduksiController extends Controller
         RespondAjuanPengambilanProduksiRequest $request,
         AjuanPengambilanProduksi $ajuan
     ) {
-        $catatanRespon = $request->validated('catatan_respon');
-        $this->service->reject(
-            $ajuan,
-            $request->user(),
-            $catatanRespon
-        );
+        try {
+            $catatanRespon = $request->validated('catatan_respon');
+            $this->service->reject(
+                $ajuan,
+                $request->user(),
+                $catatanRespon
+            );
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage() ?: 'Gagal menolak ajuan pengambilan.');
+        }
 
         // Notifikasi -> karyawan pengaju
         $ajuan->loadMissing(['produk', 'keKaryawan']);

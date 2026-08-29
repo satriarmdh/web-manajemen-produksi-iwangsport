@@ -115,10 +115,17 @@
                                     @foreach($bahanBakus as $bahanBaku)
                                         <div class="dropdown-option flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors text-sm"
                                             data-value="{{ $bahanBaku->id }}"
+                                            data-stok="{{ $bahanBaku->stok }}"
+                                            data-satuan="{{ ucfirst($bahanBaku->satuan) }}"
                                             data-text="{{ $bahanBaku->nama_bahan }} ({{ $bahanBaku->kode_bahan }}) - {{ ucfirst($bahanBaku->warna) }}, {{ ucfirst($bahanBaku->kategori) }}">
                                             <div class="flex-1 min-w-0">
                                                 <div class="font-medium text-gray-900 truncate">{{ $bahanBaku->nama_bahan }}</div>
                                                 <div class="text-xs text-gray-500 truncate">{{ $bahanBaku->kode_bahan }}  -  {{ ucfirst($bahanBaku->warna) }}, {{ ucfirst($bahanBaku->kategori) }}</div>
+                                            </div>
+                                            <div class="shrink-0 text-right">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold {{ $bahanBaku->stok > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200' }}">
+                                                    Stok: {{ number_format($bahanBaku->stok, 0, ',', '.') }} {{ ucfirst($bahanBaku->satuan) }}
+                                                </span>
                                             </div>
                                             <svg class="check-icon w-4 h-4 text-[#0F034D] hidden shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -129,6 +136,7 @@
                                 <div id="input-bahan-no-results" class="hidden p-4 text-center text-sm text-gray-500">Bahan baku tidak ditemukan</div>
                             </div>
                         </div>
+                        <p id="info-stok-bahan" class="text-xs mt-1.5 hidden"></p>
                     </div>
 
                     {{-- Qty Roll --}}
@@ -137,6 +145,7 @@
                         <input type="number" id="input-qty" min="1"
                             class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D]/30 outline-none"
                             placeholder="Contoh: 5">
+                        <p id="info-qty-warning" class="text-xs text-red-500 font-medium mt-1.5 hidden"></p>
                     </div>
 
                     {{-- Estimasi & Tombol Tambah --}}

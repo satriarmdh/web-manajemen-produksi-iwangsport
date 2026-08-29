@@ -312,17 +312,31 @@ function renderColorDot(elementId, warna) {
     const dot = document.getElementById(elementId);
     if (!dot) return;
 
-    const normalized = (warna || '-').toLowerCase();
+    const normalized = (warna || '-').toLowerCase().trim();
     const colorMap = {
-        'hitam': '#111827',
-        'navy': '#061952',
+        'hitam': '#000000',
+        'putih': '#FFFFFF',
         'abu-abu': '#9CA3AF',
         'abu': '#9CA3AF',
-        'putih': '#FFFFFF',
+        'navy': '#061952',
+        'silver': '#C0C0C0',
+        'biru': '#2563EB',
     };
-    const needsStroke = ['abu-abu', 'abu', 'putih'].includes(normalized);
 
-    dot.style.backgroundColor = colorMap[normalized] || '#CBD5E1';
+    let hex = colorMap[normalized];
+    if (!hex) {
+        if (normalized.includes('navy')) hex = '#061952';
+        else if (normalized.includes('biru')) hex = '#2563EB';
+        else if (normalized.includes('hitam')) hex = '#000000';
+        else if (normalized.includes('putih')) hex = '#FFFFFF';
+        else if (normalized.includes('silver')) hex = '#C0C0C0';
+        else if (normalized.includes('abu')) hex = '#9CA3AF';
+        else hex = '#CBD5E1';
+    }
+
+    const needsStroke = ['abu-abu', 'abu', 'putih', 'silver'].includes(normalized) || normalized.includes('putih');
+
+    dot.style.backgroundColor = hex;
     dot.title = `Warna ${warna || '-'}`;
     dot.classList.toggle('ring-1', needsStroke);
     dot.classList.toggle('ring-gray-300', needsStroke);

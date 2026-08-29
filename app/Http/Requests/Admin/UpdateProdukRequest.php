@@ -52,4 +52,30 @@ class UpdateProdukRequest extends FormRequest
             'is_aktif.boolean'      => 'Status aktif tidak valid.',
         ];
     }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $nama = trim($this->input('nama_produk', ''));
+            $ukuran = trim($this->input('ukuran', ''));
+            $warna = trim($this->input('warna', ''));
+
+            if ($nama !== '' && $ukuran !== '' && $warna !== '') {
+                $produkId = $this->route('produk')?->id ?? $this->route('produk');
+
+                $exists = \App\Models\Produk::whereRaw('LOWER(TRIM(nama_produk)) = ?', [strtolower($nama)])
+                    ->whereRaw('LOWER(TRIM(ukuran)) = ?', [strtolower($ukuran)])
+                    ->whereRaw('LOWER(TRIM(warna)) = ?', [strtolower($warna)])
+                    ->when($produkId, fn($q) => $q->where('id', '!=', $produkId))
+                    ->exists();
+
+                if ($exists) {
+                    $validator->errors()->add(
+                        'nama_produk',
+                        "Produk dengan nama '{$nama}', ukuran '" . ucfirst($ukuran) . "', dan warna '" . ucfirst($warna) . "' sudah ada di dalam sistem."
+                    );
+                }
+            }
+        });
+    }
 }

@@ -29,7 +29,8 @@ function openEditModal(button) {
     if (typeof setCustomDropdownValue === 'function') {
         setCustomDropdownValue('edit_warna', warna);
         setCustomDropdownValue('edit_kategori', kategori);
-        setCustomDropdownValue('edit_satuan', satuan);
+        const targetSatuan = (kategori && kategori.toLowerCase() === 'kain') ? 'roll' : (satuan || 'pcs');
+        setCustomDropdownValue('edit_satuan', targetSatuan);
     }
 
     // Set checkbox is_aktif

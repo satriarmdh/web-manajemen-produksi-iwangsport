@@ -49,15 +49,33 @@
             <div class="px-5 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center gap-3 relative z-20">
                 <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
                     <!-- Filter Tanggal -->
-                    <form id="filter-ajuan-form" action="{{ route('produksi.ajuan-pengambilan.index') }}" method="GET" class="flex items-center gap-2">
-                        <input type="hidden" name="search" value="{{ $search }}">
-                        <input type="hidden" name="sumber" value="{{ $filterSumber }}">
-                        <input type="hidden" name="sort" value="{{ $sort }}">
-                        <label class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $filterTanggal !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
+                    <div class="relative">
+                        <button type="button" data-custom-dropdown-button="tanggal" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border {{ $filterTanggal !== '' ? 'border-[#0F034D] text-[#0F034D] bg-blue-50/50' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }} rounded-xl text-sm font-medium transition-colors shadow-sm cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <input id="ajuan-date-filter" type="date" name="tanggal" value="{{ $filterTanggal }}" class="bg-transparent border-none outline-none text-sm font-medium w-28 cursor-pointer" onchange="this.form.submit()">
-                        </label>
-                    </form>
+                            <span>{{ $filterTanggal !== '' ? \Carbon\Carbon::parse($filterTanggal)->format('d M Y') : 'Tanggal' }}</span>
+                            @if($filterTanggal !== '')
+                                <span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0F034D] opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-[#0F034D]"></span></span>
+                            @endif
+                            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform" data-custom-dropdown-arrow="tanggal" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        <div data-custom-dropdown-menu="tanggal" class="hidden absolute left-0 mt-2 w-72 rounded-xl border border-gray-100 bg-white shadow-[0_10px_40px_rgba(15,3,77,0.12)] z-50 p-4">
+                            <form method="GET" action="{{ route('produksi.ajuan-pengambilan.index') }}">
+                                @if($search) <input type="hidden" name="search" value="{{ $search }}"> @endif
+                                @if($filterSumber) <input type="hidden" name="sumber" value="{{ $filterSumber }}"> @endif
+                                @if($sort !== 'fifo') <input type="hidden" name="sort" value="{{ $sort }}"> @endif
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Pilih Tanggal Mulai</label>
+                                        <input type="date" name="tanggal" value="{{ $filterTanggal }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0F034D]/20 focus:border-[#0F034D] transition-colors">
+                                    </div>
+                                    <div class="flex gap-2 pt-1">
+                                        <button type="submit" class="flex-1 py-2 px-3 bg-[#0F034D] hover:bg-[#1a0a6e] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer">Terapkan</button>
+                                        <a href="{{ route('produksi.ajuan-pengambilan.index', array_filter(['sumber' => $filterSumber, 'sort' => $sort !== 'fifo' ? $sort : null, 'search' => $search])) }}" class="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition-colors text-center">Reset</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
 
                     <!-- Sumber -->
                     <div class="relative">

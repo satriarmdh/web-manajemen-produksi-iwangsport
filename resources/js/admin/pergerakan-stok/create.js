@@ -27,15 +27,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnTambah = document.getElementById('btn-tambah-item');
     const tableBody = document.getElementById('table-items-body');
     const trEmpty = document.getElementById('tr-empty-state');
+    const infoStokBaku = document.getElementById('info_stok_baku');
+    const infoQtyWarning = document.getElementById('info_qty_baku_warning');
 
     let items = [];
     let editingIndex = null;
+
+    function updateStockInfo() {
+        const id = hiddenBahanInput.value;
+        if (!id) {
+            if (infoStokBaku) { infoStokBaku.classList.add('hidden'); infoStokBaku.textContent = ''; }
+            if (infoQtyWarning) { infoQtyWarning.classList.add('hidden'); infoQtyWarning.textContent = ''; }
+            btnTambah.disabled = false;
+            return null;
+        }
+
+        const selectedOpt = dropdownBahan.querySelector(`.dropdown-option[data-value="${id}"]`);
+        if (!selectedOpt) return null;
+
+        const stok = parseInt(selectedOpt.getAttribute('data-stok')) || 0;
+        const satuan = selectedOpt.getAttribute('data-satuan') || 'pcs';
+        const nama = selectedOpt.getAttribute('data-nama') || 'Bahan Baku';
+
+        if (infoStokBaku) {
+            infoStokBaku.classList.remove('hidden', 'text-emerald-600', 'text-red-500');
+            if (stok > 0) {
+                infoStokBaku.classList.add('text-emerald-600', 'font-semibold');
+                infoStokBaku.innerHTML = `Stok Tersedia: <strong>${stok.toLocaleString('id-ID')} ${satuan}</strong>`;
+            } else {
+                infoStokBaku.classList.add('text-red-500', 'font-semibold');
+                infoStokBaku.innerHTML = `Stok Kosong (0 ${satuan})`;
+            }
+        }
+
+        const qty = parseInt(inputQty.value) || 0;
+        if (jenisPergerakan === 'keluar' && qty > 0) {
+            if (qty > stok) {
+                if (infoQtyWarning) {
+                    infoQtyWarning.classList.remove('hidden');
+                    infoQtyWarning.textContent = `Jumlah keluar (${qty}) melebihi stok tersedia (${stok} ${satuan})`;
+                }
+                btnTambah.disabled = true;
+            } else {
+                if (infoQtyWarning) {
+                    infoQtyWarning.classList.add('hidden');
+                    infoQtyWarning.textContent = '';
+                }
+                btnTambah.disabled = false;
+            }
+        } else {
+            if (infoQtyWarning) {
+                infoQtyWarning.classList.add('hidden');
+                infoQtyWarning.textContent = '';
+            }
+            btnTambah.disabled = false;
+        }
+
+        return { stok, satuan, nama };
+    }
+
+    hiddenBahanInput.addEventListener('change', updateStockInfo);
+    inputQty.addEventListener('input', updateStockInfo);
 
     function resetItemForm() {
         editingIndex = null;
         resetCustomDropdown('input_bahan_baku');
         inputQty.value = '';
         btnTambah.textContent = 'Tambah';
+        btnTambah.disabled = false;
+        if (infoStokBaku) { infoStokBaku.classList.add('hidden'); infoStokBaku.textContent = ''; }
+        if (infoQtyWarning) { infoQtyWarning.classList.add('hidden'); infoQtyWarning.textContent = ''; }
     }
 
     function editItem(index) {
