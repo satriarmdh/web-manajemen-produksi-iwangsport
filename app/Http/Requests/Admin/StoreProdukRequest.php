@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProdukRequest extends FormRequest
 {
@@ -14,7 +15,11 @@ class StoreProdukRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kode_produk'  => 'nullable|string|unique:produk,kode_produk',
+            'kode_produk'  => [
+                'nullable',
+                'string',
+                Rule::unique('produk', 'kode_produk')->whereNull('deleted_at'),
+            ],
             'nama_produk'  => 'required|string|max:255',
             'ukuran'       => 'required|in:normal,jumbo',
             'warna'        => 'required|string|max:100',

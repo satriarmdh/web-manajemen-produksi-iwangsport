@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdatePelangganRequest extends FormRequest
 {
@@ -18,7 +19,7 @@ class UpdatePelangganRequest extends FormRequest
         return [
             'nama_pelanggan' => ['required', 'string', 'max:255'],
             'no_telp' => ['required', 'string', 'regex:/^[0-9+\-\s]+$/', 'max:20'],
-            'email' => ['required', 'email', 'max:255', 'unique:pelanggan,email,' . $pelangganId],
+            'email' => ['required', 'email', 'max:255', Rule::unique('pelanggan', 'email')->ignore($pelangganId)->whereNull('deleted_at')],
             'alamat' => ['required', 'string', 'max:500'],
             'keterangan' => ['nullable', 'string', 'max:500'],
             'is_aktif' => ['boolean'],

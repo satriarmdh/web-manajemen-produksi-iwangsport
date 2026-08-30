@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProdukRequest extends FormRequest
 {
@@ -16,7 +17,11 @@ class UpdateProdukRequest extends FormRequest
         $produkId = $this->route('produk')?->id ?? $this->route('produk');
 
         return [
-            'kode_produk'  => 'nullable|string|unique:produk,kode_produk,' . $produkId,
+            'kode_produk'  => [
+                'nullable',
+                'string',
+                Rule::unique('produk', 'kode_produk')->ignore($produkId)->whereNull('deleted_at'),
+            ],
             'nama_produk'  => 'required|string|max:255',
             'ukuran'       => 'required|in:normal,jumbo',
             'warna'        => 'required|string|max:100',

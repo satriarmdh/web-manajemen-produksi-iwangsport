@@ -66,8 +66,31 @@ class PelangganService
      */
     public function create(array $data): Pelanggan
     {
-        $data['kode_pelanggan'] = $this->generateKode();
         $data['is_aktif'] = $data['is_aktif'] ?? true;
+
+        $trashed = Pelanggan::onlyTrashed()
+            ->where(function ($q) use ($data) {
+                if (!empty($data['email'])) {
+                    $q->where('email', $data['email']);
+                }
+                if (!empty($data['kode_pelanggan'])) {
+                    $q->orWhere('kode_pelanggan', $data['kode_pelanggan']);
+                }
+            })
+            ->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            if (empty($data['kode_pelanggan'])) {
+                $data['kode_pelanggan'] = $trashed->kode_pelanggan ?: $this->generateKode();
+            }
+            $trashed->update($data);
+            return $trashed->fresh();
+        }
+
+        if (empty($data['kode_pelanggan'])) {
+            $data['kode_pelanggan'] = $this->generateKode();
+        }
 
         return Pelanggan::create($data);
     }
@@ -77,6 +100,24 @@ class PelangganService
      */
     public function update(Pelanggan $pelanggan, array $data): Pelanggan
     {
+        if (!empty($data['email']) || !empty($data['kode_pelanggan'])) {
+            $trashed = Pelanggan::onlyTrashed()
+                ->where('id', '!=', $pelanggan->id)
+                ->where(function ($q) use ($data) {
+                    if (!empty($data['email'])) {
+                        $q->where('email', $data['email']);
+                    }
+                    if (!empty($data['kode_pelanggan'])) {
+                        $q->orWhere('kode_pelanggan', $data['kode_pelanggan']);
+                    }
+                })
+                ->first();
+
+            if ($trashed) {
+                $trashed->forceDelete();
+            }
+        }
+
         $pelanggan->update($data);
         return $pelanggan->fresh();
     }

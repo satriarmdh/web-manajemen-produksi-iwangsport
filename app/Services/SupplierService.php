@@ -79,11 +79,6 @@ class SupplierService
      */
     public function create(array $data): Supplier
     {
-        // Generate kode jika belum ada
-        if (empty($data['kode_supplier'])) {
-            $data['kode_supplier'] = $this->generateKode();
-        }
-
         // Pastikan kategori adalah array
         if (isset($data['kategori']) && !is_array($data['kategori'])) {
             $data['kategori'] = [$data['kategori']];
@@ -91,6 +86,32 @@ class SupplierService
 
         // Set default is_aktif
         $data['is_aktif'] = $data['is_aktif'] ?? true;
+
+        // Cek apakah ada data supplier trashed dengan email / kode_supplier yang sama
+        $trashed = Supplier::onlyTrashed()
+            ->where(function ($q) use ($data) {
+                if (!empty($data['email'])) {
+                    $q->where('email', $data['email']);
+                }
+                if (!empty($data['kode_supplier'])) {
+                    $q->orWhere('kode_supplier', $data['kode_supplier']);
+                }
+            })
+            ->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            if (empty($data['kode_supplier'])) {
+                $data['kode_supplier'] = $trashed->kode_supplier ?: $this->generateKode();
+            }
+            $trashed->update($data);
+            return $trashed->fresh();
+        }
+
+        // Generate kode jika belum ada
+        if (empty($data['kode_supplier'])) {
+            $data['kode_supplier'] = $this->generateKode();
+        }
 
         return Supplier::create($data);
     }
@@ -103,6 +124,24 @@ class SupplierService
         // Pastikan kategori adalah array
         if (isset($data['kategori']) && !is_array($data['kategori'])) {
             $data['kategori'] = [$data['kategori']];
+        }
+
+        if (!empty($data['email']) || !empty($data['kode_supplier'])) {
+            $trashed = Supplier::onlyTrashed()
+                ->where('id', '!=', $supplier->id)
+                ->where(function ($q) use ($data) {
+                    if (!empty($data['email'])) {
+                        $q->where('email', $data['email']);
+                    }
+                    if (!empty($data['kode_supplier'])) {
+                        $q->orWhere('kode_supplier', $data['kode_supplier']);
+                    }
+                })
+                ->first();
+
+            if ($trashed) {
+                $trashed->forceDelete();
+            }
         }
 
         $supplier->update($data);

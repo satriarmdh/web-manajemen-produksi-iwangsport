@@ -36,6 +36,8 @@
         $totalRoll = $perintahProduksi->details->sum('qty_roll_pakai');
         $totalEstimasi = $perintahProduksi->details->sum('estimasi_pcs');
         $totalPotong = $perintahProduksi->details->sum('qty_pcs_potong');
+        $totalSelesai = $perintahProduksi->details->sum('total_qty_diterima');
+        $isWOSelesai = $perintahProduksi->status_produksi === 'selesai';
     @endphp
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
@@ -66,7 +68,7 @@
         </div>
 
         <div class="p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 {{ $isWOSelesai ? 'xl:grid-cols-6' : 'xl:grid-cols-5' }} gap-4 mb-6">
                 <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <p class="text-xs text-gray-500 mb-1">Tanggal Mulai</p>
                     <p class="font-bold text-sm text-[#0F034D]">{{ \Carbon\Carbon::parse($perintahProduksi->tgl_mulai)->format('d M Y') }}</p>
@@ -87,6 +89,12 @@
                     <p class="text-xs text-gray-500 mb-1">Estimasi PCS</p>
                     <p class="font-bold text-sm text-[#0F034D]">{{ number_format($totalEstimasi, 0, ',', '.') }} pcs</p>
                 </div>
+                @if($isWOSelesai)
+                    <div class="bg-purple-50 rounded-xl p-4 border border-purple-100">
+                        <p class="text-xs text-purple-700 mb-1">Total Selesai</p>
+                        <p class="font-bold text-sm text-purple-800">{{ number_format($totalSelesai, 0, ',', '.') }} pcs</p>
+                    </div>
+                @endif
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

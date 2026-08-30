@@ -439,4 +439,32 @@ class SupplierManagementTest extends TestCase
         $this->assertEquals('Alpha Kain', $suppliers->first()->nama_supplier);
         $this->assertCount(2, $suppliers);
     }
+
+    public function test_dapat_membuat_supplier_baru_dengan_email_yang_sama_setelah_di_soft_delete(): void
+    {
+        $supplier1 = Supplier::factory()->create([
+            'email' => 'satria0010101@gmail.com',
+            'kode_supplier' => 'SUP-001',
+        ]);
+
+        // Soft delete supplier pertama
+        $this->actingAs($this->admin)->delete('/admin/supplier/' . $supplier1->id);
+        $this->assertSoftDeleted('suppliers', ['id' => $supplier1->id]);
+
+        // Re-create supplier dengan email yang sama persis
+        $response = $this->actingAs($this->admin)->post('/admin/supplier', [
+            'nama_supplier' => 'Supplier Baru',
+            'email' => 'satria0010101@gmail.com',
+            'kontak' => '08123456789',
+            'alamat' => 'Alamat Baru',
+            'kategori' => ['kain'],
+            'is_aktif' => 1,
+        ]);
+
+        $response->assertRedirect('/admin/supplier');
+        $this->assertDatabaseHas('suppliers', [
+            'email' => 'satria0010101@gmail.com',
+            'deleted_at' => null,
+        ]);
+    }
 }

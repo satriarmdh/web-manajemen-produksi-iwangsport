@@ -15,7 +15,7 @@
     </x-slot:header>
 
     <!-- Stat Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
         <!-- Card 1: Total Item Bahan -->
         <a href="{{ route('admin.bahan-baku.index') }}" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div class="min-w-0">
@@ -60,20 +60,6 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
             </div>
         </a>
-
-        <!-- Card 4: Total Kategori -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between gap-3 min-h-[92px] group">
-            <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">Total Kategori</p>
-                <h3 class="text-2xl font-bold text-gray-950 mt-1 leading-none tabular-nums">{{ $stats['total_kategori'] }} <span class="text-xs font-normal text-gray-400">kategori</span></h3>
-                <span class="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1 font-medium">
-                    Kain, benang, aksesoris, dll
-                </span>
-            </div>
-            <div class="w-11 h-11 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-purple-100 group-hover:scale-105 transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-            </div>
-        </div>
     </div>
 
     @if(($stats['stok_habis'] ?? 0) > 0)

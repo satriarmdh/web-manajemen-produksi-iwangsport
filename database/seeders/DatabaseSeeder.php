@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
             BahanBakuSeeder::class,
             ProdukSeeder::class,
             StandardBaselineProduksiSeeder::class,
-            PergerakanStokSeeder::class,
+            // PergerakanStokSeeder::class,
             PenjualanSeeder::class,
             // PerintahProduksiTestingSeeder::class,
         ]);

@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'owner',
                 'email' => 'owner@gmail.com',
-                'alamat' => 'Jl. Jendral Sudirman No. 123, Jakarta',
+                'alamat' => 'Jl. Ambokulon',
                 'no_hp' => '081234567890',
                 'role' => 'owner',
                 'jenis_kelamin' => 'laki-laki',
@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'admin',
                 'email' => 'admin@gmail.com',
-                'alamat' => 'Jl. Rungkut, Surabaya',
+                'alamat' => 'Jl. Ambokulon',
                 'no_hp' => '081234567891',
                 'role' => 'admin',
                 'jenis_kelamin' => 'laki-laki',
@@ -44,20 +44,20 @@ class UserSeeder extends Seeder
                 'jenis_kelamin' => 'perempuan',
             ],
             [
-                'name' => 'agus',
-                'email' => 'agus@gmail.com',
+                'name' => 'desi',
+                'email' => 'desi@gmail.com',
                 'alamat' => 'Jl. Rungkut, Surabaya',
                 'no_hp' => '081234567894',
                 'role' => 'jahit',
                 'jenis_kelamin' => 'perempuan',
             ],
             [
-                'name' => 'reza',
-                'email' => 'reza@gmail.com',
+                'name' => 'budi',
+                'email' => 'budi@gmail.com',
                 'alamat' => 'Jl. Rungkut, Surabaya',
                 'no_hp' => '081234567894',
                 'role' => 'finishing',
-                'jenis_kelamin' => 'perempuan',
+                'jenis_kelamin' => 'laki-laki',
             ],
             [
                 'name' => 'finishing',

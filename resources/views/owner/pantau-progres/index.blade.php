@@ -133,6 +133,8 @@
                 @php
                     $totalRoll = $wo->details->sum('qty_roll_pakai');
                     $totalEstimasi = $wo->details->sum('estimasi_pcs');
+                    $totalSelesai = $wo->details->sum('total_qty_diterima');
+                    $isWOSelesai = $wo->status_produksi === 'selesai';
                     $statusClass = $statusColors[$wo->status_produksi] ?? 'bg-gray-50 text-gray-600 border-gray-100';
                     $statusLabel = $statusLabels[$wo->status_produksi] ?? $wo->status_produksi;
                 @endphp
@@ -153,10 +155,13 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2 mb-4">
+                    <div class="grid {{ $isWOSelesai ? 'grid-cols-2' : 'grid-cols-3' }} gap-2 mb-4">
                         <div class="rounded-xl bg-[#0F034D]/5 border border-[#0F034D]/10 p-3"><p class="text-[11px] text-[#0F034D]/60 mb-1">Jenis Produk</p><p class="text-sm font-bold text-[#0F034D]">{{ $wo->details->count() }}</p></div>
                         <div class="rounded-xl bg-amber-50 border border-amber-100 p-3"><p class="text-[11px] text-amber-700/70 mb-1">Total Roll</p><p class="text-sm font-bold text-amber-800">{{ number_format($totalRoll, 0, ',', '.') }}</p></div>
                         <div class="rounded-xl bg-green-50 border border-green-100 p-3"><p class="text-[11px] text-green-700/70 mb-1">Total Estimasi</p><p class="text-sm font-bold text-green-800">{{ number_format($totalEstimasi, 0, ',', '.') }} pcs</p></div>
+                        @if($isWOSelesai)
+                            <div class="rounded-xl bg-purple-50 border border-purple-100 p-3"><p class="text-[11px] text-purple-700/70 mb-1">Total Selesai</p><p class="text-sm font-bold text-purple-800">{{ number_format($totalSelesai, 0, ',', '.') }} pcs</p></div>
+                        @endif
                     </div>
 
                     <div class="space-y-2 mb-4 flex-1">

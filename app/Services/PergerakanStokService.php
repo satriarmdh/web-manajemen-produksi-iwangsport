@@ -236,18 +236,29 @@ class PergerakanStokService
         $prefix = $jenis === 'masuk' ? 'TRX-BM' : 'TRX-BK';
         $date = now()->format('Ymd');
         
-        $last = PergerakanStokBahanBaku::where('jenis_pergerakan', $jenis)
+        $last = PergerakanStokBahanBaku::withTrashed()
+            ->where('jenis_pergerakan', $jenis)
             ->whereDate('created_at', now()->toDateString())
             ->orderBy('id', 'desc')
             ->first();
 
         if ($last) {
             $lastNum = (int) substr($last->nomor_transaksi, -4);
-            $nextNum = str_pad($lastNum + 1, 4, '0', STR_PAD_LEFT);
+            $nextNum = $lastNum + 1;
         } else {
-            $nextNum = '0001';
+            $nextNum = 1;
         }
 
-        return "{$prefix}-{$date}-{$nextNum}";
+        do {
+            $candidate = "{$prefix}-{$date}-" . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+            $exists = PergerakanStokBahanBaku::withTrashed()
+                ->where('nomor_transaksi', $candidate)
+                ->exists();
+            if ($exists) {
+                $nextNum++;
+            }
+        } while ($exists);
+
+        return $candidate;
     }
 }

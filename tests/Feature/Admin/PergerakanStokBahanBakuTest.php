@@ -339,4 +339,51 @@ class PergerakanStokBahanBakuTest extends TestCase
         $response2->assertRedirect();
         $response2->assertSessionHas('error', 'Tanggal akhir tidak boleh kurang dari tanggal awal.');
     }
+
+    public function test_dapat_membuat_transaksi_baru_setelah_transaksi_lama_di_soft_delete()
+    {
+        $supplier = Supplier::factory()->create();
+        $bahan = BahanBaku::factory()->create([
+            'kategori' => 'bahan_pendukung',
+            'satuan' => 'pcs',
+            'stok' => 50,
+            'is_aktif' => true,
+        ]);
+
+        // 1. Buat transaksi pertama
+        $response1 = $this->actingAs($this->admin)->post('/admin/pergerakan-stok', [
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now()->format('Y-m-d'),
+            'supplier_id' => $supplier->id,
+            'items' => [
+                ['bahan_baku_id' => $bahan->id, 'quantity' => 10]
+            ],
+        ]);
+        $response1->assertRedirect('/admin/pergerakan-stok?tab=masuk');
+
+        $trx1 = PergerakanStokBahanBaku::latest('id')->first();
+        $nomor1 = $trx1->nomor_transaksi;
+
+        // 2. Soft delete transaksi pertama
+        $this->actingAs($this->admin)->delete('/admin/pergerakan-stok/' . $trx1->id);
+        $this->assertSoftDeleted('pergerakan_stok_bahan_baku', ['id' => $trx1->id]);
+
+        // 3. Buat transaksi baru -- tidak boleh error duplicate entry
+        $response2 = $this->actingAs($this->admin)->post('/admin/pergerakan-stok', [
+            'jenis_pergerakan' => 'masuk',
+            'tanggal' => now()->format('Y-m-d'),
+            'supplier_id' => $supplier->id,
+            'items' => [
+                ['bahan_baku_id' => $bahan->id, 'quantity' => 5]
+            ],
+        ]);
+        $response2->assertRedirect('/admin/pergerakan-stok?tab=masuk');
+
+        $trx2 = PergerakanStokBahanBaku::latest('id')->first();
+        $this->assertNotEquals($nomor1, $trx2->nomor_transaksi);
+        $this->assertDatabaseHas('pergerakan_stok_bahan_baku', [
+            'id' => $trx2->id,
+            'deleted_at' => null,
+        ]);
+    }
 }

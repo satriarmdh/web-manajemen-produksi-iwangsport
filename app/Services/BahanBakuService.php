@@ -81,17 +81,30 @@ class BahanBakuService
 
         $prefix = $prefixes[$kategori] ?? 'BPD';
 
-        $lastData = BahanBaku::where('kategori', $kategori)->latest('id')->first();
+        $lastData = BahanBaku::withTrashed()
+            ->where('kategori', $kategori)
+            ->latest('id')
+            ->first();
 
         if (!$lastData) {
-            return $prefix . '-001';
+            $newNumber = 1;
+        } else {
+            $lastCode = $lastData->kode_bahan;
+            $lastNumber = (int) substr($lastCode, strpos($lastCode, '-') + 1);
+            $newNumber = $lastNumber + 1;
         }
 
-        $lastCode = $lastData->kode_bahan;
-        $lastNumber = (int) substr($lastCode, strpos($lastCode, '-') + 1);
-        $newNumber = $lastNumber + 1;
+        do {
+            $candidate = $prefix . '-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+            $exists = BahanBaku::withTrashed()
+                ->where('kode_bahan', $candidate)
+                ->exists();
+            if ($exists) {
+                $newNumber++;
+            }
+        } while ($exists);
 
-        return $prefix . '-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        return $candidate;
     }
 
     /**
@@ -112,7 +125,34 @@ class BahanBakuService
      */
     public function store(array $data): BahanBaku
     {
-        $data['kode_bahan'] = $this->generateKodeBahan($data['kategori']);
+        $trashed = BahanBaku::onlyTrashed()
+            ->where(function ($q) use ($data) {
+                if (!empty($data['kode_bahan'])) {
+                    $q->where('kode_bahan', $data['kode_bahan']);
+                }
+                if (!empty($data['nama_bahan']) && !empty($data['warna']) && !empty($data['kategori']) && !empty($data['satuan'])) {
+                    $q->orWhere(function ($sub) use ($data) {
+                        $sub->whereRaw('LOWER(TRIM(nama_bahan)) = ?', [strtolower(trim($data['nama_bahan']))])
+                            ->whereRaw('LOWER(TRIM(warna)) = ?', [strtolower(trim($data['warna']))])
+                            ->whereRaw('LOWER(TRIM(kategori)) = ?', [strtolower(trim($data['kategori']))])
+                            ->whereRaw('LOWER(TRIM(satuan)) = ?', [strtolower(trim($data['satuan']))]);
+                    });
+                }
+            })
+            ->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            if (empty($data['kode_bahan'])) {
+                $data['kode_bahan'] = $trashed->kode_bahan ?: $this->generateKodeBahan($data['kategori']);
+            }
+            $trashed->update($data);
+            return $trashed->fresh();
+        }
+
+        if (empty($data['kode_bahan'])) {
+            $data['kode_bahan'] = $this->generateKodeBahan($data['kategori']);
+        }
         
         return BahanBaku::create($data);
     }
@@ -123,6 +163,29 @@ class BahanBakuService
      */
     public function update(BahanBaku $bahanBaku, array $data): bool
     {
+        if (!empty($data['kode_bahan']) || (!empty($data['nama_bahan']) && !empty($data['warna']) && !empty($data['kategori']) && !empty($data['satuan']))) {
+            $trashed = BahanBaku::onlyTrashed()
+                ->where('id', '!=', $bahanBaku->id)
+                ->where(function ($q) use ($data) {
+                    if (!empty($data['kode_bahan'])) {
+                        $q->where('kode_bahan', $data['kode_bahan']);
+                    }
+                    if (!empty($data['nama_bahan']) && !empty($data['warna']) && !empty($data['kategori']) && !empty($data['satuan'])) {
+                        $q->orWhere(function ($sub) use ($data) {
+                            $sub->whereRaw('LOWER(TRIM(nama_bahan)) = ?', [strtolower(trim($data['nama_bahan']))])
+                                ->whereRaw('LOWER(TRIM(warna)) = ?', [strtolower(trim($data['warna']))])
+                                ->whereRaw('LOWER(TRIM(kategori)) = ?', [strtolower(trim($data['kategori']))])
+                                ->whereRaw('LOWER(TRIM(satuan)) = ?', [strtolower(trim($data['satuan']))]);
+                        });
+                    }
+                })
+                ->first();
+
+            if ($trashed) {
+                $trashed->forceDelete();
+            }
+        }
+
         // Cek apakah kategori berubah
         if (isset($data['kategori']) && $data['kategori'] !== $bahanBaku->kategori) {
             $data['kode_bahan'] = $this->generateKodeBahan($data['kategori']);

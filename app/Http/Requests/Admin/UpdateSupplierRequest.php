@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSupplierRequest extends FormRequest
 {
@@ -16,12 +17,22 @@ class UpdateSupplierRequest extends FormRequest
         $supplierId = $this->route('supplier')->id;
 
         return [
-            'kode_supplier' => 'nullable|string|unique:suppliers,kode_supplier,' . $supplierId . '|max:20',
+            'kode_supplier' => [
+                'nullable',
+                'string',
+                'max:20',
+                Rule::unique('suppliers', 'kode_supplier')->ignore($supplierId)->whereNull('deleted_at'),
+            ],
             'nama_supplier' => 'required|string|max:255',
             'kategori'      => 'required|array|min:1',
             'kategori.*'    => 'string|in:kain,bahan_pendukung',
             'kontak'        => 'required|string|max:20',
-            'email'         => 'required|email|unique:suppliers,email,' . $supplierId . '|max:255',
+            'email'         => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('suppliers', 'email')->ignore($supplierId)->whereNull('deleted_at'),
+            ],
             'alamat'        => 'required|string',
             'catatan'       => 'nullable|string',
             'is_aktif'      => 'nullable|boolean',

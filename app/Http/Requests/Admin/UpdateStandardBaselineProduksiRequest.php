@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use App\Models\Produk;
 use App\Models\BahanBaku;
 
@@ -15,9 +16,19 @@ class UpdateStandardBaselineProduksiRequest extends FormRequest
 
     public function rules(): array
     {
+        $baseline = $this->route('standard_baseline_produksi');
+        $produkId = $this->input('produk_id', $baseline?->produk_id);
+
         return [
             'produk_id'      => 'required|exists:produk,id',
-            'bahan_baku_id'  => 'required|exists:bahan_baku,id|unique:standard_baseline_produksi,bahan_baku_id,' . $this->route('standard_baseline_produksi')->id . ',id,produk_id,' . $this->route('standard_baseline_produksi')->produk_id,
+            'bahan_baku_id'  => [
+                'required',
+                'exists:bahan_baku,id',
+                Rule::unique('standard_baseline_produksi', 'bahan_baku_id')
+                    ->ignore($baseline?->id)
+                    ->where('produk_id', $produkId)
+                    ->whereNull('deleted_at'),
+            ],
             'pcs_per_roll'   => 'required|integer|min:1',
             'toleransi_minus' => 'nullable|integer|min:0',
             'keterangan'     => 'nullable|string|max:500',

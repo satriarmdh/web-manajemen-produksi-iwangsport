@@ -409,4 +409,30 @@ class PelangganManagementTest extends TestCase
         $this->assertEquals('Alpha Aktif', $pelanggan->first()->nama_pelanggan);
         $this->assertCount(2, $pelanggan);
     }
+
+    public function test_dapat_membuat_pelanggan_baru_dengan_email_yang_sama_setelah_di_soft_delete(): void
+    {
+        $pelanggan1 = Pelanggan::factory()->create([
+            'email' => 'pelanggan.lama@example.com',
+        ]);
+
+        // Soft delete pelanggan
+        $this->actingAs($this->admin)->delete('/admin/pelanggan/' . $pelanggan1->id);
+        $this->assertSoftDeleted('pelanggan', ['id' => $pelanggan1->id]);
+
+        // Re-create pelanggan dengan email yang sama persis
+        $response = $this->actingAs($this->admin)->post('/admin/pelanggan', [
+            'nama_pelanggan' => 'Pelanggan Baru',
+            'email' => 'pelanggan.lama@example.com',
+            'no_telp' => '081234567899',
+            'alamat' => 'Alamat Baru',
+            'is_aktif' => 1,
+        ]);
+
+        $response->assertRedirect('/admin/pelanggan');
+        $this->assertDatabaseHas('pelanggan', [
+            'email' => 'pelanggan.lama@example.com',
+            'deleted_at' => null,
+        ]);
+    }
 }

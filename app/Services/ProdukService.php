@@ -78,6 +78,30 @@ class ProdukService
      */
     public function store(array $data): Produk
     {
+        $trashed = Produk::onlyTrashed()
+            ->where(function ($q) use ($data) {
+                if (!empty($data['kode_produk'])) {
+                    $q->where('kode_produk', $data['kode_produk']);
+                }
+                if (!empty($data['nama_produk']) && !empty($data['ukuran']) && !empty($data['warna'])) {
+                    $q->orWhere(function ($sub) use ($data) {
+                        $sub->whereRaw('LOWER(TRIM(nama_produk)) = ?', [strtolower(trim($data['nama_produk']))])
+                            ->whereRaw('LOWER(TRIM(ukuran)) = ?', [strtolower(trim($data['ukuran']))])
+                            ->whereRaw('LOWER(TRIM(warna)) = ?', [strtolower(trim($data['warna']))]);
+                    });
+                }
+            })
+            ->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            if (empty($data['kode_produk'])) {
+                $data['kode_produk'] = $trashed->kode_produk ?: $this->generateKodeProduk();
+            }
+            $trashed->update($data);
+            return $trashed->fresh();
+        }
+
         if (empty($data['kode_produk'])) {
             $data['kode_produk'] = $this->generateKodeProduk();
         }
@@ -91,6 +115,28 @@ class ProdukService
      */
     public function update(Produk $produk, array $data): bool
     {
+        if (!empty($data['kode_produk']) || (!empty($data['nama_produk']) && !empty($data['ukuran']) && !empty($data['warna']))) {
+            $trashed = Produk::onlyTrashed()
+                ->where('id', '!=', $produk->id)
+                ->where(function ($q) use ($data) {
+                    if (!empty($data['kode_produk'])) {
+                        $q->where('kode_produk', $data['kode_produk']);
+                    }
+                    if (!empty($data['nama_produk']) && !empty($data['ukuran']) && !empty($data['warna'])) {
+                        $q->orWhere(function ($sub) use ($data) {
+                            $sub->whereRaw('LOWER(TRIM(nama_produk)) = ?', [strtolower(trim($data['nama_produk']))])
+                                ->whereRaw('LOWER(TRIM(ukuran)) = ?', [strtolower(trim($data['ukuran']))])
+                                ->whereRaw('LOWER(TRIM(warna)) = ?', [strtolower(trim($data['warna']))]);
+                        });
+                    }
+                })
+                ->first();
+
+            if ($trashed) {
+                $trashed->forceDelete();
+            }
+        }
+
         $stokLama = $produk->stok;
         $hargaLama = $produk->harga_satuan;
         $result = $produk->update($data);

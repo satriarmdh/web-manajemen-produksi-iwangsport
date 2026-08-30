@@ -78,6 +78,17 @@ class StandardBaselineProduksiService
         $data['is_aktif'] = $data['is_aktif'] ?? true;
         $data['toleransi_minus'] = $data['toleransi_minus'] ?? 0;
 
+        $trashed = StandardBaselineProduksi::onlyTrashed()
+            ->where('produk_id', $data['produk_id'])
+            ->where('bahan_baku_id', $data['bahan_baku_id'])
+            ->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            $trashed->update($data);
+            return $trashed->fresh();
+        }
+
         return StandardBaselineProduksi::create($data);
     }
 
@@ -86,6 +97,19 @@ class StandardBaselineProduksiService
      */
     public function update(StandardBaselineProduksi $estimasi, array $data): StandardBaselineProduksi
     {
+        $produkId = $data['produk_id'] ?? $estimasi->produk_id;
+        $bahanBakuId = $data['bahan_baku_id'] ?? $estimasi->bahan_baku_id;
+
+        $trashed = StandardBaselineProduksi::onlyTrashed()
+            ->where('produk_id', $produkId)
+            ->where('bahan_baku_id', $bahanBakuId)
+            ->where('id', '!=', $estimasi->id)
+            ->first();
+
+        if ($trashed) {
+            $trashed->forceDelete();
+        }
+
         $estimasi->update($data);
         return $estimasi->fresh();
     }

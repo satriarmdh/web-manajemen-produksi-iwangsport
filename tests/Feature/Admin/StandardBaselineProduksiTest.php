@@ -181,14 +181,14 @@ class StandardBaselineProduksiTest extends TestCase
             'produk_id' => $produkAktif->id,
             'bahan_baku_id' => $bahanAktif->id,
             'is_aktif' => true,
-            'pcs_per_roll' => 333,
+            'pcs_per_roll' => 33333,
         ]);
 
         StandardBaselineProduksi::factory()->create([
             'produk_id' => $produkNonaktif->id,
             'bahan_baku_id' => $bahanNonaktif->id,
             'is_aktif' => false,
-            'pcs_per_roll' => 444,
+            'pcs_per_roll' => 44444,
         ]);
 
         $response = $this->actingAs($this->user)
@@ -196,8 +196,44 @@ class StandardBaselineProduksiTest extends TestCase
 
         $response->assertStatus(200);
         // Gunakan pcs_per_roll sebagai penanda unik karena hanya muncul di baris tabel
-        $response->assertDontSee('333')
-            ->assertSee('444');
+        $response->assertDontSee('33333')
+            ->assertSee('44444');
+    }
+
+    public function test_dapat_membuat_baseline_baru_setelah_baseline_lama_di_soft_delete()
+    {
+        [$produk, $bahan] = $this->createMatchingPair('hitam');
+
+        // 1. Buat baseline pertama
+        $baseline1 = StandardBaselineProduksi::factory()->create([
+            'produk_id' => $produk->id,
+            'bahan_baku_id' => $bahan->id,
+            'pcs_per_roll' => 120,
+            'is_aktif' => true,
+        ]);
+
+        // 2. Soft delete baseline pertama
+        $this->actingAs($this->user)
+            ->delete(route('admin.standard-baseline-produksi.destroy', $baseline1));
+        $this->assertSoftDeleted('standard_baseline_produksi', ['id' => $baseline1->id]);
+
+        // 3. Buat baseline baru dengan kombinasi produk & bahan baku yang persis sama
+        $response = $this->actingAs($this->user)
+            ->post(route('admin.standard-baseline-produksi.store'), [
+                'produk_id' => $produk->id,
+                'bahan_baku_id' => $bahan->id,
+                'pcs_per_roll' => 130,
+                'toleransi_minus' => 5,
+                'is_aktif' => 1,
+            ]);
+
+        $response->assertRedirect(route('admin.standard-baseline-produksi.index'));
+        $this->assertDatabaseHas('standard_baseline_produksi', [
+            'produk_id' => $produk->id,
+            'bahan_baku_id' => $bahan->id,
+            'pcs_per_roll' => 130,
+            'deleted_at' => null,
+        ]);
     }
 
     public function test_admin_dapat_mengurutkan_berdasarkan_waktu_terbaru()

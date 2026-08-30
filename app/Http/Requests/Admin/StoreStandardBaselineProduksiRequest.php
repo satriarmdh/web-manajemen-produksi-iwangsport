@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use App\Models\Produk;
 use App\Models\BahanBaku;
 
@@ -17,7 +18,13 @@ class StoreStandardBaselineProduksiRequest extends FormRequest
     {
         return [
             'produk_id'      => 'required|exists:produk,id',
-            'bahan_baku_id'  => 'required|exists:bahan_baku,id|unique:standard_baseline_produksi,bahan_baku_id,NULL,id,produk_id,' . $this->produk_id,
+            'bahan_baku_id'  => [
+                'required',
+                'exists:bahan_baku,id',
+                Rule::unique('standard_baseline_produksi', 'bahan_baku_id')
+                    ->where('produk_id', $this->produk_id)
+                    ->whereNull('deleted_at'),
+            ],
             'pcs_per_roll'   => 'required|integer|min:1',
             'toleransi_minus' => 'nullable|integer|min:0',
             'keterangan'     => 'nullable|string|max:500',
